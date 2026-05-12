@@ -1,0 +1,416 @@
+# =========== Universal Config - Mihomo Ultimate v1.1.0 by badregister ===============
+# Last update: May 11, 2026 
+#
+# Changelog
+# 1. 绝对 DNS 隔离 (国内阿里DoH 国外 CloudFlare/Google DoH)
+# 2. 多机场异步聚合 (FlowerCloud, oixCloud, Maying, Nexitally, LiangXin) Proxy-Provider
+# 3. Rule-Provider 异步挂载 (ACL4SSR为主, Crypto采用 BM7)
+# 4. 策略组设置微调, 按使用频率排序
+# 5. 增量注入: 高敏金融、第三方支付、加密货币及流媒体独立分流架构
+# 6. 精简冗余本地规则 (遵循原生 String 解析标准，弃用冗余域名后缀，保留 ASN)
+# 7. 优化策略组选项 (全量横向内联排版)
+# 8. Maying SSR 只用于手动切换以确保 VoWiFi 稳定工作
+# 9. 修正国旗字符、编码匹配及正则逻辑 未修改分流架构
+# 10. 增量注入: VoWiFi 容灾备份通道可切换美区; respect-rules: false 降低 DNS 预解析耗时
+# 11. 节点防抖: 基础容差 自动测速 50ms, 其它策略组 75ms, Non-HK for AI 独立高容差 100ms
+# 12. 净化审计 注释保留 测试观察 未定稿
+# 13. 妥协：放弃绝对 DNS 隔离思路, 全面采用国内 DoH 提高弱网生存率及国内服务解析准确性
+# 14. 策略组 emoji 批量替换
+# 15. sniffer 增加 QUIC 协议, 改善 UDP 分流效率, 豁免米家产品的嗅探阻断
+# 16. 重构 dns, 使用 Mihomo 的 direct-nameserver 建立分流防线 撤销国内流氓大厂的 DNS 妥协
+# 17. 优化 dns tun sniffer 设置 待观察
+# 18. 订阅filter优化, 适配台湾节点, 增加韩国节点显示
+# 19. 废弃部分文本型远程规则集, 改用 Geosite, 降低系统占用, 提高查询效率及冷启动生存率 
+# 20. 重新测试筛选远程规则集, 混用 BM7 和 ACL4SSR, 格式大坑须谨慎. 优化 12306
+# 21. [v1.1.0] 架构定稿 规则集持续测试优化
+# 22. 将可等价替换的远程规则集改为 GEOSITE: 
+#     Apple/Microsoft/OneDrive/GoogleFCM/Telegram/OpenAi/YouTube/Netflix/
+#     Spotify/Epic/Steam/TikTok/Bilibili/GoogleCN/SteamCN
+# ====================================================================================
+
+port: 7890
+socks-port: 7891
+redir-port: 7892
+tproxy-port: 7895
+allow-lan: true
+mode: rule
+log-level: info
+ipv6: false
+unified-delay: true
+tcp-concurrent: true
+
+tun:
+  enable: true
+  stack: mixed
+  dns-hijack:
+    - any:53
+    - tcp://any:53
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: true
+
+geo-auto-update: true
+geo-update-interval: 24
+geox-url:
+  geoip: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/geoip.dat"
+  geosite: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/geosite.dat"
+  mmdb: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/country.mmdb"
+  asn: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/GeoLite2-ASN.mmdb"
+
+sniffer:
+  enable: true
+  parse-pure-ip: true
+  sniff:
+    TLS:
+      ports: [443, 8443]
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    QUIC:
+      ports: [443, 8443]
+  skip-domain:
+    - "Mijia Cloud"
+    - "dlg.io.mi.com"
+    - "+.push.apple.com"
+    - '+.12306.cn'
+    - '+.12306.com'
+
+dns:
+  enable: true
+  cache-algorithm: arc
+  ipv6: false
+  listen: 0.0.0.0:1053
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  respect-rules: false
+  fake-ip-filter:
+    - '+.lan'
+    - '+.local'
+    - 'pool.ntp.org'
+    - '+.apple.com'
+    - '+.icloud.com'
+    - '+.itunes.com'
+    - '+.apple-dns.net'
+    - '+.3gppnetwork.org'
+    - '+.t-mobile.com'
+    - '+.12306.cn'
+    - '+.12306.com'
+  
+  # 物理自举马达：强制要求内核使用本地 UDP 53 解析下方 DoH 域名的真实 IP, 冷启动必需
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  proxy-server-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  # 【绝对隔离第一道防线】直连专属出站 DNS (接管所有规则判定为 DIRECT 的流量)
+  direct-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  direct-nameserver-follow-policy: true
+  # 【绝对隔离第二道防线】全局海外兜底 (强制套代理隧道，实现远端代解析与物理阻断防污染)
+  nameserver:
+    - "https://1.1.1.1/dns-query#🚀 节点选择"
+    - "https://dns.google/dns-query#🚀 节点选择"
+  # 【绝对隔离第三道防线】特定规则的精准纠偏 (确保 fake-ip-filter 中的国内高敏业务获得正确的本地 CDN)
+  nameserver-policy:
+    "geosite:cn,private":
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+    "+.apple.com,+.icloud.com,+.itunes.com,+.apple-dns.net":
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+
+proxy-providers:
+  FlowerCloud:
+    type: http
+    url: "YOUR_FLOWERCLOUD_URL"
+    interval: 14400
+    path: ./proxy_provider/FlowerCloud.yaml
+    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
+    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
+
+  oixCloud:
+    type: http
+    url: "YOUR_OIXCLOUD_URL"
+    interval: 14400
+    path: ./proxy_provider/oixCloud.yaml
+    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
+    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
+
+  Maying:
+    type: http
+    url: "YOUR_MAYING_URL"
+    interval: 14400
+    path: ./proxy_provider/Maying.yaml
+    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
+    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
+
+  Nexitally:
+    type: http
+    url: "YOUR_NEXITALLY_URL"
+    interval: 14400
+    path: ./proxy_provider/Nexitally.yaml
+    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
+    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
+
+  LiangXin:
+    type: http
+    url: "YOUR_LIANGXIN_URL"
+    interval: 14400
+    path: ./proxy_provider/LiangXin.yaml
+    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
+    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}    
+
+proxy-groups:
+  - {name: 📇 HTTPDNS, type: select, proxies: [🎯 全球直连, REJECT, 🚀 节点选择]}
+  - {name: 🚀 节点选择, type: select, proxies: [📡 自动测速, 💰 省流节点, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, DIRECT]}
+  - {name: 🎛️ 手动切换, type: select, use: [FlowerCloud, oixCloud, Maying, Nexitally, LiangXin]}
+  - {name: 🤖 AI 服务, type: select, proxies: [🗺️ Non-HK, 🎛️ 手动切换, 🚀 节点选择, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 📞 VoWiFi, type: select, proxies: [🎯 全球直连, 🎛️ 手动切换, 🇺🇸 美国节点, 🚀 节点选择]}
+  - {name: ☁️ 微软云盘, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 🪟 微软服务, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 🍎 苹果服务, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 🎮 游戏平台, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎯 全球直连, 🎛️ 手动切换, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: ▶️ 油管视频, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 🎥 奈飞视频, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 📱 TikTok, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 🎧 Spotify, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎛️ 手动切换, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: ✈️ 电报消息, type: select, proxies: [🇺🇸 美国节点, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 📺 哔哩哔哩, type: select, proxies: [🎯 全球直连, 🇹🇼 台湾节点, 🇭🇰 香港节点]}
+  - {name: 🌍 国外媒体, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 📢 谷歌FCM, type: select, proxies: [🚀 节点选择, 🎯 全球直连, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 📺 巴哈姆特, type: select, proxies: [🇹🇼 台湾节点, 🚀 节点选择, 🎛️ 手动切换]}
+  - {name: 🎶 网易音乐, type: select, proxies: [🎯 全球直连, 🚀 节点选择]}
+  - {name: 🌏 国内媒体, type: select, proxies: [🎯 全球直连, 🇭🇰 香港节点, 🇹🇼 台湾节点]}  
+  - {name: 🏦 香港金融, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎯 全球直连]}
+  - {name: 🅿️ PayPal, type: select, proxies: [🎯 全球直连, 🇺🇸 美国节点, 🇬🇧 英国节点, 🚀 节点选择]}
+  - {name: 🦉 Wise, type: select, proxies: [🎯 全球直连, 🇬🇧 英国节点, 🇺🇸 美国节点, 🇭🇰 香港节点, 🇸🇬 狮城节点, 🎛️ 手动切换]}
+  - {name: 🪙 Crypto, type: select, proxies: [🇸🇬 狮城节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎯 全球直连]}
+  - {name: 🎯 全球直连, type: select, proxies: [DIRECT, 🚀 节点选择, 🎛️ 手动切换]}
+  - {name: 🛑 广告拦截, type: select, proxies: [REJECT, 🎯 全球直连]}
+  - {name: 🇭🇰 香港节点, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🇰🇷 韩国节点, type: url-test, tolerance: 75, filter: "(?i)(🇰🇷|韩|Korea|KR)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🇸🇬 狮城节点, type: url-test, tolerance: 75, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🇺🇸 美国节点, type: url-test, tolerance: 75, filter: "(?i)(🇺🇸|美|States|US)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🇬🇧 英国节点, type: url-test, tolerance: 75, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🇲🇾 马来节点, type: url-test, tolerance: 75, filter: "(?i)(🇲🇾|马|Malaysia|MY|MA)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🗺️ Non-HK, type: url-test, tolerance: 100, filter: "(?i)(🇹🇼|台|Tai|TW|🇯🇵|日|Japan|JP|🇰🇷|韩|Korea|KR|🇸🇬|新|Singapore|SG|🇺🇸|美|States|US|🇬🇧|英|Kingdom|UK|🇲🇾|马|Malaysia|MY|MA|喀麦隆|冰岛|土耳其|阿根廷)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, 🎯 全球直连]}
+  - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: "实验性|(?i)1x", use: [FlowerCloud, oixCloud, Maying, Nexitally, LiangXin]}
+  
+rule-providers:
+  ProxyMedia:
+    type: http
+    behavior: classical
+    format: yaml
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia.yaml"
+    path: ./rule_provider/ProxyMedia.yaml
+    interval: 86400
+
+  Crypto_Rules:
+    type: http
+    behavior: classical
+    format: yaml
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Crypto/Crypto.yaml"
+    path: ./rule_provider/Crypto_Rules.yaml
+    interval: 86400
+
+  LocalAreaNetwork:
+    type: http
+    behavior: classical
+    format: text
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/LocalAreaNetwork.list"
+    path: ./rule_provider/LocalAreaNetwork.yaml
+    interval: 86400
+
+  UnBan:
+    type: http
+    behavior: classical
+    format: text
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/UnBan.list"
+    path: ./rule_provider/UnBan.yaml
+    interval: 86400
+
+  AI:
+    type: http
+    behavior: classical
+    format: text
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/AI.list"
+    path: ./rule_provider/AI.yaml
+    interval: 86400
+
+  ProxyGFWlist:
+    type: http
+    behavior: classical
+    format: text
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyGFWlist.list"
+    path: ./rule_provider/ProxyGFWlist.yaml
+    interval: 86400
+
+  ChinaMedia:
+    type: http
+    behavior: classical
+    format: yaml
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMedia/ChinaMedia.yaml"
+    path: ./rule_provider/ChinaMedia.yaml
+    interval: 86400
+
+  Download:
+    type: http
+    behavior: classical
+    format: yaml
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Download/Download.yaml"
+    path: ./rule_provider/Download.yaml
+    interval: 86400
+
+rules:
+  # === 核心底层链路 (基础公共 DNS & Apple 推送) ===
+  # 强制远端解析并接管 Apple 安全浏览验证组件
+  - DOMAIN,token.safebrowsing.apple,🍎 苹果服务
+  - IP-CIDR,17.0.0.0/8,🍎 苹果服务,no-resolve
+  - IP-CIDR,8.8.8.8/32,🚀 节点选择,no-resolve
+  - IP-CIDR,1.1.1.1/32,🚀 节点选择,no-resolve
+
+  # === 订阅自举冷启动通道 (全量物理直连) ===
+  - DOMAIN-SUFFIX,xmancdn.com,🎯 全球直连
+  - DOMAIN-SUFFIX,api-huacloud.dev,🎯 全球直连
+  - DOMAIN-SUFFIX,oics.net,🎯 全球直连
+  - DOMAIN-SUFFIX,sub.ssr.sh,🎯 全球直连
+  - DOMAIN-SUFFIX,nxonearth.com,🎯 全球直连
+  - DOMAIN-SUFFIX,metaglide.org,🎯 全球直连
+  - DOMAIN-SUFFIX,liangxin.xyz,🎯 全球直连
+
+  # === GitHub 硬编码 提高冷启动生存率 ===
+  - DOMAIN,gist.github.com,🚀 节点选择
+  - DOMAIN,raw.githubusercontent.com,🚀 节点选择
+  - DOMAIN-SUFFIX,github.com,🚀 节点选择
+  - DOMAIN-SUFFIX,githubusercontent.com,🚀 节点选择
+  - DOMAIN-SUFFIX,githubassets.com,🚀 节点选择
+  - DOMAIN-SUFFIX,github.io,🚀 节点选择
+  - GEOSITE,github,🚀 节点选择
+  
+  # === VoWiFi 专线 (接管 UDP 穿透、SIP、ePDG 鉴权) ===
+  - DST-PORT,5060,📞 VoWiFi
+  - DST-PORT,5061,📞 VoWiFi
+  - DOMAIN-SUFFIX,t-mobile.com,📞 VoWiFi
+  - DOMAIN-SUFFIX,3gppnetwork.org,📞 VoWiFi
+  - DOMAIN-KEYWORD,epdg.epc,📞 VoWiFi
+  - DOMAIN-KEYWORD,ims,📞 VoWiFi
+  - AND,((NETWORK,UDP),(OR,((DST-PORT,500),(DST-PORT,4500)))),📞 VoWiFi
+ 
+  # === 本地局域网防泄漏与直连放行 ===
+  - RULE-SET,LocalAreaNetwork,🎯 全球直连
+  - RULE-SET,UnBan,🎯 全球直连
+
+  # === 游戏与底层鉴权 API 通用特化接管 ===
+  # 动视 (CODM 等)
+  - DOMAIN-SUFFIX,activision.com,🎮 游戏平台
+  - DOMAIN-SUFFIX,callofduty.com,🎮 游戏平台
+  - DOMAIN-KEYWORD,codm,🎮 游戏平台
+  - AND,((NETWORK,UDP),(DST-PORT,7500-7650)),🎮 游戏平台
+  # 原神
+  - DOMAIN-SUFFIX,hoyoverse.com,🎮 游戏平台
+  - DOMAIN-SUFFIX,hoyolab.com,🎮 游戏平台
+  - DOMAIN-SUFFIX,cognosphere.com,🎮 游戏平台
+  # 腾讯海外基建 (覆盖 CODM、PUBGM、Nikke 等鉴权防作弊)
+  - DOMAIN-SUFFIX,proximabeta.com,🎮 游戏平台
+  - DOMAIN-SUFFIX,gcloudcs.com,🎮 游戏平台
+  - DOMAIN-SUFFIX,levelinfinite.com,🎮 游戏平台
+  - DOMAIN-SUFFIX,tdsgame.com,🎮 游戏平台
+  - DOMAIN-KEYWORD,proximabeta,🎮 游戏平台
+  # 育碧 (彩虹六号、全境封锁等)
+  - DOMAIN-SUFFIX,ubisoft.com,🎮 游戏平台
+  - DOMAIN-SUFFIX,ubi.com,🎮 游戏平台
+  - DOMAIN-KEYWORD,ubisoft,🎮 游戏平台
+  # 通用商业遥测与归因 SDK (强行提取，绕过底层广告库断流)
+  - DOMAIN-SUFFIX,appsflyer.com,🎮 游戏平台
+  - DOMAIN-SUFFIX,adjust.com,🎮 游戏平台
+  - DOMAIN-SUFFIX,rayjump.com,🎮 游戏平台
+  - DOMAIN-KEYWORD,crashlytics,🎮 游戏平台
+
+  # === 高敏资产独立分流 (跨境金融 / 虚拟货币) ===
+  - DOMAIN-KEYWORD,wise,🦉 Wise
+  - DOMAIN-SUFFIX,transferwise.com,🦉 Wise
+  - DOMAIN-KEYWORD,paypal,🅿️ PayPal
+  - DOMAIN-KEYWORD,hsbc,🏦 香港金融
+  - DOMAIN-KEYWORD,bochk,🏦 香港金融
+  - DOMAIN-KEYWORD,cmbwinglung,🏦 香港金融
+  - DOMAIN-KEYWORD,hangseng,🏦 香港金融
+  - DOMAIN-KEYWORD,hkbea,🏦 香港金融
+  - DOMAIN-SUFFIX,sc.com,🏦 香港金融
+  - DOMAIN-SUFFIX,citibank.com.hk,🏦 香港金融
+  - DOMAIN-SUFFIX,za.group,🏦 香港金融
+  - DOMAIN-SUFFIX,mox.com,🏦 香港金融
+  - DOMAIN-SUFFIX,livibank.com,🏦 香港金融
+  - DOMAIN-SUFFIX,welab.bank,🏦 香港金融
+  - RULE-SET,Crypto_Rules,🪙 Crypto
+
+  # === 特殊微调指定区 开始 ===
+  - DOMAIN-SUFFIX,browserleaks.com,🚀 节点选择
+  # 阻断阿里系 SDK 底层 UDP 隧道探测，切断 DNS 解析死循环
+  - DOMAIN,test.tunnel.com,REJECT
+  # === NotebookLM 与 Google AI 鉴权精准靶向 ===
+  - DOMAIN,accounts.google.com,🤖 AI 服务
+  - DOMAIN,oauth2.googleapis.com,🤖 AI 服务
+  - DOMAIN,alkali.google.com,🤖 AI 服务
+  - DOMAIN,generativelanguage.googleapis.com,🤖 AI 服务
+  - DOMAIN,notebooklm-pa.googleapis.com,🤖 AI 服务
+  - DOMAIN-KEYWORD,notebooklm,🤖 AI 服务
+  
+  # === 特殊微调指定区 结束 ===
+  
+  # === 国内流氓大厂硬编码直连 (腾讯 / 阿里 / ASN 豁免) ===
+  - IP-ASN,132203,🎯 全球直连,no-resolve
+  - IP-ASN,131830,🎯 全球直连,no-resolve
+  - IP-ASN,45090,🎯 全球直连,no-resolve
+  - IP-ASN,37963,🎯 全球直连,no-resolve
+  - IP-ASN,45102,🎯 全球直连,no-resolve
+  - IP-ASN,133775,🎯 全球直连,no-resolve
+
+  # === 国内流氓大厂特化网络调度 (HTTPDNS 防污染) ===
+  - DOMAIN-KEYWORD,httpdns,📇 HTTPDNS
+  - IP-CIDR,119.29.29.29/32,📇 HTTPDNS,no-resolve
+  - IP-CIDR,182.254.116.116/32,📇 HTTPDNS,no-resolve
+  - IP-CIDR,1.2.4.8/32,📇 HTTPDNS,no-resolve
+  - IP-CIDR,119.28.28.28/32,📇 HTTPDNS,no-resolve
+  - IP-CIDR,223.5.5.5/32,📇 HTTPDNS,no-resolve
+  - IP-CIDR,223.6.6.6/32,📇 HTTPDNS,no-resolve
+
+  # === 强地缘属性业务 (Truth Social 美国区锁定) ===
+  - DOMAIN-SUFFIX,truthsocial.com,🇺🇸 美国节点
+  - DOMAIN-SUFFIX,tmtgcorp.com,🇺🇸 美国节点
+  - DOMAIN-KEYWORD,truthsocial,🇺🇸 美国节点
+
+  # === 规则集全量挂载 (GEOSITE + ACL4SSR + BM7) ===
+  - GEOSITE,googlefcm,📢 谷歌FCM
+  - GEOSITE,telegram,✈️ 电报消息
+  - GEOSITE,openai,🤖 AI 服务
+  - RULE-SET,AI,🤖 AI 服务
+  - GEOSITE,apple,🍎 苹果服务
+  - GEOSITE,microsoft,🪟 微软服务
+  - GEOSITE,onedrive,☁️ 微软云盘
+  - GEOSITE,tiktok,📱 TikTok
+  - GEOSITE,youtube,▶️ 油管视频
+  - GEOSITE,netflix,🎥 奈飞视频
+  - GEOSITE,spotify,🎧 Spotify
+  - GEOSITE,epicgames,🎮 游戏平台
+  - GEOSITE,steam,🎮 游戏平台
+  - RULE-SET,ProxyMedia,🌍 国外媒体
+  - RULE-SET,ProxyGFWlist,🚀 节点选择
+  - GEOSITE,bilibili,📺 哔哩哔哩
+  - RULE-SET,ChinaMedia,🎯 全球直连
+  - GEOSITE,google-cn,🎯 全球直连
+  - GEOSITE,steam@cn,🎯 全球直连
+  - RULE-SET,Download,🎯 全球直连
+  - GEOSITE,category-ads-all,🛑 广告拦截
+  
+  # === 兜底 ===
+  - GEOSITE,cn,🎯 全球直连
+  - DOMAIN-SUFFIX,cn,🎯 全球直连
+  - GEOIP,CN,🎯 全球直连,no-resolve
+  - MATCH,🐟 漏网之鱼

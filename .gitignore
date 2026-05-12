@@ -2,3 +2,9 @@
 *.tmp
 *.bak
 *.swp
+
+# 含真实订阅链接的本地配置，禁止提交
+openclash/src/local.yaml
+
+# Claude Code 内部目录
+.claude/
