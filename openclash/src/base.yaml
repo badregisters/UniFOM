@@ -121,6 +121,7 @@ dns:
       - https://dns.alidns.com/dns-query
       - https://doh.pub/dns-query
 
+# [机场列表-订阅 开始] 新增/删除机场时在此区块同步操作
 proxy-providers:
   FlowerCloud:
     type: http
@@ -160,7 +161,8 @@ proxy-providers:
     interval: 14400
     path: ./proxy_provider/LiangXin.yaml
     filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
-    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}    
+    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
+# [机场列表-订阅 结束]
 
 proxy-groups:
   - {name: 📇 HTTPDNS, type: select, proxies: [🎯 全球直连, REJECT, 🚀 节点选择]}
@@ -189,6 +191,7 @@ proxy-groups:
   - {name: 🪙 Crypto, type: select, proxies: [🇸🇬 狮城节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎯 全球直连]}
   - {name: 🎯 全球直连, type: select, proxies: [DIRECT, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🛑 广告拦截, type: select, proxies: [REJECT, 🎯 全球直连]}
+  # [机场列表-策略组 开始] 新增机场时同步更新以下所有 use: 列表（Maying 仅限手动切换和省流节点）
   - {name: 🇭🇰 香港节点, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
   - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
   - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
@@ -202,6 +205,7 @@ proxy-groups:
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, 🎯 全球直连]}
   - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
   - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: "实验性|(?i)1x", use: [FlowerCloud, oixCloud, Maying, Nexitally, LiangXin]}
+  # [机场列表-策略组 结束]
   
 rule-providers:
   ProxyMedia:
@@ -277,6 +281,7 @@ rules:
   - IP-CIDR,1.1.1.1/32,🚀 节点选择,no-resolve
 
   # === 订阅自举冷启动通道 (全量物理直连) ===
+  # [机场列表-直连域名 开始] 新增机场时在此补充订阅域名
   - DOMAIN-SUFFIX,xmancdn.com,🎯 全球直连
   - DOMAIN-SUFFIX,api-huacloud.dev,🎯 全球直连
   - DOMAIN-SUFFIX,oics.net,🎯 全球直连
@@ -284,6 +289,7 @@ rules:
   - DOMAIN-SUFFIX,nxonearth.com,🎯 全球直连
   - DOMAIN-SUFFIX,metaglide.org,🎯 全球直连
   - DOMAIN-SUFFIX,liangxin.xyz,🎯 全球直连
+  # [机场列表-直连域名 结束]
 
   # === GitHub 硬编码 提高冷启动生存率 ===
   - DOMAIN,gist.github.com,🚀 节点选择
