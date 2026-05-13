@@ -20,7 +20,7 @@
 # 16. 重构 dns, 使用 Mihomo 的 direct-nameserver 建立分流防线 撤销国内流氓大厂的 DNS 妥协
 # 17. 优化 dns tun sniffer 设置 待观察
 # 18. 订阅filter优化, 适配台湾节点, 增加韩国节点显示
-# 19. 废弃部分文本型远程规则集, 改用 Geosite, 降低系统占用, 提高查询效率及冷启动生存率 
+# 19. 废弃部分文本型远程规则集, 改用 Geosite, 降低系统占用, 提高查询效率及冷启动生存率
 # 20. 重新测试筛选远程规则集, 混用 BM7 和 ACL4SSR, 格式大坑须谨慎. 优化 12306
 # 21. [v1.1.0] 架构定稿 规则集持续测试优化
 # 22. 将可等价替换的远程规则集改为 GEOSITE:
@@ -94,24 +94,24 @@ dns:
     - '+.t-mobile.com'
     - '+.12306.cn'
     - '+.12306.com'
-  
-  # 物理自举马达: 强制要求内核使用本地 UDP 53 解析下方 DoH 域名的真实 IP, 冷启动必需
+
+  # bootstrap motor: force kernel to resolve DoH hostnames below via local UDP 53, required for cold start
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
   proxy-server-nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
-  # [绝对隔离第一道防线] 直连专属出站 DNS (接管所有规则判定为 DIRECT 的流量)
+  # [isolation layer 1] direct-outbound DNS (handles all DIRECT-matched traffic)
   direct-nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
   direct-nameserver-follow-policy: true
-  # [绝对隔离第二道防线] 全局海外兜底 (强制套代理隧道, 实现远端代解析与物理阻断防污染)
+  # [isolation layer 2] global overseas fallback (tunneled through proxy for remote resolution and anti-pollution)
   nameserver:
     - "https://1.1.1.1/dns-query#🚀 节点选择"
     - "https://dns.google/dns-query#🚀 节点选择"
-  # [绝对隔离第三道防线] 国内域名精准纠偏, 确保国内高敏业务获得正确的本地 CDN
+  # [isolation layer 3] CN domain correction, ensures domestic services receive correct local CDN IPs
   nameserver-policy:
     "geosite:cn,private":
       - https://dns.alidns.com/dns-query
@@ -180,7 +180,7 @@ proxy-groups:
   - {name: 📢 谷歌FCM, type: select, proxies: [🚀 节点选择, 🎯 全球直连, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: 📺 巴哈姆特, type: select, proxies: [🇹🇼 台湾节点, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🎶 网易音乐, type: select, proxies: [🎯 全球直连, 🚀 节点选择]}
-  - {name: 🌏 国内媒体, type: select, proxies: [🎯 全球直连, 🇭🇰 香港节点, 🇹🇼 台湾节点]}  
+  - {name: 🌏 国内媒体, type: select, proxies: [🎯 全球直连, 🇭🇰 香港节点, 🇹🇼 台湾节点]}
   - {name: 🏦 香港金融, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎯 全球直连]}
   - {name: 🅿️ PayPal, type: select, proxies: [🎯 全球直连, 🇺🇸 美国节点, 🇬🇧 英国节点, 🚀 节点选择]}
   - {name: 🦉 Wise, type: select, proxies: [🎯 全球直连, 🇬🇧 英国节点, 🇺🇸 美国节点, 🇭🇰 香港节点, 🇸🇬 狮城节点, 🎛️ 手动切换]}
@@ -202,7 +202,7 @@ proxy-groups:
   - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
   - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: "实验性|(?i)1x", use: [FlowerCloud, oixCloud, Maying, Nexitally, LiangXin]}
   # [proxy-provider-groups end]
-  
+
 rule-providers:
   ProxyMedia:
     type: http
@@ -269,14 +269,14 @@ rule-providers:
     interval: 86400
 
 rules:
-  # === 核心底层链路 (基础公共 DNS & Apple 推送) ===
-  # 强制远端解析并接管 Apple 安全浏览验证组件
+  # === core transport layer (public DNS & Apple push) ===
+  # force remote resolution and intercept Apple Safe Browsing token
   - DOMAIN,token.safebrowsing.apple,🍎 苹果服务
   - IP-CIDR,17.0.0.0/8,🍎 苹果服务,no-resolve
   - IP-CIDR,8.8.8.8/32,🚀 节点选择,no-resolve
   - IP-CIDR,1.1.1.1/32,🚀 节点选择,no-resolve
 
-  # === 订阅自举冷启动通道 (全量物理直连) ===
+  # === subscription bootstrap cold-start (full physical direct) ===
   # [proxy-provider-direct-domains start] add subscription domains here when adding a new provider
   - DOMAIN-SUFFIX,xmancdn.com,🎯 全球直连
   - DOMAIN-SUFFIX,api-huacloud.dev,🎯 全球直连
@@ -287,7 +287,7 @@ rules:
   - DOMAIN-SUFFIX,liangxin.xyz,🎯 全球直连
   # [proxy-provider-direct-domains end]
 
-  # === GitHub 硬编码 提高冷启动生存率 ===
+  # === GitHub hardcoded rules (improve cold-start survivability) ===
   - DOMAIN,gist.github.com,🚀 节点选择
   - DOMAIN,raw.githubusercontent.com,🚀 节点选择
   - DOMAIN-SUFFIX,github.com,🚀 节点选择
@@ -295,8 +295,8 @@ rules:
   - DOMAIN-SUFFIX,githubassets.com,🚀 节点选择
   - DOMAIN-SUFFIX,github.io,🚀 节点选择
   - GEOSITE,github,🚀 节点选择
-  
-  # === VoWiFi 专线 (接管 UDP 穿透、SIP、ePDG 鉴权) ===
+
+  # === VoWiFi dedicated lane (UDP traversal, SIP, ePDG auth) ===
   - DST-PORT,5060,📞 VoWiFi
   - DST-PORT,5061,📞 VoWiFi
   - DOMAIN-SUFFIX,t-mobile.com,📞 VoWiFi
@@ -304,38 +304,38 @@ rules:
   - DOMAIN-KEYWORD,epdg.epc,📞 VoWiFi
   - DOMAIN-KEYWORD,ims,📞 VoWiFi
   - AND,((NETWORK,UDP),(OR,((DST-PORT,500),(DST-PORT,4500)))),📞 VoWiFi
- 
-  # === 本地局域网防泄漏与直连放行 ===
+
+  # === LAN anti-leak and direct passthrough ===
   - RULE-SET,LocalAreaNetwork,🎯 全球直连
   - RULE-SET,UnBan,🎯 全球直连
 
-  # === 游戏与底层鉴权 API 通用特化接管 ===
-  # 动视 (CODM 等)
+  # === game platform and auth API intercepts ===
+  # Activision (CODM, etc.)
   - DOMAIN-SUFFIX,activision.com,🎮 游戏平台
   - DOMAIN-SUFFIX,callofduty.com,🎮 游戏平台
   - DOMAIN-KEYWORD,codm,🎮 游戏平台
   - AND,((NETWORK,UDP),(DST-PORT,7500-7650)),🎮 游戏平台
-  # 原神
+  # Genshin Impact
   - DOMAIN-SUFFIX,hoyoverse.com,🎮 游戏平台
   - DOMAIN-SUFFIX,hoyolab.com,🎮 游戏平台
   - DOMAIN-SUFFIX,cognosphere.com,🎮 游戏平台
-  # 腾讯海外基建 (覆盖 CODM、PUBGM、Nikke 等鉴权防作弊)
+  # Tencent overseas infra (CODM, PUBGM, Nikke auth and anti-cheat)
   - DOMAIN-SUFFIX,proximabeta.com,🎮 游戏平台
   - DOMAIN-SUFFIX,gcloudcs.com,🎮 游戏平台
   - DOMAIN-SUFFIX,levelinfinite.com,🎮 游戏平台
   - DOMAIN-SUFFIX,tdsgame.com,🎮 游戏平台
   - DOMAIN-KEYWORD,proximabeta,🎮 游戏平台
-  # 育碧 (彩虹六号、全境封锁等)
+  # Ubisoft (Rainbow Six, Division, etc.)
   - DOMAIN-SUFFIX,ubisoft.com,🎮 游戏平台
   - DOMAIN-SUFFIX,ubi.com,🎮 游戏平台
   - DOMAIN-KEYWORD,ubisoft,🎮 游戏平台
-  # 通用商业遥测与归因 SDK (强行提取, 绕过底层广告库断流)
+  # generic telemetry and attribution SDKs (forced intercept to bypass ad-library disconnects)
   - DOMAIN-SUFFIX,appsflyer.com,🎮 游戏平台
   - DOMAIN-SUFFIX,adjust.com,🎮 游戏平台
   - DOMAIN-SUFFIX,rayjump.com,🎮 游戏平台
   - DOMAIN-KEYWORD,crashlytics,🎮 游戏平台
 
-  # === 高敏资产独立分流 (跨境金融 / 虚拟货币) ===
+  # === sensitive assets routing (cross-border finance / crypto) ===
   - DOMAIN-KEYWORD,wise,🦉 Wise
   - DOMAIN-SUFFIX,transferwise.com,🦉 Wise
   - DOMAIN-KEYWORD,paypal,🅿️ PayPal
@@ -352,29 +352,29 @@ rules:
   - DOMAIN-SUFFIX,welab.bank,🏦 香港金融
   - RULE-SET,Crypto_Rules,🪙 Crypto
 
-  # === 特殊微调指定区 开始 ===
-  # 苹果服务经第三方 CDN 分发的域名 (已移出 fake-ip-filter 后理论冗余, 观察期注释保留)
+  # === custom overrides start ===
+  # Apple CDN domains via third-party CDN (theoretically redundant after fake-ip-filter removal, kept during observation period)
   # - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,mail.me.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,ls-apple.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,apple-relay.fastly-edge.com,🍎 苹果服务
   - DOMAIN-SUFFIX,browserleaks.com,🚀 节点选择
-  # 阻断阿里系 SDK 底层 UDP 隧道探测, 切断 DNS 解析死循环
+  # block Alibaba SDK UDP tunnel probes to cut DNS resolution loops
   - DOMAIN,test.tunnel.com,REJECT
-  # === NotebookLM 与 Google AI 鉴权精准靶向 ===
+  # === NotebookLM and Google AI auth targeting ===
   - DOMAIN,accounts.google.com,🤖 AI 服务
   - DOMAIN,oauth2.googleapis.com,🤖 AI 服务
   - DOMAIN,alkali.google.com,🤖 AI 服务
   - DOMAIN,generativelanguage.googleapis.com,🤖 AI 服务
   - DOMAIN,notebooklm-pa.googleapis.com,🤖 AI 服务
   - DOMAIN-KEYWORD,notebooklm,🤖 AI 服务
-  # === AutoDesk 阻断 ===
+  # === AutoDesk block ===
   - DOMAIN-SUFFIX, api.genuine-software.autodesk.com, REJECT
   - DOMAIN-SUFFIX, genuine-software2.autodesk.com, REJECT
-  
-  # === 特殊微调指定区 结束 ===
-  
-  # === 国内流氓大厂硬编码直连 (腾讯 / 阿里 / ASN 豁免) ===
+
+  # === custom overrides end ===
+
+  # === CN tech giants hardcoded direct (Tencent / Alibaba / ASN exemptions) ===
   - IP-ASN,132203,🎯 全球直连,no-resolve
   - IP-ASN,131830,🎯 全球直连,no-resolve
   - IP-ASN,45090,🎯 全球直连,no-resolve
@@ -382,7 +382,7 @@ rules:
   - IP-ASN,45102,🎯 全球直连,no-resolve
   - IP-ASN,133775,🎯 全球直连,no-resolve
 
-  # === 国内流氓大厂特化网络调度 (HTTPDNS 防污染) ===
+  # === CN tech giants HTTPDNS anti-pollution ===
   - DOMAIN-KEYWORD,httpdns,📇 HTTPDNS
   - IP-CIDR,119.29.29.29/32,📇 HTTPDNS,no-resolve
   - IP-CIDR,182.254.116.116/32,📇 HTTPDNS,no-resolve
@@ -391,12 +391,12 @@ rules:
   - IP-CIDR,223.5.5.5/32,📇 HTTPDNS,no-resolve
   - IP-CIDR,223.6.6.6/32,📇 HTTPDNS,no-resolve
 
-  # === 强地缘属性业务 (Truth Social 美国区锁定) ===
+  # === geo-locked services (Truth Social US-only) ===
   - DOMAIN-SUFFIX,truthsocial.com,🇺🇸 美国节点
   - DOMAIN-SUFFIX,tmtgcorp.com,🇺🇸 美国节点
   - DOMAIN-KEYWORD,truthsocial,🇺🇸 美国节点
 
-  # === 规则集全量挂载 (GEOSITE + ACL4SSR + BM7) ===
+  # === rule-set full mount (GEOSITE + ACL4SSR + BM7) ===
   - GEOSITE,googlefcm,📢 谷歌FCM
   - GEOSITE,telegram,✈️ 电报消息
   - GEOSITE,openai,🤖 AI 服务
@@ -418,8 +418,8 @@ rules:
   - GEOSITE,steam@cn,🎯 全球直连
   - RULE-SET,Download,🎯 全球直连
   - GEOSITE,category-ads-all,🛑 广告拦截
-  
-  # === 兜底 ===
+
+  # === fallback ===
   - GEOSITE,cn,🎯 全球直连
   - DOMAIN-SUFFIX,cn,🎯 全球直连
   - GEOIP,CN,🎯 全球直连,no-resolve
