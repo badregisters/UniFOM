@@ -357,6 +357,8 @@ rules:
   - RULE-SET,Crypto_Rules,🪙 Crypto
 
   # === 特殊微调指定区 开始 ===
+  # 苹果服务经 Akamai CDN 分发的域名，GEOSITE 无法覆盖，强制直连保留就近 CDN 解析
+  - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
   - DOMAIN-SUFFIX,browserleaks.com,🚀 节点选择
   # 阻断阿里系 SDK 底层 UDP 隧道探测，切断 DNS 解析死循环
   - DOMAIN,test.tunnel.com,REJECT
