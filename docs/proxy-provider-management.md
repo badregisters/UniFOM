@@ -7,10 +7,10 @@ Example: removing Maying. 6 files to update:
 | File | Location | Action |
 |------|----------|--------|
 | `openclash/src/secrets.yaml` | find the entry | delete line |
-| `openclash/src/base.yaml` | `[机场列表-订阅]` | delete entire provider block |
-| `openclash/src/base.yaml` | `[机场列表-直连域名]` | delete subscription domain rule |
-| `openclash/src/base.yaml` | `[机场列表-策略组]` | remove from all `use:` lists |
-| `shadowrocket/src/base.conf` | `[机场列表-直连域名]` | delete subscription domain rule |
+| `openclash/src/base.yaml` | `[proxy-provider-subscriptions]` | delete entire provider block |
+| `openclash/src/base.yaml` | `[proxy-provider-direct-domains]` | delete subscription domain rule |
+| `openclash/src/base.yaml` | `[proxy-provider-groups]` | remove from all `use:` lists |
+| `shadowrocket/src/base.conf` | `[proxy-provider-direct-domains]` | delete subscription domain rule |
 | `scripts/build.py` | `replacements` dict | delete corresponding placeholder line |
 
 Then rebuild:
@@ -27,10 +27,10 @@ Example: adding NewProvider. Same 6 files:
 | File | Location | Action |
 |------|----------|--------|
 | `openclash/src/secrets.yaml` | append | add `NewProvider: "https://actual-url"` |
-| `openclash/src/base.yaml` | `[机场列表-订阅]` | add provider block with `YOUR_NEWPROVIDER_URL` placeholder |
-| `openclash/src/base.yaml` | `[机场列表-直连域名]` | add subscription domain direct rule |
-| `openclash/src/base.yaml` | `[机场列表-策略组]` | add to all regional `use:` lists |
-| `shadowrocket/src/base.conf` | `[机场列表-直连域名]` | add subscription domain direct rule |
+| `openclash/src/base.yaml` | `[proxy-provider-subscriptions]` | add provider block with `YOUR_NEWPROVIDER_URL` placeholder |
+| `openclash/src/base.yaml` | `[proxy-provider-direct-domains]` | add subscription domain direct rule |
+| `openclash/src/base.yaml` | `[proxy-provider-groups]` | add to all regional `use:` lists |
+| `shadowrocket/src/base.conf` | `[proxy-provider-direct-domains]` | add subscription domain direct rule |
 | `scripts/build.py` | `replacements` dict | add `"YOUR_NEWPROVIDER_URL": secrets.get("NewProvider", "")` |
 
 Then rebuild:
