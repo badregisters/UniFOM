@@ -7,14 +7,14 @@
 # 3. Rule-Provider 异步挂载 (ACL4SSR为主, Crypto采用 BM7)
 # 4. 策略组设置微调, 按使用频率排序
 # 5. 增量注入: 高敏金融、第三方支付、加密货币及流媒体独立分流架构
-# 6. 精简冗余本地规则 (遵循原生 String 解析标准，弃用冗余域名后缀，保留 ASN)
+# 6. 精简冗余本地规则 (遵循原生 String 解析标准, 弃用冗余域名后缀, 保留 ASN)
 # 7. 优化策略组选项 (全量横向内联排版)
 # 8. Maying SSR 只用于手动切换以确保 VoWiFi 稳定工作
 # 9. 修正国旗字符、编码匹配及正则逻辑 未修改分流架构
 # 10. 增量注入: VoWiFi 容灾备份通道可切换美区; respect-rules: false 降低 DNS 预解析耗时
 # 11. 节点防抖: 基础容差 自动测速 50ms, 其它策略组 75ms, Non-HK for AI 独立高容差 100ms
 # 12. 净化审计 注释保留 测试观察 未定稿
-# 13. 妥协：放弃绝对 DNS 隔离思路, 全面采用国内 DoH 提高弱网生存率及国内服务解析准确性
+# 13. 妥协: 放弃绝对 DNS 隔离思路, 全面采用国内 DoH 提高弱网生存率及国内服务解析准确性
 # 14. 策略组 emoji 批量替换
 # 15. sniffer 增加 QUIC 协议, 改善 UDP 分流效率, 豁免米家产品的嗅探阻断
 # 16. 重构 dns, 使用 Mihomo 的 direct-nameserver 建立分流防线 撤销国内流氓大厂的 DNS 妥协
@@ -96,23 +96,23 @@ dns:
     - '+.12306.cn'
     - '+.12306.com'
   
-  # 物理自举马达：强制要求内核使用本地 UDP 53 解析下方 DoH 域名的真实 IP, 冷启动必需
+  # 物理自举马达: 强制要求内核使用本地 UDP 53 解析下方 DoH 域名的真实 IP, 冷启动必需
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
   proxy-server-nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
-  # 【绝对隔离第一道防线】直连专属出站 DNS (接管所有规则判定为 DIRECT 的流量)
+  # [绝对隔离第一道防线] 直连专属出站 DNS (接管所有规则判定为 DIRECT 的流量)
   direct-nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
   direct-nameserver-follow-policy: true
-  # 【绝对隔离第二道防线】全局海外兜底 (强制套代理隧道，实现远端代解析与物理阻断防污染)
+  # [绝对隔离第二道防线] 全局海外兜底 (强制套代理隧道, 实现远端代解析与物理阻断防污染)
   nameserver:
     - "https://1.1.1.1/dns-query#🚀 节点选择"
     - "https://dns.google/dns-query#🚀 节点选择"
-  # 【绝对隔离第三道防线】特定规则的精准纠偏 (确保 fake-ip-filter 中的国内高敏业务获得正确的本地 CDN)
+  # [绝对隔离第三道防线] 特定规则的精准纠偏 (确保 fake-ip-filter 中的国内高敏业务获得正确的本地 CDN)
   nameserver-policy:
     "geosite:cn,private":
       - https://dns.alidns.com/dns-query
@@ -191,7 +191,7 @@ proxy-groups:
   - {name: 🪙 Crypto, type: select, proxies: [🇸🇬 狮城节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎯 全球直连]}
   - {name: 🎯 全球直连, type: select, proxies: [DIRECT, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🛑 广告拦截, type: select, proxies: [REJECT, 🎯 全球直连]}
-  # [机场列表-策略组 开始] 新增机场时同步更新以下所有 use: 列表（Maying 仅限手动切换和省流节点）
+  # [机场列表-策略组 开始] 新增机场时同步更新以下所有 use: 列表 (Maying 仅限手动切换和省流节点)
   - {name: 🇭🇰 香港节点, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
   - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
   - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
@@ -333,7 +333,7 @@ rules:
   - DOMAIN-SUFFIX,ubisoft.com,🎮 游戏平台
   - DOMAIN-SUFFIX,ubi.com,🎮 游戏平台
   - DOMAIN-KEYWORD,ubisoft,🎮 游戏平台
-  # 通用商业遥测与归因 SDK (强行提取，绕过底层广告库断流)
+  # 通用商业遥测与归因 SDK (强行提取, 绕过底层广告库断流)
   - DOMAIN-SUFFIX,appsflyer.com,🎮 游戏平台
   - DOMAIN-SUFFIX,adjust.com,🎮 游戏平台
   - DOMAIN-SUFFIX,rayjump.com,🎮 游戏平台
@@ -357,10 +357,10 @@ rules:
   - RULE-SET,Crypto_Rules,🪙 Crypto
 
   # === 特殊微调指定区 开始 ===
-  # 苹果服务经 Akamai CDN 分发的域名，GEOSITE 无法覆盖，强制直连保留就近 CDN 解析
+  # 苹果服务经 Akamai CDN 分发的域名, GEOSITE 无法覆盖, 强制直连保留就近 CDN 解析
   - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
   - DOMAIN-SUFFIX,browserleaks.com,🚀 节点选择
-  # 阻断阿里系 SDK 底层 UDP 隧道探测，切断 DNS 解析死循环
+  # 阻断阿里系 SDK 底层 UDP 隧道探测, 切断 DNS 解析死循环
   - DOMAIN,test.tunnel.com,REJECT
   # === NotebookLM 与 Google AI 鉴权精准靶向 ===
   - DOMAIN,accounts.google.com,🤖 AI 服务
