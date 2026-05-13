@@ -110,6 +110,7 @@ dns:
   # [Mihomo] supports list values here; Clash Premium accepts single string only
   nameserver-policy:
     "geosite:cn,private": https://dns.alidns.com/dns-query
+    "geosite:apple": https://dns.alidns.com/dns-query
 
 # [proxy-provider-subscriptions start] add/remove providers in this block
 proxy-providers:
