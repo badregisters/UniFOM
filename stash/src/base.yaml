@@ -310,7 +310,6 @@ rules:
   # Activision (CODM, etc.)
   - DOMAIN-SUFFIX,activision.com,🎮 游戏平台
   - DOMAIN-SUFFIX,callofduty.com,🎮 游戏平台
-  # - DOMAIN-KEYWORD,codm,🎮 游戏平台
   # [Mihomo] AND,((NETWORK,UDP),(DST-PORT,7500-7650)),🎮 游戏平台 — no equivalent in Clash Premium
   # Genshin Impact
   - DOMAIN-SUFFIX,hoyoverse.com,🎮 游戏平台
