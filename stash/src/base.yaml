@@ -23,20 +23,24 @@
 # 18. 订阅filter优化, 适配台湾节点, 增加韩国节点显示
 # 19. 废弃部分文本型远程规则集, 改用 Geosite, 降低系统占用, 提高查询效率及冷启动生存率
 # 20. 重新测试筛选远程规则集, 混用 BM7 和 ACL4SSR, 格式大坑须谨慎. 优化 12306
-# 21. [v1.0.0-rc.1] Stash 移植版: Clash Premium 内核兼容, 保留 Mihomo 超集功能, 降级不兼容指令
-#     - 降级: direct-nameserver (Mihomo only) → DNS 双层防线
-#     - 降级: AND 复合规则 → VoWiFi UDP 拆成独立 DST-PORT, 游戏 UDP 端口规则删除
-#     - 删除: geox-url 自定义, proxy-server-nameserver, cache-algorithm, tcp-concurrent
-#     - 删除: tproxy-port / redir-port (iOS 无关), QUIC sniffer, parse-pure-ip
+# 21. [v1.0.0-rc.1] Stash 移植版: Clash Premium 内核兼容, 保留 Mihomo 超集功能
+#     Mihomo 超集指令注释保留, 标记 [Mihomo], 静默忽略不影响运行
+#     - 注释: geo-auto-update / geox-url (Stash 内部管理, YAML 无效)
+#     - 注释: direct-nameserver / proxy-server-nameserver / respect-rules / cache-algorithm
+#     - 注释: tproxy-port / redir-port (iOS 无关) / parse-pure-ip / QUIC sniffer
+#     - 降级: AND 复合规则 → VoWiFi UDP 拆成独立 DST-PORT; 游戏 UDP 端口规则无等价实现
 # ====================================================================================
 
 port: 7890
 socks-port: 7891
+# [Mihomo] redir-port: 7892
+# [Mihomo] tproxy-port: 7895
 allow-lan: true
 mode: rule
 log-level: info
 ipv6: false
 unified-delay: true
+# [Mihomo] tcp-concurrent: true
 
 tun:
   enable: true
@@ -48,17 +52,21 @@ tun:
   auto-detect-interface: true
   strict-route: true
 
-geo-auto-update: true
-geo-update-interval: 24
+# [Mihomo] geo-auto-update: true
+# [Mihomo] geo-update-interval: 24
+# [Mihomo] geox-url: (managed internally by Stash, not YAML-configurable)
 
 sniffer:
   enable: true
+  # [Mihomo] parse-pure-ip: true
   sniff:
     TLS:
       ports: [443, 8443]
     HTTP:
       ports: [80, 8080-8880]
       override-destination: true
+    # [Mihomo] QUIC:
+    #   ports: [443, 8443]
   skip-domain:
     - "Mijia Cloud"
     - "dlg.io.mi.com"
@@ -68,10 +76,12 @@ sniffer:
 
 dns:
   enable: true
+  # [Mihomo] cache-algorithm: arc
   ipv6: false
   listen: 0.0.0.0:1053
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
+  # [Mihomo] respect-rules: false
   fake-ip-filter:
     - '+.lan'
     - '+.local'
@@ -85,6 +95,13 @@ dns:
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
+  # [Mihomo] proxy-server-nameserver:
+  #   - https://dns.alidns.com/dns-query
+  #   - https://doh.pub/dns-query
+  # [Mihomo] direct-nameserver: (air-gap tier 1 — direct-path nameserver, Mihomo only)
+  #   - https://dns.alidns.com/dns-query
+  #   - https://doh.pub/dns-query
+  # [Mihomo] direct-nameserver-follow-policy: true
   # [air-gap tier 1] proxied fallback — remote resolution via tunnel, guards against DNS poisoning
   nameserver:
     - "https://1.1.1.1/dns-query#🚀 节点选择"
@@ -274,8 +291,8 @@ rules:
   - DOMAIN-SUFFIX,github.io,🚀 节点选择
   - GEOSITE,github,🚀 节点选择
 
-  # === VoWiFi pinned path (SIP, ePDG auth) ===
-  # UDP 500/4500 (IKEv2): split from AND compound rule — Clash Premium does not support logical rule operators
+  # === VoWiFi pinned path (UDP hole-punching, SIP, ePDG auth) ===
+  # [Mihomo] AND,((NETWORK,UDP),(OR,((DST-PORT,500),(DST-PORT,4500)))),📞 VoWiFi — split below, TCP 500/4500 also caught (harmless)
   - DST-PORT,5060,📞 VoWiFi
   - DST-PORT,5061,📞 VoWiFi
   - DST-PORT,500,📞 VoWiFi
@@ -294,6 +311,7 @@ rules:
   - DOMAIN-SUFFIX,activision.com,🎮 游戏平台
   - DOMAIN-SUFFIX,callofduty.com,🎮 游戏平台
   - DOMAIN-KEYWORD,codm,🎮 游戏平台
+  # [Mihomo] AND,((NETWORK,UDP),(DST-PORT,7500-7650)),🎮 游戏平台 — no equivalent in Clash Premium
   # Genshin Impact
   - DOMAIN-SUFFIX,hoyoverse.com,🎮 游戏平台
   - DOMAIN-SUFFIX,hoyolab.com,🎮 游戏平台
