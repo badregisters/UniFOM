@@ -95,23 +95,23 @@ dns:
     - '+.12306.cn'
     - '+.12306.com'
 
-  # bootstrap motor: force kernel to resolve DoH hostnames below via local UDP 53, required for cold start
+  # DNS bootstrap anchor: forces kernel to resolve DoH endpoints below via plain UDP 53 — cold-start prerequisite
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
   proxy-server-nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
-  # [isolation layer 1] direct-outbound DNS (handles all DIRECT-matched traffic)
+  # [air-gap tier 1] direct-path nameserver — handles all DIRECT-matched traffic
   direct-nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
   direct-nameserver-follow-policy: true
-  # [isolation layer 2] global overseas fallback (tunneled through proxy for remote resolution and anti-pollution)
+  # [air-gap tier 2] proxied fallback — remote resolution via tunnel, guards against DNS poisoning
   nameserver:
     - "https://1.1.1.1/dns-query#🚀 节点选择"
     - "https://dns.google/dns-query#🚀 节点选择"
-  # [isolation layer 3] CN domain correction, ensures domestic services receive correct local CDN IPs
+  # [air-gap tier 3] CN domain override — pins domestic services to correct local CDN endpoints
   nameserver-policy:
     "geosite:cn,private":
       - https://dns.alidns.com/dns-query
@@ -276,7 +276,7 @@ rules:
   - IP-CIDR,8.8.8.8/32,🚀 节点选择,no-resolve
   - IP-CIDR,1.1.1.1/32,🚀 节点选择,no-resolve
 
-  # === subscription bootstrap cold-start (full physical direct) ===
+  # === provider bootstrap — cold-start direct bypass (unproxied) ===
   # [proxy-provider-direct-domains start] add subscription domains here when adding a new provider
   - DOMAIN-SUFFIX,xmancdn.com,🎯 全球直连
   - DOMAIN-SUFFIX,api-huacloud.dev,🎯 全球直连
@@ -287,7 +287,7 @@ rules:
   - DOMAIN-SUFFIX,liangxin.xyz,🎯 全球直连
   # [proxy-provider-direct-domains end]
 
-  # === GitHub hardcoded rules (improve cold-start survivability) ===
+  # === GitHub pinned rules (cold-start resilience) ===
   - DOMAIN,gist.github.com,🚀 节点选择
   - DOMAIN,raw.githubusercontent.com,🚀 节点选择
   - DOMAIN-SUFFIX,github.com,🚀 节点选择
@@ -296,7 +296,7 @@ rules:
   - DOMAIN-SUFFIX,github.io,🚀 节点选择
   - GEOSITE,github,🚀 节点选择
 
-  # === VoWiFi dedicated lane (UDP traversal, SIP, ePDG auth) ===
+  # === VoWiFi pinned path (UDP hole-punching, SIP, ePDG auth) ===
   - DST-PORT,5060,📞 VoWiFi
   - DST-PORT,5061,📞 VoWiFi
   - DOMAIN-SUFFIX,t-mobile.com,📞 VoWiFi
@@ -305,11 +305,11 @@ rules:
   - DOMAIN-KEYWORD,ims,📞 VoWiFi
   - AND,((NETWORK,UDP),(OR,((DST-PORT,500),(DST-PORT,4500)))),📞 VoWiFi
 
-  # === LAN anti-leak and direct passthrough ===
+  # === LAN leak prevention and direct passthrough ===
   - RULE-SET,LocalAreaNetwork,🎯 全球直连
   - RULE-SET,UnBan,🎯 全球直连
 
-  # === game platform and auth API intercepts ===
+  # === game platform and auth API overrides ===
   # Activision (CODM, etc.)
   - DOMAIN-SUFFIX,activision.com,🎮 游戏平台
   - DOMAIN-SUFFIX,callofduty.com,🎮 游戏平台
@@ -329,13 +329,13 @@ rules:
   - DOMAIN-SUFFIX,ubisoft.com,🎮 游戏平台
   - DOMAIN-SUFFIX,ubi.com,🎮 游戏平台
   - DOMAIN-KEYWORD,ubisoft,🎮 游戏平台
-  # generic telemetry and attribution SDKs (forced intercept to bypass ad-library disconnects)
+  # telemetry and attribution SDKs — force-intercepted to avoid ad-network blackholes
   - DOMAIN-SUFFIX,appsflyer.com,🎮 游戏平台
   - DOMAIN-SUFFIX,adjust.com,🎮 游戏平台
   - DOMAIN-SUFFIX,rayjump.com,🎮 游戏平台
   - DOMAIN-KEYWORD,crashlytics,🎮 游戏平台
 
-  # === sensitive assets routing (cross-border finance / crypto) ===
+  # === high-value asset routing (cross-border finance / crypto) ===
   - DOMAIN-KEYWORD,wise,🦉 Wise
   - DOMAIN-SUFFIX,transferwise.com,🦉 Wise
   - DOMAIN-KEYWORD,paypal,🅿️ PayPal
@@ -353,15 +353,15 @@ rules:
   - RULE-SET,Crypto_Rules,🪙 Crypto
 
   # === custom overrides start ===
-  # Apple CDN domains via third-party CDN (theoretically redundant after fake-ip-filter removal, kept during observation period)
+  # Apple domains via third-party CDNs — theoretically redundant post fake-ip-filter removal, retained for observation
   # - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,mail.me.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,ls-apple.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,apple-relay.fastly-edge.com,🍎 苹果服务
   - DOMAIN-SUFFIX,browserleaks.com,🚀 节点选择
-  # block Alibaba SDK UDP tunnel probes to cut DNS resolution loops
+  # drop Alibaba SDK UDP tunnel probes — breaks DNS resolution feedback loops
   - DOMAIN,test.tunnel.com,REJECT
-  # === NotebookLM and Google AI auth targeting ===
+  # === NotebookLM and Google AI auth pinning ===
   - DOMAIN,accounts.google.com,🤖 AI 服务
   - DOMAIN,oauth2.googleapis.com,🤖 AI 服务
   - DOMAIN,alkali.google.com,🤖 AI 服务
@@ -374,7 +374,7 @@ rules:
 
   # === custom overrides end ===
 
-  # === CN tech giants hardcoded direct (Tencent / Alibaba / ASN exemptions) ===
+  # === CN tech giants — pinned direct (Tencent / Alibaba / ASN exemptions) ===
   - IP-ASN,132203,🎯 全球直连,no-resolve
   - IP-ASN,131830,🎯 全球直连,no-resolve
   - IP-ASN,45090,🎯 全球直连,no-resolve
@@ -382,7 +382,7 @@ rules:
   - IP-ASN,45102,🎯 全球直连,no-resolve
   - IP-ASN,133775,🎯 全球直连,no-resolve
 
-  # === CN tech giants HTTPDNS anti-pollution ===
+  # === CN tech giants HTTPDNS override (anti-pollution) ===
   - DOMAIN-KEYWORD,httpdns,📇 HTTPDNS
   - IP-CIDR,119.29.29.29/32,📇 HTTPDNS,no-resolve
   - IP-CIDR,182.254.116.116/32,📇 HTTPDNS,no-resolve
@@ -391,12 +391,12 @@ rules:
   - IP-CIDR,223.5.5.5/32,📇 HTTPDNS,no-resolve
   - IP-CIDR,223.6.6.6/32,📇 HTTPDNS,no-resolve
 
-  # === geo-locked services (Truth Social US-only) ===
+  # === geo-fenced services (Truth Social US-region lock) ===
   - DOMAIN-SUFFIX,truthsocial.com,🇺🇸 美国节点
   - DOMAIN-SUFFIX,tmtgcorp.com,🇺🇸 美国节点
   - DOMAIN-KEYWORD,truthsocial,🇺🇸 美国节点
 
-  # === rule-set full mount (GEOSITE + ACL4SSR + BM7) ===
+  # === full ruleset ingestion (GEOSITE + ACL4SSR + BM7) ===
   - GEOSITE,googlefcm,📢 谷歌FCM
   - GEOSITE,telegram,✈️ 电报消息
   - GEOSITE,openai,🤖 AI 服务
