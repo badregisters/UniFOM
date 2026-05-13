@@ -353,11 +353,11 @@ rules:
   - RULE-SET,Crypto_Rules,🪙 Crypto
 
   # === 特殊微调指定区 开始 ===
-  # 苹果服务经第三方 CDN 分发的域名, GEOSITE 无法覆盖, 强制直连保留就近 CDN 解析
-  - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
-  - DOMAIN-SUFFIX,mail.me.com.akadns.net,🍎 苹果服务
-  - DOMAIN-SUFFIX,ls-apple.com.akadns.net,🍎 苹果服务
-  - DOMAIN-SUFFIX,apple-relay.fastly-edge.com,🍎 苹果服务
+  # 苹果服务经第三方 CDN 分发的域名 (已移出 fake-ip-filter 后理论冗余, 观察期注释保留)
+  # - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
+  # - DOMAIN-SUFFIX,mail.me.com.akadns.net,🍎 苹果服务
+  # - DOMAIN-SUFFIX,ls-apple.com.akadns.net,🍎 苹果服务
+  # - DOMAIN-SUFFIX,apple-relay.fastly-edge.com,🍎 苹果服务
   - DOMAIN-SUFFIX,browserleaks.com,🚀 节点选择
   # 阻断阿里系 SDK 底层 UDP 隧道探测, 切断 DNS 解析死循环
   - DOMAIN,test.tunnel.com,REJECT
