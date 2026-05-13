@@ -3,8 +3,12 @@
 *.bak
 *.swp
 
-# 含真实订阅链接的本地配置，禁止提交
+# 含真实订阅链接，禁止提交
+openclash/src/secrets.yaml
 openclash/src/local.yaml
+
+# 构建输出 (含真实订阅链接)
+openclash/dist/
 
 # Claude Code 内部目录
 .claude/

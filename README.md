@@ -1,14 +1,32 @@
 # MSS
 Unified repository for multi-client config projects.
+
 ## Structure
-- shadowrocket/src/base.conf          : Shadowrocket source of truth
-- shadowrocket/dist/shadowrocket.conf : Shadowrocket distributable output
-- openclash/src/base.yaml             : OpenClash source (placeholder)
-- openclash/dist/openclash.yaml       : OpenClash output (placeholder)
+```
+shadowrocket/
+  src/base.conf          - SR source of truth (in git)
+  dist/UniFOM.conf       - SR deployable output (in git)
+
+openclash/
+  src/base.yaml          - OC template with placeholders (in git)
+  src/secrets.yaml       - subscription URLs, gitignored, local only
+  dist/UniFOM.yaml       - OC deployable output, gitignored, local only
+
+scripts/
+  build.py               - merges base.yaml + secrets.yaml -> dist/UniFOM.yaml
+                           also copies SR src -> dist
+```
+
+## Build
+```bash
+python3 scripts/build.py
+```
+
 ## Branching
-- main        : stable
-- feat/*      : feature development
-- release/*   : release and RC stabilization
+- main      : stable
+- feat/*    : feature development
+- release/* : release and RC stabilization
+
 ## Tags
-- Shadowrocket: sr-vX.Y.Z / sr-vX.Y.Z-rc.N
-- OpenClash   : oc-vX.Y.Z / oc-vX.Y.Z-rc.N
+- Shadowrocket : sr-vX.Y.Z / sr-vX.Y.Z-rc.N
+- OpenClash    : oc-vX.Y.Z / oc-vX.Y.Z-rc.N
