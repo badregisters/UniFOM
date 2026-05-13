@@ -1,5 +1,5 @@
 # =========== Universal Config - Mihomo Ultimate v1.1.0 by badregister ===============
-# Last update: May 11, 2026 
+# Last update: May 13, 2026
 #
 # Changelog
 # 1. 绝对 DNS 隔离 (国内阿里DoH 国外 CloudFlare/Google DoH)
@@ -23,9 +23,10 @@
 # 19. 废弃部分文本型远程规则集, 改用 Geosite, 降低系统占用, 提高查询效率及冷启动生存率 
 # 20. 重新测试筛选远程规则集, 混用 BM7 和 ACL4SSR, 格式大坑须谨慎. 优化 12306
 # 21. [v1.1.0] 架构定稿 规则集持续测试优化
-# 22. 将可等价替换的远程规则集改为 GEOSITE: 
+# 22. 将可等价替换的远程规则集改为 GEOSITE:
 #     Apple/Microsoft/OneDrive/GoogleFCM/Telegram/OpenAi/YouTube/Netflix/
 #     Spotify/Epic/Steam/TikTok/Bilibili/GoogleCN/SteamCN
+# 23. [2026-05-13] 补充苹果 Akamai CDN 直连规则 (apple.com.akadns.net, mail.me.com.akadns.net)
 # ====================================================================================
 
 port: 7890
@@ -359,6 +360,7 @@ rules:
   # === 特殊微调指定区 开始 ===
   # 苹果服务经 Akamai CDN 分发的域名, GEOSITE 无法覆盖, 强制直连保留就近 CDN 解析
   - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
+  - DOMAIN-SUFFIX,mail.me.com.akadns.net,🍎 苹果服务
   - DOMAIN-SUFFIX,browserleaks.com,🚀 节点选择
   # 阻断阿里系 SDK 底层 UDP 隧道探测, 切断 DNS 解析死循环
   - DOMAIN,test.tunnel.com,REJECT
