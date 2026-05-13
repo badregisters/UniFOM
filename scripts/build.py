@@ -8,10 +8,12 @@
 #   openclash/src/base.yaml    - template with placeholders (in git)
 #   openclash/src/secrets.yaml - real subscription URLs (gitignored, local only)
 #   shadowrocket/src/base.conf - SR config (no secrets)
+#   stash/src/base.yaml        - Clash Premium template with placeholders (in git)
 #
 # Outputs:
 #   openclash/dist/UniFOM.yaml    - deployable OC config (gitignored, local only)
 #   shadowrocket/dist/UniFOM.conf - deployable SR config (in git)
+#   stash/dist/UniFOM.yaml        - deployable Stash config (gitignored, local only)
 
 import re
 import sys
@@ -72,7 +74,41 @@ def build_sr():
     print(f"✓ SR built: {output_path}")
     return True
 
+def build_stash():
+    secrets_path  = ROOT / "openclash/src/secrets.yaml"
+    template_path = ROOT / "stash/src/base.yaml"
+    output_path   = ROOT / "stash/dist/UniFOM.yaml"
+
+    if not secrets_path.exists():
+        print(f"✗ Missing: {secrets_path}")
+        print("  Create openclash/src/secrets.yaml with your subscription URLs.")
+        return False
+
+    secrets = load_secrets(secrets_path)
+
+    with open(template_path) as f:
+        content = f.read()
+
+    replacements = {
+        "YOUR_FLOWERCLOUD_URL": secrets.get("FlowerCloud", ""),
+        "YOUR_OIXCLOUD_URL":    secrets.get("oixCloud", ""),
+        "YOUR_MAYING_URL":      secrets.get("Maying", ""),
+        "YOUR_NEXITALLY_URL":   secrets.get("Nexitally", ""),
+        "YOUR_LIANGXIN_URL":    secrets.get("LiangXin", ""),
+    }
+
+    for placeholder, value in replacements.items():
+        content = content.replace(f'"{placeholder}"', f'"{value}"')
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w") as f:
+        f.write(content)
+
+    print(f"✓ Stash built: {output_path}")
+    return True
+
 if __name__ == "__main__":
-    ok_oc = build_oc()
-    ok_sr = build_sr()
-    sys.exit(0 if (ok_oc and ok_sr) else 1)
+    ok_oc    = build_oc()
+    ok_sr    = build_sr()
+    ok_stash = build_stash()
+    sys.exit(0 if (ok_oc and ok_sr and ok_stash) else 1)
