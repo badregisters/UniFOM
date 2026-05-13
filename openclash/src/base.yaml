@@ -28,6 +28,7 @@
 #     Spotify/Epic/Steam/TikTok/Bilibili/GoogleCN/SteamCN
 # 23. [2026-05-13] 补充苹果 Akamai CDN 直连规则 (apple.com.akadns.net, mail.me.com.akadns.net)
 # 24. [2026-05-13] 补充苹果 CDN 直连规则 (ls-apple.com.akadns.net, apple-relay.fastly-edge.com)
+# 25. [2026-05-13] 苹果域名移出 fake-ip-filter, 交由 direct-nameserver 处理, 修复 CNAME 漏网并优化冷启动
 # ====================================================================================
 
 port: 7890
@@ -89,10 +90,6 @@ dns:
     - '+.lan'
     - '+.local'
     - 'pool.ntp.org'
-    - '+.apple.com'
-    - '+.icloud.com'
-    - '+.itunes.com'
-    - '+.apple-dns.net'
     - '+.3gppnetwork.org'
     - '+.t-mobile.com'
     - '+.12306.cn'
@@ -114,12 +111,9 @@ dns:
   nameserver:
     - "https://1.1.1.1/dns-query#🚀 节点选择"
     - "https://dns.google/dns-query#🚀 节点选择"
-  # [绝对隔离第三道防线] 特定规则的精准纠偏 (确保 fake-ip-filter 中的国内高敏业务获得正确的本地 CDN)
+  # [绝对隔离第三道防线] 国内域名精准纠偏, 确保国内高敏业务获得正确的本地 CDN
   nameserver-policy:
     "geosite:cn,private":
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
-    "+.apple.com,+.icloud.com,+.itunes.com,+.apple-dns.net":
       - https://dns.alidns.com/dns-query
       - https://doh.pub/dns-query
 
@@ -374,6 +368,8 @@ rules:
   - DOMAIN,generativelanguage.googleapis.com,🤖 AI 服务
   - DOMAIN,notebooklm-pa.googleapis.com,🤖 AI 服务
   - DOMAIN-KEYWORD,notebooklm,🤖 AI 服务
+  # === AutoDesk 阻断 ===
+  - DOMAIN-SUFFIX, autodesk.com, REJECT
   
   # === 特殊微调指定区 结束 ===
   
