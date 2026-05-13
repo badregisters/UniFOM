@@ -107,10 +107,9 @@ dns:
     - "https://1.1.1.1/dns-query#🚀 节点选择"
     - "https://dns.google/dns-query#🚀 节点选择"
   # [air-gap tier 2] CN domain override — pins domestic services to correct local CDN endpoints
+  # [Mihomo] supports list values here; Clash Premium accepts single string only
   nameserver-policy:
-    "geosite:cn,private":
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
+    "geosite:cn,private": https://dns.alidns.com/dns-query
 
 # [proxy-provider-subscriptions start] add/remove providers in this block
 proxy-providers:
