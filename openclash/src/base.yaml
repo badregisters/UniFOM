@@ -161,7 +161,7 @@ proxy-providers:
 # [机场列表-订阅 结束]
 
 proxy-groups:
-  - {name: 📇 HTTPDNS, type: select, proxies: [🎯 全球直连, REJECT, 🚀 节点选择]}
+  - {name: 📇 HTTPDNS, type: select, proxies: [REJECT, 🎯 全球直连, 🚀 节点选择]}
   - {name: 🚀 节点选择, type: select, proxies: [📡 自动测速, 💰 省流节点, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, DIRECT]}
   - {name: 🎛️ 手动切换, type: select, use: [FlowerCloud, oixCloud, Maying, Nexitally, LiangXin]}
   - {name: 🤖 AI 服务, type: select, proxies: [🗺️ Non-HK, 🎛️ 手动切换, 🚀 节点选择, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
