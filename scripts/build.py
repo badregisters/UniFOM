@@ -57,7 +57,19 @@ def build_clash(platform):
     with open(platform_path) as f:
         content = f.read()
     with open(base_path) as f:
-        content += "\n" + f.read()
+        base = f.read()
+
+    # Strip Mihomo-only lines from base when building Stash.
+    # Lines tagged with trailing "# [Mihomo]" are active rules that use
+    # Mihomo-exclusive syntax (e.g. DST-PORT ranges in AND rules) and
+    # must be dropped; Stash will reject them at parse time.
+    if platform == "stash":
+        base = "\n".join(
+            line for line in base.splitlines()
+            if not line.rstrip().endswith("# [Mihomo]")
+        ) + "\n"
+
+    content += "\n" + base
 
     replacements = {
         "YOUR_FLOWERCLOUD_URL": secrets.get("FlowerCloud", ""),
