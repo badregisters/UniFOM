@@ -6,7 +6,7 @@ Example: removing Maying. 5 files to update:
 
 | File | Location | Action |
 |------|----------|--------|
-| `openclash/src/secrets.yaml` | find the entry | delete line |
+| `clash/src/secrets.yaml` | find the entry | delete line |
 | `clash/src/base.yaml` | `[proxy-provider-subscriptions]` | delete entire provider block |
 | `clash/src/base.yaml` | `[proxy-provider-direct-domains]` | delete subscription domain rule |
 | `clash/src/base.yaml` | `[proxy-provider-groups]` | remove from all `use:` lists |
@@ -26,7 +26,7 @@ Example: adding NewProvider. Same 6 files:
 
 | File | Location | Action |
 |------|----------|--------|
-| `openclash/src/secrets.yaml` | append | add `NewProvider: "https://actual-url"` |
+| `clash/src/secrets.yaml` | append | add `NewProvider: "https://actual-url"` |
 | `clash/src/base.yaml` | `[proxy-provider-subscriptions]` | add provider block with `YOUR_NEWPROVIDER_URL` placeholder |
 | `clash/src/base.yaml` | `[proxy-provider-direct-domains]` | add subscription domain direct rule |
 | `clash/src/base.yaml` | `[proxy-provider-groups]` | add to all regional `use:` lists |
@@ -42,7 +42,7 @@ python3 scripts/build.py
 
 ## Notes
 
-- `secrets.yaml` contains real subscription URLs, local only, never commit to git
+- `clash/src/secrets.yaml` contains real subscription URLs, local only, never commit to git
 - `openclash/dist/UniFOM.yaml` and `stash/dist/UniFOM.yaml` are build output, local only, never commit to git
 - `shadowrocket/dist/UniFOM.conf` contains no secrets, committed to git normally
 - Maying is SSR protocol, appears only in manual-select and budget-node groups, not in regional groups

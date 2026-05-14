@@ -4,7 +4,7 @@
 *.swp
 
 # 含真实订阅链接，禁止提交
-openclash/src/secrets.yaml
+clash/src/secrets.yaml
 openclash/src/local.yaml
 
 # 构建输出 (含真实订阅链接)
