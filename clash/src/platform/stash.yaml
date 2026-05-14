@@ -26,9 +26,9 @@
 # 21. [v1.0.0-rc.1] Stash 移植版: Clash Premium 内核兼容
 # 22. [2026-05-14] Stash 3.0: AND/OR/NOT 逻辑规则确认支持, 与 Mihomo 统一至 clash/src/base.yaml
 #     nameserver-policy list 格式不支持 (Mihomo 专有), 降级为单条字符串
-# 23. [2026-05-14] 重构 DNS: 根因是 Stash 缺少 direct-nameserver 指令
-#     nameserver-policy+geosite 作为补偿方案存在冷启动依赖问题, 全面废弃
-#     nameserver 改用 CN DoH 直连, 移动端优先保障可靠性, DNS 隐私让位于 mihomo.yaml
+# 23. [2026-05-14] 重构 DNS: proxy-tagged nameserver + nameserver-policy + fallback 三层架构
+#     补偿 direct-nameserver 缺失: 温启动走 geosite:cn policy 精确命中, 冷启动由 fallback 兜底
+#     fallback-filter geoip:CN 依赖本地 MMDB, 无 CDN 冷启动依赖
 # 23. [2026-05-14] 重构: 单源架构, platform/stash.yaml 承载 Stash 专属 dns 头部
 # 24. [2026-05-14] 维护原则: 以 OC 为准; 所有 Mihomo 专属指令统一加 [Mihomo] 标记;
 #     有实质行为差异的额外补充 Stash 等价实现 (direct-nameserver → geosite:apple)
@@ -106,18 +106,26 @@ dns:
   #   - https://dns.alidns.com/dns-query
   #   - https://doh.pub/dns-query
   # [Mihomo] direct-nameserver — Stash does not support this directive.
-  # Mihomo uses direct-nameserver to route DIRECT-bound DNS to CN DoH, keeping nameserver
-  # proxy-tagged for privacy. Without direct-nameserver, replicating this split on Stash
-  # requires nameserver-policy with geosite:cn — but Stash's geosite loads on demand from CDN
-  # and is unavailable at cold start, causing all CN DNS to fall through to the proxy-tagged
-  # nameserver, which has no proxies yet and times out.
-  # Resolution: use CN DoH as nameserver directly (no proxy tag). Stash is a mobile client
-  # primarily used in CN; reliability takes priority over DNS privacy here. Proxy-tagged DoH
-  # is preserved in mihomo.yaml where the network environment is stable.
+  # Compensated via nameserver-policy (geosite:cn → CN DoH) + fallback (geoip:CN → CN DoH).
+  # nameserver-policy handles warm-start with precision; fallback catches cold-start and any
+  # geosite miss — both query concurrently, so cold-start never blocks on a proxy timeout.
   # direct-nameserver:
   #   - https://dns.alidns.com/dns-query
   #   - https://doh.pub/dns-query
   # [Mihomo] direct-nameserver-follow-policy: true
+  # [air-gap tier 1] proxied nameserver — remote resolution via tunnel, guards against DNS poisoning
   nameserver:
-    - "https://dns.alidns.com/dns-query"
-    - "https://doh.pub/dns-query"
+    - "https://1.1.1.1/dns-query#🚀 节点选择"
+    - "https://dns.google/dns-query#🚀 节点选择"
+  # [air-gap tier 2] CN domain override — geosite:cn pins domestic domains to CN DoH (warm-start)
+  # Note: Stash does not support list values in nameserver-policy (Mihomo-only); single string used
+  nameserver-policy:
+    "geosite:cn,private": "https://dns.alidns.com/dns-query"
+  # [air-gap tier 3] cold-start safety net — if nameserver fails or geosite:cn is unavailable,
+  # CN-IP responses trigger fallback to CN DoH; uses local geoip MMDB, no CDN dependency
+  fallback:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
