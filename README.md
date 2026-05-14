@@ -6,6 +6,7 @@ Unified repository for multi-client config projects.
 clash/
   src/
     base.yaml              - shared rules / providers / groups (all Clash platforms)
+    secrets.yaml           - subscription URLs, gitignored, local only
     platform/
       mihomo.yaml          - Mihomo (OpenClash) header: port, tun, geo, sniffer, dns
       stash.yaml           - Stash (Clash Premium) header: port, tun, sniffer, dns

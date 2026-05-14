@@ -8,7 +8,7 @@
 #   clash/src/platform/mihomo.yaml - Mihomo-specific header (port, tun, geo, sniffer, dns)
 #   clash/src/platform/stash.yaml  - Stash-specific header
 #   clash/src/base.yaml            - shared body (proxy-providers, groups, rules)
-#   openclash/src/secrets.yaml     - real subscription URLs (gitignored, local only)
+#   clash/src/secrets.yaml         - real subscription URLs (gitignored, local only)
 #   shadowrocket/src/base.conf     - SR config (no secrets)
 #
 # Outputs:
@@ -33,7 +33,7 @@ def load_secrets(path):
     return secrets
 
 def build_clash(platform):
-    secrets_path  = ROOT / "openclash/src/secrets.yaml"
+    secrets_path  = ROOT / "clash/src/secrets.yaml"
     platform_path = ROOT / f"clash/src/platform/{platform}.yaml"
     base_path     = ROOT / "clash/src/base.yaml"
 
