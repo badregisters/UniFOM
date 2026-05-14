@@ -24,26 +24,23 @@
 # 19. 废弃部分文本型远程规则集, 改用 Geosite, 降低系统占用, 提高查询效率及冷启动生存率
 # 20. 重新测试筛选远程规则集, 混用 BM7 和 ACL4SSR, 格式大坑须谨慎. 优化 12306
 # 21. [v1.0.0-rc.1] Stash 移植版: Clash Premium 内核兼容
-#     Mihomo 超集指令注释保留, 标记 [Mihomo], 静默忽略不影响运行
-#     - 注释: geo-auto-update / geox-url (Stash 内部管理, YAML 无效)
-#     - 注释: direct-nameserver / proxy-server-nameserver / respect-rules / cache-algorithm
-#     - 注释: tproxy-port / redir-port (iOS 无关) / parse-pure-ip / QUIC sniffer
-# 22. [2026-05-14] Stash 3.0 确认支持 AND/OR/NOT 逻辑规则及 nameserver-policy 列表格式
-#     AND 规则降级已无必要, 规则部分与 Mihomo 完全统一至 clash/src/base.yaml
-#     nameserver-policy 升级为双 DoH 列表
-# 23. [2026-05-14] 重构: 拆分单源架构, platform/stash.yaml 承载 Stash 专属头部, 规则共享至 clash/src/base.yaml
+# 22. [2026-05-14] Stash 3.0: AND/OR/NOT 逻辑规则及 nameserver-policy 列表格式确认支持
+#     AND 规则与 Mihomo 完全统一至 clash/src/base.yaml
+# 23. [2026-05-14] 重构: 单源架构, platform/stash.yaml 承载 Stash 专属 dns 头部
+# 24. [2026-05-14] 维护原则确立: 以 OC 为准; 静默忽略的指令保留激活态; 仅 direct-nameserver
+#     系列有实质行为差异, 保留 [Mihomo] 标记并补充 Stash 等价实现
 # ====================================================================================
 
 port: 7890
 socks-port: 7891
-# [Mihomo] redir-port: 7892
-# [Mihomo] tproxy-port: 7895
+redir-port: 7892
+tproxy-port: 7895
 allow-lan: true
 mode: rule
 log-level: info
 ipv6: false
 unified-delay: true
-# [Mihomo] tcp-concurrent: true
+tcp-concurrent: true
 
 tun:
   enable: true
@@ -55,21 +52,25 @@ tun:
   auto-detect-interface: true
   strict-route: true
 
-# [Mihomo] geo-auto-update: true
-# [Mihomo] geo-update-interval: 24
-# [Mihomo] geox-url: (managed internally by Stash, not YAML-configurable)
+geo-auto-update: true
+geo-update-interval: 24
+geox-url:
+  geoip: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/geoip.dat"
+  geosite: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/geosite.dat"
+  mmdb: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/country.mmdb"
+  asn: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/GeoLite2-ASN.mmdb"
 
 sniffer:
   enable: true
-  # [Mihomo] parse-pure-ip: true
+  parse-pure-ip: true
   sniff:
     TLS:
       ports: [443, 8443]
     HTTP:
       ports: [80, 8080-8880]
       override-destination: true
-    # [Mihomo] QUIC:
-    #   ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
   skip-domain:
     - "Mijia Cloud"
     - "dlg.io.mi.com"
@@ -79,12 +80,12 @@ sniffer:
 
 dns:
   enable: true
-  # [Mihomo] cache-algorithm: arc
+  cache-algorithm: arc
   ipv6: false
   listen: 0.0.0.0:1053
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
-  # [Mihomo] respect-rules: false
+  respect-rules: false
   fake-ip-filter:
     - '+.lan'
     - '+.local'
@@ -98,10 +99,11 @@ dns:
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
-  # [Mihomo] proxy-server-nameserver:
-  #   - https://dns.alidns.com/dns-query
-  #   - https://doh.pub/dns-query
-  # [Mihomo] direct-nameserver: (air-gap tier 1 — Mihomo only)
+  proxy-server-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  # [Mihomo] direct-nameserver — Stash does not support; geosite:apple pinned below as equivalent
+  # direct-nameserver:
   #   - https://dns.alidns.com/dns-query
   #   - https://doh.pub/dns-query
   # [Mihomo] direct-nameserver-follow-policy: true
@@ -110,7 +112,7 @@ dns:
     - "https://1.1.1.1/dns-query#🚀 节点选择"
     - "https://dns.google/dns-query#🚀 节点选择"
   # [air-gap tier 2] CN domain override — pins domestic services to correct local CDN endpoints
-  # geosite:apple explicitly pinned to compensate for missing direct-nameserver
+  # geosite:apple explicitly pinned to AliDoH — compensates for missing direct-nameserver
   nameserver-policy:
     "geosite:cn,private":
       - https://dns.alidns.com/dns-query
