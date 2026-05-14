@@ -5,53 +5,12 @@
 # Requires: Stash 3.0+ (AND/OR/NOT logical rules), Mihomo (all versions).
 # ====================================================================================
 
-# [proxy-provider-subscriptions start] add/remove providers in this block
-proxy-providers:
-  FlowerCloud:
-    type: http
-    url: "YOUR_FLOWERCLOUD_URL"
-    interval: 14400
-    path: ./proxy_provider/FlowerCloud.yaml
-    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
-    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
-
-  oixCloud:
-    type: http
-    url: "YOUR_OIXCLOUD_URL"
-    interval: 14400
-    path: ./proxy_provider/oixCloud.yaml
-    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
-    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
-
-  Maying:
-    type: http
-    url: "YOUR_MAYING_URL"
-    interval: 14400
-    path: ./proxy_provider/Maying.yaml
-    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
-    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
-
-  Nexitally:
-    type: http
-    url: "YOUR_NEXITALLY_URL"
-    interval: 14400
-    path: ./proxy_provider/Nexitally.yaml
-    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
-    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
-
-  LiangXin:
-    type: http
-    url: "YOUR_LIANGXIN_URL"
-    interval: 14400
-    path: ./proxy_provider/LiangXin.yaml
-    filter: "(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|喀麦隆|冰岛|土耳其|阿根廷)"
-    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
-# [proxy-provider-subscriptions end]
+# [GENERATED: proxy-providers]
 
 proxy-groups:
   - {name: 📇 HTTPDNS, type: select, proxies: [REJECT, 🎯 全球直连, 🚀 节点选择]}
   - {name: 🚀 节点选择, type: select, proxies: [📡 自动测速, 💰 省流节点, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, DIRECT]}
-  - {name: 🎛️ 手动切换, type: select, use: [FlowerCloud, oixCloud, Maying, Nexitally, LiangXin]}
+  - {name: 🎛️ 手动切换, type: select, use: [__USE_manual__]}
   - {name: 🤖 AI 服务, type: select, proxies: [🗺️ Non-HK, 🎛️ 手动切换, 🚀 节点选择, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: 📞 VoWiFi, type: select, proxies: [🎯 全球直连, 🎛️ 手动切换, 🇺🇸 美国节点, 🚀 节点选择]}
   - {name: ☁️ 微软云盘, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
@@ -76,19 +35,19 @@ proxy-groups:
   - {name: 🎯 全球直连, type: select, proxies: [DIRECT, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🛑 广告拦截, type: select, proxies: [REJECT, 🎯 全球直连]}
   # [proxy-provider-groups start] add provider to all use: lists below (Maying: manual-select and budget-node groups only)
-  - {name: 🇭🇰 香港节点, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 🇰🇷 韩国节点, type: url-test, tolerance: 75, filter: "(?i)(🇰🇷|韩|Korea|KR)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 🇸🇬 狮城节点, type: url-test, tolerance: 75, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 🇺🇸 美国节点, type: url-test, tolerance: 75, filter: "(?i)(🇺🇸|美|States|US)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 🇬🇧 英国节点, type: url-test, tolerance: 75, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 🇲🇾 马来节点, type: url-test, tolerance: 75, filter: "(?i)(🇲🇾|马|Malaysia|MY|MA)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 🗺️ Non-HK, type: url-test, tolerance: 100, filter: "(?i)(🇹🇼|台|Tai|TW|🇯🇵|日|Japan|JP|🇰🇷|韩|Korea|KR|🇸🇬|新|Singapore|SG|🇺🇸|美|States|US|🇬🇧|英|Kingdom|UK)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
+  - {name: 🇭🇰 香港节点, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_regional__]}
+  - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_regional__]}
+  - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_regional__]}
+  - {name: 🇰🇷 韩国节点, type: url-test, tolerance: 75, filter: "(?i)(🇰🇷|韩|Korea|KR)", use: [__USE_regional__]}
+  - {name: 🇸🇬 狮城节点, type: url-test, tolerance: 75, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_regional__]}
+  - {name: 🇺🇸 美国节点, type: url-test, tolerance: 75, filter: "(?i)(🇺🇸|美|States|US)", use: [__USE_regional__]}
+  - {name: 🇬🇧 英国节点, type: url-test, tolerance: 75, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_regional__]}
+  - {name: 🇲🇾 马来节点, type: url-test, tolerance: 75, filter: "(?i)(🇲🇾|马|Malaysia|MY|MA)", use: [__USE_regional__]}
+  - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷)", use: [__USE_regional__]}
+  - {name: 🗺️ Non-HK, type: url-test, tolerance: 100, filter: "(?i)(🇹🇼|台|Tai|TW|🇯🇵|日|Japan|JP|🇰🇷|韩|Korea|KR|🇸🇬|新|Singapore|SG|🇺🇸|美|States|US|🇬🇧|英|Kingdom|UK)", use: [__USE_regional__]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, 🎯 全球直连]}
-  - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
-  - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: "实验性|(?i)1x", use: [FlowerCloud, oixCloud, Maying, Nexitally, LiangXin]}
+  - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [__USE_regional__]}
+  - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: "实验性|(?i)1x", use: [__USE_manual__]}
   # [proxy-provider-groups end]
 
 rule-providers:
@@ -165,15 +124,10 @@ rules:
   - IP-CIDR,1.1.1.1/32,🚀 节点选择,no-resolve
 
   # === subscription bootstrap cold-start (full physical direct) ===
-  # [proxy-provider-direct-domains start] add subscription domains here when adding a new provider
+  # [GENERATED: direct-domains]
+  # secondary CDN / alt domains not derivable from subscription URL:
   - DOMAIN-SUFFIX,xmancdn.com,🎯 全球直连
-  - DOMAIN-SUFFIX,api-huacloud.dev,🎯 全球直连
-  - DOMAIN-SUFFIX,oics.net,🎯 全球直连
-  - DOMAIN-SUFFIX,sub.ssr.sh,🎯 全球直连
   - DOMAIN-SUFFIX,nxonearth.com,🎯 全球直连
-  - DOMAIN-SUFFIX,metaglide.org,🎯 全球直连
-  - DOMAIN-SUFFIX,liangxin.xyz,🎯 全球直连
-  # [proxy-provider-direct-domains end]
 
   # === GitHub hardcoded rules (improve cold-start survivability) ===
   - DOMAIN,gist.github.com,🚀 节点选择
