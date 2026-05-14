@@ -3,22 +3,27 @@ Unified repository for multi-client config projects.
 
 ## Structure
 ```
+clash/
+  src/
+    base.yaml              - shared rules / providers / groups (all Clash platforms)
+    platform/
+      mihomo.yaml          - Mihomo (OpenClash) header: port, tun, geo, sniffer, dns
+      stash.yaml           - Stash (Clash Premium) header: port, tun, sniffer, dns
+
 shadowrocket/
-  src/base.conf          - SR source of truth (in git)
-  dist/UniFOM.conf       - SR deployable output (in git)
+  src/base.conf            - SR source of truth (in git)
+  dist/UniFOM.conf         - SR deployable output (in git)
 
 openclash/
-  src/base.yaml          - OC template with placeholders (in git)
-  src/secrets.yaml       - subscription URLs, gitignored, local only
-  dist/UniFOM.yaml       - OC deployable output, gitignored, local only
+  src/secrets.yaml         - subscription URLs, gitignored, local only
+  dist/UniFOM.yaml         - OC deployable output, gitignored, local only
 
 stash/
-  src/base.yaml          - Stash template with placeholders (in git)
-  dist/UniFOM.yaml       - Stash deployable output, gitignored, local only
+  dist/UniFOM.yaml         - Stash deployable output, gitignored, local only
 
 scripts/
-  build.py               - merges base.yaml + secrets.yaml -> dist/UniFOM.yaml
-                           also copies SR src -> dist
+  build.py                 - concatenates platform header + base.yaml, injects secrets
+                             also copies SR src -> dist
 ```
 
 ## Build
