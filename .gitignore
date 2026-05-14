@@ -9,6 +9,7 @@ openclash/src/local.yaml
 
 # 构建输出 (含真实订阅链接)
 openclash/dist/
+stash/dist/
 
 # Claude Code 内部目录
 .claude/
