@@ -12,9 +12,9 @@
 #   shadowrocket/src/base.conf     - SR config (no secrets)
 #
 # Outputs:
-#   openclash/dist/UniFOM.yaml    - deployable OC config (gitignored, local only)
-#   stash/dist/UniFOM.yaml        - deployable Stash config (gitignored, local only)
-#   shadowrocket/dist/UniFOM.conf - deployable SR config (in git)
+#   clash/openclash/dist/UniFOM.yaml - deployable OC config (gitignored, local only)
+#   clash/stash/dist/UniFOM.yaml     - deployable Stash config (gitignored, local only)
+#   shadowrocket/dist/UniFOM.conf    - deployable SR config (in git)
 
 import re
 import sys
@@ -38,10 +38,10 @@ def build_clash(platform):
     base_path     = ROOT / "clash/src/base.yaml"
 
     if platform == "mihomo":
-        output_path = ROOT / "openclash/dist/UniFOM.yaml"
+        output_path = ROOT / "clash/openclash/dist/UniFOM.yaml"
         label = "OC"
     elif platform == "stash":
-        output_path = ROOT / "stash/dist/UniFOM.yaml"
+        output_path = ROOT / "clash/stash/dist/UniFOM.yaml"
         label = "Stash"
     else:
         print(f"✗ Unknown platform: {platform}")
@@ -49,7 +49,7 @@ def build_clash(platform):
 
     if not secrets_path.exists():
         print(f"✗ Missing: {secrets_path}")
-        print("  Create openclash/src/secrets.yaml with your subscription URLs.")
+        print("  Create clash/src/secrets.yaml with your subscription URLs.")
         return False
 
     secrets = load_secrets(secrets_path)

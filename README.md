@@ -10,17 +10,14 @@ clash/
     platform/
       mihomo.yaml          - Mihomo (OpenClash) header: port, tun, geo, sniffer, dns
       stash.yaml           - Stash (Clash Premium) header: port, tun, sniffer, dns
+  openclash/
+    dist/UniFOM.yaml       - OC deployable output, gitignored, local only
+  stash/
+    dist/UniFOM.yaml       - Stash deployable output, gitignored, local only
 
 shadowrocket/
   src/base.conf            - SR source of truth (in git)
   dist/UniFOM.conf         - SR deployable output (in git)
-
-openclash/
-  src/secrets.yaml         - subscription URLs, gitignored, local only
-  dist/UniFOM.yaml         - OC deployable output, gitignored, local only
-
-stash/
-  dist/UniFOM.yaml         - Stash deployable output, gitignored, local only
 
 scripts/
   build.py                 - concatenates platform header + base.yaml, injects secrets
