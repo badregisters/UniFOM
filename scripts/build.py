@@ -5,15 +5,16 @@
 #   python3 scripts/build.py
 #
 # Inputs:
-#   openclash/src/base.yaml    - template with placeholders (in git)
-#   openclash/src/secrets.yaml - real subscription URLs (gitignored, local only)
-#   shadowrocket/src/base.conf - SR config (no secrets)
-#   stash/src/base.yaml        - Clash Premium template with placeholders (in git)
+#   clash/src/platform/mihomo.yaml - Mihomo-specific header (port, tun, geo, sniffer, dns)
+#   clash/src/platform/stash.yaml  - Stash-specific header
+#   clash/src/base.yaml            - shared body (proxy-providers, groups, rules)
+#   openclash/src/secrets.yaml     - real subscription URLs (gitignored, local only)
+#   shadowrocket/src/base.conf     - SR config (no secrets)
 #
 # Outputs:
 #   openclash/dist/UniFOM.yaml    - deployable OC config (gitignored, local only)
-#   shadowrocket/dist/UniFOM.conf - deployable SR config (in git)
 #   stash/dist/UniFOM.yaml        - deployable Stash config (gitignored, local only)
+#   shadowrocket/dist/UniFOM.conf - deployable SR config (in git)
 
 import re
 import sys
@@ -31,10 +32,20 @@ def load_secrets(path):
                 secrets[m.group(1)] = m.group(2)
     return secrets
 
-def build_oc():
-    secrets_path = ROOT / "openclash/src/secrets.yaml"
-    template_path = ROOT / "openclash/src/base.yaml"
-    output_path   = ROOT / "openclash/dist/UniFOM.yaml"
+def build_clash(platform):
+    secrets_path  = ROOT / "openclash/src/secrets.yaml"
+    platform_path = ROOT / f"clash/src/platform/{platform}.yaml"
+    base_path     = ROOT / "clash/src/base.yaml"
+
+    if platform == "mihomo":
+        output_path = ROOT / "openclash/dist/UniFOM.yaml"
+        label = "OC"
+    elif platform == "stash":
+        output_path = ROOT / "stash/dist/UniFOM.yaml"
+        label = "Stash"
+    else:
+        print(f"✗ Unknown platform: {platform}")
+        return False
 
     if not secrets_path.exists():
         print(f"✗ Missing: {secrets_path}")
@@ -43,8 +54,10 @@ def build_oc():
 
     secrets = load_secrets(secrets_path)
 
-    with open(template_path) as f:
+    with open(platform_path) as f:
         content = f.read()
+    with open(base_path) as f:
+        content += "\n" + f.read()
 
     replacements = {
         "YOUR_FLOWERCLOUD_URL": secrets.get("FlowerCloud", ""),
@@ -61,7 +74,7 @@ def build_oc():
     with open(output_path, "w") as f:
         f.write(content)
 
-    print(f"✓ OC built: {output_path}")
+    print(f"✓ {label} built: {output_path}")
     return True
 
 def build_sr():
@@ -74,41 +87,8 @@ def build_sr():
     print(f"✓ SR built: {output_path}")
     return True
 
-def build_stash():
-    secrets_path  = ROOT / "openclash/src/secrets.yaml"
-    template_path = ROOT / "stash/src/base.yaml"
-    output_path   = ROOT / "stash/dist/UniFOM.yaml"
-
-    if not secrets_path.exists():
-        print(f"✗ Missing: {secrets_path}")
-        print("  Create openclash/src/secrets.yaml with your subscription URLs.")
-        return False
-
-    secrets = load_secrets(secrets_path)
-
-    with open(template_path) as f:
-        content = f.read()
-
-    replacements = {
-        "YOUR_FLOWERCLOUD_URL": secrets.get("FlowerCloud", ""),
-        "YOUR_OIXCLOUD_URL":    secrets.get("oixCloud", ""),
-        "YOUR_MAYING_URL":      secrets.get("Maying", ""),
-        "YOUR_NEXITALLY_URL":   secrets.get("Nexitally", ""),
-        "YOUR_LIANGXIN_URL":    secrets.get("LiangXin", ""),
-    }
-
-    for placeholder, value in replacements.items():
-        content = content.replace(f'"{placeholder}"', f'"{value}"')
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, "w") as f:
-        f.write(content)
-
-    print(f"✓ Stash built: {output_path}")
-    return True
-
 if __name__ == "__main__":
-    ok_oc    = build_oc()
+    ok_oc    = build_clash("mihomo")
+    ok_stash = build_clash("stash")
     ok_sr    = build_sr()
-    ok_stash = build_stash()
-    sys.exit(0 if (ok_oc and ok_sr and ok_stash) else 1)
+    sys.exit(0 if (ok_oc and ok_stash and ok_sr) else 1)
