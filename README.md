@@ -12,6 +12,10 @@ openclash/
   src/secrets.yaml       - subscription URLs, gitignored, local only
   dist/UniFOM.yaml       - OC deployable output, gitignored, local only
 
+stash/
+  src/base.yaml          - Stash template with placeholders (in git)
+  dist/UniFOM.yaml       - Stash deployable output, gitignored, local only
+
 scripts/
   build.py               - merges base.yaml + secrets.yaml -> dist/UniFOM.yaml
                            also copies SR src -> dist
@@ -30,3 +34,4 @@ python3 scripts/build.py
 ## Tags
 - Shadowrocket : sr-vX.Y.Z / sr-vX.Y.Z-rc.N
 - OpenClash    : oc-vX.Y.Z / oc-vX.Y.Z-rc.N
+- Stash        : stash-vX.Y.Z / stash-vX.Y.Z-rc.N
