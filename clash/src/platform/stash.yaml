@@ -26,6 +26,9 @@
 # 21. [v1.0.0-rc.1] Stash 移植版: Clash Premium 内核兼容
 # 22. [2026-05-14] Stash 3.0: AND/OR/NOT 逻辑规则确认支持, 与 Mihomo 统一至 clash/src/base.yaml
 #     nameserver-policy list 格式不支持 (Mihomo 专有), 降级为单条字符串
+# 23. [2026-05-14] 重构 DNS: 根因是 Stash 缺少 direct-nameserver 指令
+#     nameserver-policy+geosite 作为补偿方案存在冷启动依赖问题, 全面废弃
+#     nameserver 改用 CN DoH 直连, 移动端优先保障可靠性, DNS 隐私让位于 mihomo.yaml
 # 23. [2026-05-14] 重构: 单源架构, platform/stash.yaml 承载 Stash 专属 dns 头部
 # 24. [2026-05-14] 维护原则: 以 OC 为准; 所有 Mihomo 专属指令统一加 [Mihomo] 标记;
 #     有实质行为差异的额外补充 Stash 等价实现 (direct-nameserver → geosite:apple)
@@ -102,18 +105,19 @@ dns:
   # [Mihomo] proxy-server-nameserver:
   #   - https://dns.alidns.com/dns-query
   #   - https://doh.pub/dns-query
-  # [Mihomo] direct-nameserver — Stash does not support; geosite:apple pinned below as equivalent
+  # [Mihomo] direct-nameserver — Stash does not support this directive.
+  # Mihomo uses direct-nameserver to route DIRECT-bound DNS to CN DoH, keeping nameserver
+  # proxy-tagged for privacy. Without direct-nameserver, replicating this split on Stash
+  # requires nameserver-policy with geosite:cn — but Stash's geosite loads on demand from CDN
+  # and is unavailable at cold start, causing all CN DNS to fall through to the proxy-tagged
+  # nameserver, which has no proxies yet and times out.
+  # Resolution: use CN DoH as nameserver directly (no proxy tag). Stash is a mobile client
+  # primarily used in CN; reliability takes priority over DNS privacy here. Proxy-tagged DoH
+  # is preserved in mihomo.yaml where the network environment is stable.
   # direct-nameserver:
   #   - https://dns.alidns.com/dns-query
   #   - https://doh.pub/dns-query
   # [Mihomo] direct-nameserver-follow-policy: true
-  # [air-gap tier 1] proxied fallback — remote resolution via tunnel, guards against DNS poisoning
   nameserver:
-    - "https://1.1.1.1/dns-query#🚀 节点选择"
-    - "https://dns.google/dns-query#🚀 节点选择"
-  # [air-gap tier 2] CN domain override — pins domestic services to correct local CDN endpoints
-  # geosite:apple explicitly pinned to AliDoH — compensates for missing direct-nameserver
-  # Note: Stash does not support list values in nameserver-policy (Mihomo-only); single string used
-  nameserver-policy:
-    "geosite:cn,private": "https://dns.alidns.com/dns-query"
-    "geosite:apple": "https://dns.alidns.com/dns-query"
+    - "https://dns.alidns.com/dns-query"
+    - "https://doh.pub/dns-query"
