@@ -43,7 +43,7 @@ python3 scripts/build.py
 ## Notes
 
 - `clash/src/secrets.yaml` contains real subscription URLs, local only, never commit to git
-- `openclash/dist/UniFOM.yaml` and `stash/dist/UniFOM.yaml` are build output, local only, never commit to git
+- `clash/openclash/dist/UniFOM.yaml` and `clash/stash/dist/UniFOM.yaml` are build output, local only, never commit to git
 - `shadowrocket/dist/UniFOM.conf` contains no secrets, committed to git normally
 - Maying is SSR protocol, appears only in manual-select and budget-node groups, not in regional groups
 - OC and Stash share `clash/src/base.yaml` — edit once, both platforms updated on next build
