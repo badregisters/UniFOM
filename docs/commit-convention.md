@@ -9,7 +9,7 @@
 | `feat` | 新增规则或功能 |
 | `fix` | 修正错误的规则 |
 | `remove` | 删除规则 |
-| `tune` | 调整参数（DNS、超时、容差等） |
+| `tune` | 调整参数（DNS、超时、容差等）|
 | `refactor` | 结构调整，功能不变 |
 
 ## 平台
@@ -33,3 +33,41 @@ refactor(all): 重新整理策略组顺序
 ## 说明
 
 文件头的 Changelog 面向用户，描述配置功能变化；git commit 记录面向自己，追踪每次改动历史。两者独立维护，互不影响。
+
+---
+
+# Commit Convention
+
+Format: `<type>(<platform>): <description>`
+
+## Types
+
+| Type | Purpose |
+|------|---------|
+| `feat` | Add a new rule or feature |
+| `fix` | Fix an incorrect rule |
+| `remove` | Delete a rule |
+| `tune` | Adjust parameters (DNS, timeout, tolerance, etc.) |
+| `refactor` | Structural change with no functional impact |
+
+## Platforms
+
+| Tag | Platform |
+|-----|----------|
+| `sr` | Shadowrocket |
+| `oc` | OpenClash |
+| `all` | All platforms |
+
+## Examples
+
+```
+feat(sr): add Telegram routing rule
+fix(sr): fix iCloud domain leak
+tune(sr): adjust url-test tolerance to 75ms
+remove(sr): remove redundant local rule
+refactor(all): reorganize proxy group order
+```
+
+## Notes
+
+The in-file Changelog is user-facing and describes functional changes to the config. Git commit messages are for personal tracking of edit history. The two are maintained independently and do not need to match.
