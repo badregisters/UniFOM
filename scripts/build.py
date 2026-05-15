@@ -36,9 +36,9 @@ ROOT = Path(__file__).parent.parent
 
 # Default filter applied to all proxy providers
 PROVIDER_FILTER = (
-    '(?i)(香港|🇭🇰|HK|美国|🇺🇸|US|日本|🇯🇵|JP|韩国|🇰🇷|KR|'
-    '台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|'
-    '喀麦隆|冰岛|土耳其|阿根廷)'
+    r'(?i)(香港|🇭🇰|HK|美国|🇺🇸|\bUS\b|日本|🇯🇵|JP|韩国|🇰🇷|KR|'
+    r'台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|'
+    r'喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)'
 )
 
 def load_providers(path):
