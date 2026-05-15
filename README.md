@@ -1,4 +1,6 @@
-# MSS — Mihomo + Shadowrocket + Surge/Stash
+# UniFOM — Universal FlowerCloud + oixCloud + Maying
+
+> 原项目名 MSS（Mihomo + Shadowrocket + Surge/Stash）
 
 多客户端代理配置统一仓库，支持 Shadowrocket（SR）、OpenClash（OC）和 Stash。
 
@@ -48,14 +50,16 @@ python3 scripts/build.py
 ## SR 订阅链接
 
 ```
-https://raw.githubusercontent.com/badregisters/MSS/main/shadowrocket/dist/UniFOM.conf
+https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf
 ```
 
 注意：raw.githubusercontent.com 有 5 分钟 CDN 缓存（max-age=300），push 后稍等即可更新。
 
 ---
 
-# MSS — Mihomo + Shadowrocket + Surge/Stash
+# UniFOM — Universal FlowerCloud + oixCloud + Maying
+
+> Previously known as MSS (Mihomo + Shadowrocket + Surge/Stash)
 
 Unified repository for multi-client proxy configurations, supporting Shadowrocket (SR), OpenClash (OC), and Stash.
 
@@ -105,7 +109,7 @@ python3 scripts/build.py
 ## SR Subscription URL
 
 ```
-https://raw.githubusercontent.com/badregisters/MSS/main/shadowrocket/dist/UniFOM.conf
+https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf
 ```
 
 Note: raw.githubusercontent.com has a 5-minute CDN cache (max-age=300). Allow a short wait after pushing.
