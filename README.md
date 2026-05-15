@@ -59,7 +59,7 @@ https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/Uni
 
 # UniFOM — Universal FlowerCloud + oixCloud + Maying
 
-> Previously known as MSS (Mihomo + Shadowrocket + Surge/Stash)
+> Previously known as MSS (Mihomo + Shadowrocket + Stash/Surge)
 
 Unified repository for multi-client proxy configurations, supporting Shadowrocket (SR), OpenClash (OC), and Stash.
 
