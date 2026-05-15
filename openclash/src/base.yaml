@@ -95,29 +95,29 @@ dns:
     - '+.12306.cn'
     - '+.12306.com'
 
-  # DNS bootstrap anchor: forces kernel to resolve DoH endpoints below via plain UDP 53 — cold-start prerequisite
+  # DNS 引导锚点: 冷启动时由明文 UDP 53 解析下方 DoH 地址 — 冷启动必要条件
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
   proxy-server-nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
-  # [air-gap tier 1] direct-path nameserver — handles all DIRECT-matched traffic
+  # [隔离层 1] 直连域名服务器 — 处理所有 DIRECT 匹配流量
   direct-nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
   direct-nameserver-follow-policy: true
-  # [air-gap tier 2] proxied fallback — remote resolution via tunnel, guards against DNS poisoning
+  # [隔离层 2] 代理回退 — 经隧道远程解析，防止 DNS 污染
   nameserver:
     - "https://1.1.1.1/dns-query#🚀 节点选择"
     - "https://dns.google/dns-query#🚀 节点选择"
-  # [air-gap tier 3] CN domain override — pins domestic services to correct local CDN endpoints
+  # [隔离层 3] 国内域名覆盖 — 固定国内服务到正确的本地 CDN 节点
   nameserver-policy:
     "geosite:cn,private":
       - https://dns.alidns.com/dns-query
       - https://doh.pub/dns-query
 
-# [proxy-provider-subscriptions start] add/remove providers in this block
+# [proxy-provider-subscriptions start] 在此处增减机场订阅
 proxy-providers:
   FlowerCloud:
     type: http
@@ -187,7 +187,7 @@ proxy-groups:
   - {name: 🪙 Crypto, type: select, proxies: [🇸🇬 狮城节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎯 全球直连]}
   - {name: 🎯 全球直连, type: select, proxies: [DIRECT, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🛑 广告拦截, type: select, proxies: [REJECT, 🎯 全球直连]}
-  # [proxy-provider-groups start] add provider to all use: lists below (Maying: manual-select and budget-node groups only)
+  # [proxy-provider-groups start] 新增机场时需同步添加到下方所有 use: 列表 (魅影: 仅手动切换和省流节点组)
   - {name: 🇭🇰 香港节点, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
   - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
   - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [FlowerCloud, oixCloud, Nexitally, LiangXin]}
@@ -269,15 +269,15 @@ rule-providers:
     interval: 86400
 
 rules:
-  # === core transport layer (public DNS & Apple push) ===
-  # force remote resolution and intercept Apple Safe Browsing token
+  # === 核心传输层 (公共 DNS 与苹果推送) ===
+  # 强制远端解析并拦截苹果安全浏览 token
   - DOMAIN,token.safebrowsing.apple,🍎 苹果服务
   - IP-CIDR,17.0.0.0/8,🍎 苹果服务,no-resolve
   - IP-CIDR,8.8.8.8/32,🚀 节点选择,no-resolve
   - IP-CIDR,1.1.1.1/32,🚀 节点选择,no-resolve
 
-  # === provider bootstrap — cold-start direct bypass (unproxied) ===
-  # [proxy-provider-direct-domains start] add subscription domains here when adding a new provider
+  # === 订阅冷启动直连域名 (不走代理) ===
+  # [proxy-provider-direct-domains start] 新增机场时在此处添加订阅域名
   - DOMAIN-SUFFIX,xmancdn.com,🎯 全球直连
   - DOMAIN-SUFFIX,api-huacloud.dev,🎯 全球直连
   - DOMAIN-SUFFIX,oics.net,🎯 全球直连
@@ -287,7 +287,7 @@ rules:
   - DOMAIN-SUFFIX,liangxin.xyz,🎯 全球直连
   # [proxy-provider-direct-domains end]
 
-  # === GitHub pinned rules (cold-start resilience) ===
+  # === GitHub 固定规则 (冷启动保活) ===
   - DOMAIN,gist.github.com,🚀 节点选择
   - DOMAIN,raw.githubusercontent.com,🚀 节点选择
   - DOMAIN-SUFFIX,github.com,🚀 节点选择
@@ -296,7 +296,7 @@ rules:
   - DOMAIN-SUFFIX,github.io,🚀 节点选择
   - GEOSITE,github,🚀 节点选择
 
-  # === VoWiFi pinned path (UDP hole-punching, SIP, ePDG auth) ===
+  # === VoWiFi 固定通道 (UDP 打洞、SIP、ePDG 鉴权) ===
   - DST-PORT,5060,📞 VoWiFi
   - DST-PORT,5061,📞 VoWiFi
   - DOMAIN-SUFFIX,t-mobile.com,📞 VoWiFi
@@ -305,37 +305,37 @@ rules:
   - DOMAIN-KEYWORD,ims,📞 VoWiFi
   - AND,((NETWORK,UDP),(OR,((DST-PORT,500),(DST-PORT,4500)))),📞 VoWiFi
 
-  # === LAN leak prevention and direct passthrough ===
+  # === 局域网防泄漏与直连放行 ===
   - RULE-SET,LocalAreaNetwork,🎯 全球直连
   - RULE-SET,UnBan,🎯 全球直连
 
-  # === game platform and auth API overrides ===
-  # Activision (CODM, etc.)
+  # === 游戏平台及认证 API 覆盖规则 ===
+  # 动视 (CODM 等)
   - DOMAIN-SUFFIX,activision.com,🎮 游戏平台
   - DOMAIN-SUFFIX,callofduty.com,🎮 游戏平台
   - DOMAIN-KEYWORD,codm,🎮 游戏平台
   - AND,((NETWORK,UDP),(DST-PORT,7500-7650)),🎮 游戏平台
-  # Genshin Impact
+  # 原神
   - DOMAIN-SUFFIX,hoyoverse.com,🎮 游戏平台
   - DOMAIN-SUFFIX,hoyolab.com,🎮 游戏平台
   - DOMAIN-SUFFIX,cognosphere.com,🎮 游戏平台
-  # Tencent overseas infra (CODM, PUBGM, Nikke auth and anti-cheat)
+  # 腾讯海外基础设施 (CODM、PUBGM、妮姬认证与反作弊)
   - DOMAIN-SUFFIX,proximabeta.com,🎮 游戏平台
   - DOMAIN-SUFFIX,gcloudcs.com,🎮 游戏平台
   - DOMAIN-SUFFIX,levelinfinite.com,🎮 游戏平台
   - DOMAIN-SUFFIX,tdsgame.com,🎮 游戏平台
   - DOMAIN-KEYWORD,proximabeta,🎮 游戏平台
-  # Ubisoft (Rainbow Six, Division, etc.)
+  # 育碧 (彩虹六号、全境封锁等)
   - DOMAIN-SUFFIX,ubisoft.com,🎮 游戏平台
   - DOMAIN-SUFFIX,ubi.com,🎮 游戏平台
   - DOMAIN-KEYWORD,ubisoft,🎮 游戏平台
-  # telemetry and attribution SDKs — force-intercepted to avoid ad-network blackholes
+  # 遥测与归因 SDK — 强制拦截以避免广告网络黑洞
   - DOMAIN-SUFFIX,appsflyer.com,🎮 游戏平台
   - DOMAIN-SUFFIX,adjust.com,🎮 游戏平台
   - DOMAIN-SUFFIX,rayjump.com,🎮 游戏平台
   - DOMAIN-KEYWORD,crashlytics,🎮 游戏平台
 
-  # === high-value asset routing (cross-border finance / crypto) ===
+  # === 高敏资产路由 (跨境金融/加密货币) ===
   - DOMAIN-KEYWORD,wise,🦉 Wise
   - DOMAIN-SUFFIX,transferwise.com,🦉 Wise
   - DOMAIN-KEYWORD,paypal,🅿️ PayPal
@@ -352,29 +352,29 @@ rules:
   - DOMAIN-SUFFIX,welab.bank,🏦 香港金融
   - RULE-SET,Crypto_Rules,🪙 Crypto
 
-  # === custom overrides start ===
-  # Apple domains via third-party CDNs — theoretically redundant post fake-ip-filter removal, retained for observation
+  # === 自定义覆盖规则 开始 ===
+  # 苹果经第三方 CDN 的域名 — 移除 fake-ip-filter 后理论上冗余，保留观察
   # - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,mail.me.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,ls-apple.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,apple-relay.fastly-edge.com,🍎 苹果服务
   - DOMAIN-SUFFIX,browserleaks.com,🚀 节点选择
-  # drop Alibaba SDK UDP tunnel probes — breaks DNS resolution feedback loops
+  # 丢弃阿里 SDK 的 UDP 隧道探测 — 会破坏 DNS 解析反馈回路
   - DOMAIN,test.tunnel.com,REJECT
-  # === NotebookLM and Google AI auth pinning ===
+  # === NotebookLM 及谷歌 AI 认证固定规则 ===
   - DOMAIN,accounts.google.com,🤖 AI 服务
   - DOMAIN,oauth2.googleapis.com,🤖 AI 服务
   - DOMAIN,alkali.google.com,🤖 AI 服务
   - DOMAIN,generativelanguage.googleapis.com,🤖 AI 服务
   - DOMAIN,notebooklm-pa.googleapis.com,🤖 AI 服务
   - DOMAIN-KEYWORD,notebooklm,🤖 AI 服务
-  # === AutoDesk block ===
+  # === AutoDesk 拦截 ===
   - DOMAIN-SUFFIX, api.genuine-software.autodesk.com, REJECT
   - DOMAIN-SUFFIX, genuine-software2.autodesk.com, REJECT
 
-  # === custom overrides end ===
+  # === 自定义覆盖规则 结束 ===
 
-  # === CN tech giants — pinned direct (Tencent / Alibaba / ASN exemptions) ===
+  # === 国内大厂直连固定规则 (腾讯/阿里 ASN 豁免) ===
   - IP-ASN,132203,🎯 全球直连,no-resolve
   - IP-ASN,131830,🎯 全球直连,no-resolve
   - IP-ASN,45090,🎯 全球直连,no-resolve
@@ -382,7 +382,7 @@ rules:
   - IP-ASN,45102,🎯 全球直连,no-resolve
   - IP-ASN,133775,🎯 全球直连,no-resolve
 
-  # === CN tech giants HTTPDNS override (anti-pollution) ===
+  # === 国内大厂 HTTPDNS 劫持覆盖 (防污染) ===
   - DOMAIN-KEYWORD,httpdns,📇 HTTPDNS
   - IP-CIDR,119.29.29.29/32,📇 HTTPDNS,no-resolve
   - IP-CIDR,182.254.116.116/32,📇 HTTPDNS,no-resolve
@@ -391,12 +391,12 @@ rules:
   - IP-CIDR,223.5.5.5/32,📇 HTTPDNS,no-resolve
   - IP-CIDR,223.6.6.6/32,📇 HTTPDNS,no-resolve
 
-  # === geo-fenced services (Truth Social US-region lock) ===
+  # === 地区锁定服务 (Truth Social 美区限制) ===
   - DOMAIN-SUFFIX,truthsocial.com,🇺🇸 美国节点
   - DOMAIN-SUFFIX,tmtgcorp.com,🇺🇸 美国节点
   - DOMAIN-KEYWORD,truthsocial,🇺🇸 美国节点
 
-  # === full ruleset ingestion (GEOSITE + ACL4SSR + BM7) ===
+  # === 全量规则集挂载 (GEOSITE + ACL4SSR + BM7) ===
   - GEOSITE,googlefcm,📢 谷歌FCM
   - GEOSITE,telegram,✈️ 电报消息
   - GEOSITE,openai,🤖 AI 服务
@@ -419,7 +419,7 @@ rules:
   - RULE-SET,Download,🎯 全球直连
   - GEOSITE,category-ads-all,🛑 广告拦截
 
-  # === fallback ===
+  # === 兜底 ===
   - GEOSITE,cn,🎯 全球直连
   - DOMAIN-SUFFIX,cn,🎯 全球直连
   - GEOIP,CN,🎯 全球直连,no-resolve

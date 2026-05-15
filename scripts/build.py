@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-# build.py - Generate dist files from src templates and secrets
+# build.py - 从源模板和密钥生成 dist 文件
 #
-# Usage:
+# 用法:
 #   python3 scripts/build.py
 #
-# Inputs:
-#   openclash/src/base.yaml    - template with placeholders (in git)
-#   openclash/src/secrets.yaml - real subscription URLs (gitignored, local only)
-#   shadowrocket/src/base.conf - SR config (no secrets)
+# 输入:
+#   openclash/src/base.yaml    - 含占位符的模板 (已纳入 git)
+#   openclash/src/secrets.yaml - 真实订阅链接 (gitignore，仅本地)
+#   shadowrocket/src/base.conf - SR 配置 (无敏感信息)
 #
-# Outputs:
-#   openclash/dist/UniFOM.yaml    - deployable OC config (gitignored, local only)
-#   shadowrocket/dist/UniFOM.conf - deployable SR config (in git)
+# 输出:
+#   openclash/dist/UniFOM.yaml    - 可部署的 OC 配置 (gitignore，仅本地)
+#   shadowrocket/dist/UniFOM.conf - 可部署的 SR 配置 (已纳入 git)
 
 import re
 import sys
