@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'sr-v*'
+      - 'oc-v*'
+      - 'stash-v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect client and release type
+        id: meta
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+          if [[ "$TAG" == sr-* ]]; then
+            echo "client=sr" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" == oc-* ]]; then
+            echo "client=oc" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" == stash-* ]]; then
+            echo "client=stash" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$TAG" == *-rc.* ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build OC dist
+        if: steps.meta.outputs.client == 'oc'
+        env:
+          FLOWERCLOUD_URL: ${{ secrets.FLOWERCLOUD_URL }}
+          OIXCLOUD_URL: ${{ secrets.OIXCLOUD_URL }}
+          MAYING_URL: ${{ secrets.MAYING_URL }}
+          NEXITALLY_URL: ${{ secrets.NEXITALLY_URL }}
+          LIANGXIN_URL: ${{ secrets.LIANGXIN_URL }}
+        run: |
+          mkdir -p openclash/src
+          cat > openclash/src/secrets.yaml << EOF
+          FlowerCloud: "$FLOWERCLOUD_URL"
+          oixCloud:    "$OIXCLOUD_URL"
+          Maying:      "$MAYING_URL"
+          Nexitally:   "$NEXITALLY_URL"
+          LiangXin:    "$LIANGXIN_URL"
+          EOF
+          python3 scripts/build.py
+
+      - name: Collect dist file
+        id: dist
+        run: |
+          CLIENT="${{ steps.meta.outputs.client }}"
+          if [[ "$CLIENT" == "sr" ]]; then
+            echo "path=shadowrocket/dist/UniFOM.conf" >> $GITHUB_OUTPUT
+            echo "name=UniFOM.conf" >> $GITHUB_OUTPUT
+          elif [[ "$CLIENT" == "oc" ]]; then
+            echo "path=openclash/dist/UniFOM.yaml" >> $GITHUB_OUTPUT
+            echo "name=UniFOM.yaml" >> $GITHUB_OUTPUT
+          elif [[ "$CLIENT" == "stash" ]]; then
+            echo "path=clash/stash/dist/UniFOM.yaml" >> $GITHUB_OUTPUT
+            echo "name=UniFOM-stash.yaml" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
+          generate_release_notes: true
+          files: ${{ steps.dist.outputs.path }}
