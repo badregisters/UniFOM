@@ -14,6 +14,10 @@ openclash/
   src/secrets.yaml       - 真实订阅链接，gitignore，仅本地
   dist/UniFOM.yaml       - OC 可部署输出，gitignore，仅本地
 
+clash/
+  src/platform/stash.yaml - Stash 配置源文件（纳入 git，feat/stash-port 分支）
+  stash/dist/UniFOM.yaml  - Stash 可部署输出，gitignore，仅本地
+
 scripts/
   build.py               - 合并 base.yaml + secrets.yaml → dist/UniFOM.yaml
                            同时将 SR src 复制到 dist
@@ -27,14 +31,16 @@ python3 scripts/build.py
 
 ## 分支策略
 
-- `main`      : 稳定版本
-- `feat/*`    : 功能开发
-- `release/*` : 发布与 RC 稳定化
+- `main`           : 稳定版本，包含 SR 和 OC
+- `feat/stash-port`: Stash 适配，开发中；因 Stash geosite CDN 故障暂停验证，待恢复后合并 main
+- `feat/*`         : 其他功能开发
+- `release/*`      : 发布与 RC 稳定化
 
 ## 标签规范
 
 - Shadowrocket : `sr-vX.Y.Z` / `sr-vX.Y.Z-rc.N`
 - OpenClash    : `oc-vX.Y.Z` / `oc-vX.Y.Z-rc.N`
+- Stash        : `stash-vX.Y.Z` / `stash-vX.Y.Z-rc.N`
 
 ## SR 订阅链接
 
@@ -62,6 +68,10 @@ openclash/
   src/secrets.yaml       - real subscription URLs, gitignored, local only
   dist/UniFOM.yaml       - OC deployable output, gitignored, local only
 
+clash/
+  src/platform/stash.yaml - Stash config source (in git, feat/stash-port branch)
+  stash/dist/UniFOM.yaml  - Stash deployable output, gitignored, local only
+
 scripts/
   build.py               - merges base.yaml + secrets.yaml -> dist/UniFOM.yaml
                            also copies SR src -> dist
@@ -75,14 +85,16 @@ python3 scripts/build.py
 
 ## Branching
 
-- `main`      : stable
-- `feat/*`    : feature development
-- `release/*` : release and RC stabilization
+- `main`           : stable, contains SR and OC
+- `feat/stash-port`: Stash port, in progress; validation paused due to Stash geosite CDN outage, pending merge to main
+- `feat/*`         : other feature development
+- `release/*`      : release and RC stabilization
 
 ## Tags
 
 - Shadowrocket : `sr-vX.Y.Z` / `sr-vX.Y.Z-rc.N`
 - OpenClash    : `oc-vX.Y.Z` / `oc-vX.Y.Z-rc.N`
+- Stash        : `stash-vX.Y.Z` / `stash-vX.Y.Z-rc.N`
 
 ## SR Subscription URL
 
