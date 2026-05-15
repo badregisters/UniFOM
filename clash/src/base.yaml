@@ -40,14 +40,14 @@ proxy-groups:
   - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_regional__]}
   - {name: 🇰🇷 韩国节点, type: url-test, tolerance: 75, filter: "(?i)(🇰🇷|韩|Korea|KR)", use: [__USE_regional__]}
   - {name: 🇸🇬 狮城节点, type: url-test, tolerance: 75, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_regional__]}
-  - {name: 🇺🇸 美国节点, type: url-test, tolerance: 75, filter: "(?i)(🇺🇸|美|States|\\bUS\\b)", use: [__USE_regional__]}
+  - {name: 🇺🇸 美国节点, type: url-test, tolerance: 75, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_regional__]}
   - {name: 🇬🇧 英国节点, type: url-test, tolerance: 75, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_regional__]}
   - {name: 🇲🇾 马来节点, type: url-test, tolerance: 75, filter: "(?i)(🇲🇾|马|Malaysia|MY|MA)", use: [__USE_regional__]}
   - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷)", use: [__USE_regional__]}
-  - {name: 🗺️ Non-HK, type: url-test, tolerance: 100, filter: "(?i)(🇹🇼|台|Tai|TW|🇯🇵|日|Japan|JP|🇰🇷|韩|Korea|KR|🇸🇬|新|Singapore|SG|🇺🇸|美|States|\\bUS\\b|🇬🇧|英|Kingdom|UK)", use: [__USE_regional__]}
+  - {name: 🗺️ Non-HK, type: url-test, tolerance: 100, filter: '(?i)(🇹🇼|台|Tai|TW|🇯🇵|日|Japan|JP|🇰🇷|韩|Korea|KR|🇸🇬|新|Singapore|SG|🇺🇸|美|States|\bUS\b|🇬🇧|英|Kingdom|UK)', use: [__USE_regional__]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, 🎯 全球直连]}
   - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [__USE_regional__]}
-  - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: "实验性|(?i)0\\.1x|(?i)1x", use: [__USE_manual__]}
+  - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: '实验性|(?i)0\.1x|(?i)1x', use: [__USE_manual__]}
   # [proxy-provider-groups end]
 
 rule-providers:
