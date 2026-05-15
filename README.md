@@ -1,26 +1,29 @@
-# MSS
+# MSS — Mihomo + Shadowrocket + Surge/Stash
 
-多客户端代理配置统一仓库，支持 Shadowrocket 和 OpenClash。
+多客户端代理配置统一仓库，支持 Shadowrocket（SR）、OpenClash（OC）和 Stash。
 
 ## 目录结构
 
 ```
 shadowrocket/
-  src/base.conf          - SR 配置源文件（纳入 git）
-  dist/UniFOM.conf       - SR 可部署输出（纳入 git）
+  src/base.conf              - SR 配置源文件（纳入 git）
+  dist/UniFOM.conf           - SR 可部署输出（纳入 git）
 
 openclash/
-  src/base.yaml          - OC 模板，含订阅占位符（纳入 git）
-  src/secrets.yaml       - 真实订阅链接，gitignore，仅本地
-  dist/UniFOM.yaml       - OC 可部署输出，gitignore，仅本地
+  src/base.yaml              - OC 模板，含订阅占位符（纳入 git）
 
 clash/
-  src/platform/stash.yaml - Stash 配置源文件（纳入 git，feat/stash-port 分支）
-  stash/dist/UniFOM.yaml  - Stash 可部署输出，gitignore，仅本地
+  src/secrets.yaml           - 所有机场真实订阅链接，gitignore，仅本地
+  openclash/dist/UniFOM.yaml - OC 可部署输出，gitignore，仅本地
+  stash/dist/UniFOM.yaml     - Stash 可部署输出，gitignore，仅本地
 
 scripts/
-  build.py               - 合并 base.yaml + secrets.yaml → dist/UniFOM.yaml
-                           同时将 SR src 复制到 dist
+  build.py                   - 合并 base.yaml + secrets.yaml → OC dist
+                               同时将 SR src 复制到 SR dist
+
+docs/
+  commit-convention.md       - git commit 规范
+  proxy-provider-management.md - 机场增删操作指南
 ```
 
 ## 构建
@@ -52,29 +55,32 @@ https://raw.githubusercontent.com/badregisters/MSS/main/shadowrocket/dist/UniFOM
 
 ---
 
-# MSS
+# MSS — Mihomo + Shadowrocket + Surge/Stash
 
-Unified repository for multi-client proxy configurations, supporting Shadowrocket and OpenClash.
+Unified repository for multi-client proxy configurations, supporting Shadowrocket (SR), OpenClash (OC), and Stash.
 
 ## Structure
 
 ```
 shadowrocket/
-  src/base.conf          - SR source of truth (in git)
-  dist/UniFOM.conf       - SR deployable output (in git)
+  src/base.conf              - SR source of truth (in git)
+  dist/UniFOM.conf           - SR deployable output (in git)
 
 openclash/
-  src/base.yaml          - OC template with placeholders (in git)
-  src/secrets.yaml       - real subscription URLs, gitignored, local only
-  dist/UniFOM.yaml       - OC deployable output, gitignored, local only
+  src/base.yaml              - OC template with placeholders (in git)
 
 clash/
-  src/platform/stash.yaml - Stash config source (in git, feat/stash-port branch)
-  stash/dist/UniFOM.yaml  - Stash deployable output, gitignored, local only
+  src/secrets.yaml           - real subscription URLs for all providers, gitignored, local only
+  openclash/dist/UniFOM.yaml - OC deployable output, gitignored, local only
+  stash/dist/UniFOM.yaml     - Stash deployable output, gitignored, local only
 
 scripts/
-  build.py               - merges base.yaml + secrets.yaml -> dist/UniFOM.yaml
-                           also copies SR src -> dist
+  build.py                   - merges base.yaml + secrets.yaml -> OC dist
+                               also copies SR src -> SR dist
+
+docs/
+  commit-convention.md       - git commit style guide
+  proxy-provider-management.md - instructions for adding/removing providers
 ```
 
 ## Build
