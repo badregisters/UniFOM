@@ -125,9 +125,6 @@ rules:
 
   # === subscription bootstrap cold-start (full physical direct) ===
   # [GENERATED: direct-domains]
-  # secondary CDN / alt domains not derivable from subscription URL:
-  - DOMAIN-SUFFIX,xmancdn.com,🎯 全球直连
-  - DOMAIN-SUFFIX,nxonearth.com,🎯 全球直连
 
   # === GitHub hardcoded rules (improve cold-start survivability) ===
   - DOMAIN,gist.github.com,🚀 节点选择

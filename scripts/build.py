@@ -9,7 +9,7 @@
 #   clash/src/platform/stash.yaml  - Stash-specific header
 #   clash/src/base.yaml            - shared body with injection markers
 #   clash/src/secrets.yaml         - provider list with URLs (gitignored, local only)
-#   shadowrocket/src/base.conf     - SR config (no secrets)
+#   shadowrocket/src/base.conf     - SR config template
 #
 # Outputs:
 #   clash/openclash/dist/UniFOM.yaml - deployable OC config (gitignored, local only)
@@ -20,10 +20,11 @@
 #   Simple entry (defaults to regional + manual groups):
 #     FlowerCloud: "https://..."
 #
-#   Extended entry (override groups):
-#     Maying:
+#   Extended entry (all fields optional except url):
+#     FlowerCloud:
 #       url: "https://..."
-#       groups: manual          # comma-separated string or YAML list
+#       groups: manual          # comma-separated string or YAML list; default: regional,manual
+#       extra_domains: [xmancdn.com]  # secondary CDN domains not derivable from URL
 
 import re
 import sys
@@ -42,12 +43,13 @@ PROVIDER_FILTER = (
 )
 
 def load_providers(path):
-    """Parse secrets.yaml into an ordered dict of name -> {url, groups}.
+    """Parse secrets.yaml into an ordered dict of name -> {url, groups, extra_domains}.
 
     Simple entry:   FlowerCloud: "https://..."
-    Extended entry: Maying:
+    Extended entry: FlowerCloud:
                       url: "https://..."
-                      groups: manual   # or [manual, budget]
+                      groups: manual          # or [manual, budget]
+                      extra_domains: [xmancdn.com]
 
     Default groups when not specified: [regional, manual]
     """
@@ -57,7 +59,7 @@ def load_providers(path):
     providers = {}
     for name, value in raw.items():
         if isinstance(value, str):
-            providers[name] = {'url': value, 'groups': ['regional', 'manual']}
+            providers[name] = {'url': value, 'groups': ['regional', 'manual'], 'extra_domains': []}
         elif isinstance(value, dict):
             groups_raw = value.get('groups', 'regional,manual')
             if isinstance(groups_raw, str):
@@ -66,7 +68,10 @@ def load_providers(path):
                 groups = [str(g) for g in groups_raw]
             else:
                 groups = ['regional', 'manual']
-            providers[name] = {'url': value['url'], 'groups': groups}
+            extra = value.get('extra_domains', [])
+            if isinstance(extra, str):
+                extra = [extra]
+            providers[name] = {'url': value['url'], 'groups': groups, 'extra_domains': list(extra)}
     return providers
 
 def gen_proxy_providers(providers):
@@ -85,22 +90,32 @@ def gen_proxy_providers(providers):
         ]
     return '\n'.join(lines)
 
-def gen_direct_domains(providers):
-    """Generate DOMAIN-SUFFIX direct rules from each provider's subscription hostname."""
-    lines = []
+def _all_direct_hosts(providers):
+    """Yield (host, is_extra) pairs for all direct-connect domains, deduped."""
     seen = set()
-    for name, info in providers.items():
+    for info in providers.values():
         host = urlparse(info['url']).hostname
         if host and host not in seen:
             seen.add(host)
-            lines.append(f'  - DOMAIN-SUFFIX,{host},🎯 全球直连')
-    return '\n'.join(lines)
+            yield host
+        for extra in info['extra_domains']:
+            if extra and extra not in seen:
+                seen.add(extra)
+                yield extra
+
+def gen_direct_domains_clash(providers):
+    """Generate Clash-format DOMAIN-SUFFIX direct rules (YAML list items)."""
+    return '\n'.join(f'  - DOMAIN-SUFFIX,{h},🎯 全球直连' for h in _all_direct_hosts(providers))
+
+def gen_direct_domains_sr(providers):
+    """Generate SR-format DOMAIN-SUFFIX direct rules (plain text)."""
+    return '\n'.join(f'DOMAIN-SUFFIX,{h},🎯 全球直连' for h in _all_direct_hosts(providers))
 
 def use_list(providers, group):
     """Return comma-separated provider names belonging to the given group."""
     return ', '.join(n for n, i in providers.items() if group in i['groups'])
 
-def inject(content, providers):
+def inject_clash(content, providers):
     """Replace all generation markers in base.yaml content."""
     content = content.replace(
         '# [GENERATED: proxy-providers]',
@@ -108,11 +123,23 @@ def inject(content, providers):
     )
     content = content.replace(
         '  # [GENERATED: direct-domains]',
-        gen_direct_domains(providers)
+        gen_direct_domains_clash(providers)
     )
     content = content.replace('[__USE_regional__]', f'[{use_list(providers, "regional")}]')
     content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual")}]')
     return content
+
+def inject_sr(content, providers):
+    """Replace the direct-domains marker block in base.conf content."""
+    start_marker = '# [proxy-provider-direct-domains start]'
+    end_marker   = '# [proxy-provider-direct-domains end]'
+    generated    = gen_direct_domains_sr(providers)
+    replacement  = f'{start_marker}\n{generated}\n{end_marker}'
+    pattern = re.compile(
+        re.escape(start_marker) + r'.*?' + re.escape(end_marker),
+        re.DOTALL,
+    )
+    return pattern.sub(replacement, content)
 
 def build_clash(platform, providers):
     platform_path = ROOT / f'clash/src/platform/{platform}.yaml'
@@ -143,7 +170,7 @@ def build_clash(platform, providers):
         ) + '\n'
 
     content += '\n' + base
-    content = inject(content, providers)
+    content = inject_clash(content, providers)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w') as f:
@@ -152,12 +179,18 @@ def build_clash(platform, providers):
     print(f'✓ {label} built: {output_path}')
     return True
 
-def build_sr():
+def build_sr(providers):
     src_path    = ROOT / 'shadowrocket/src/base.conf'
     output_path = ROOT / 'shadowrocket/dist/UniFOM.conf'
 
+    with open(src_path) as f:
+        content = f.read()
+
+    content = inject_sr(content, providers)
+
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src_path, output_path)
+    with open(output_path, 'w') as f:
+        f.write(content)
 
     print(f'✓ SR built: {output_path}')
     return True
@@ -174,5 +207,5 @@ if __name__ == '__main__':
 
     ok_oc    = build_clash('mihomo', providers)
     ok_stash = build_clash('stash', providers)
-    ok_sr    = build_sr()
+    ok_sr    = build_sr(providers)
     sys.exit(0 if (ok_oc and ok_stash and ok_sr) else 1)
