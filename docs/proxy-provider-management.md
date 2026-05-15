@@ -1,65 +1,82 @@
-# Proxy Provider Management
+# Proxy Provider Management / 机场管理指南
 
-## Add / Remove a Proxy Provider
+## Add a Provider / 新增机场
 
-Edit **`clash/src/secrets.yaml`** only, then rebuild.
+Edit **`clash/src/secrets.yaml`** only, then rebuild. No other files need to be touched.
 
-### Simple entry (regional + manual groups)
+仅编辑 **`clash/src/secrets.yaml`**，rebuild 即可，无需改其他文件。
+
+---
+
+### Entry formats / 条目格式
+
+**Simple** — regional + manual groups, no secondary CDN:
 ```yaml
 NewProvider: "https://subscription-url"
 ```
 
-### Extended entry (manual-only groups, e.g. SSR providers)
+**Extended** — all fields optional except `url`:
 ```yaml
 NewProvider:
   url: "https://subscription-url"
-  groups: manual
+  groups: manual                    # default: regional,manual
+  extra_domains: [cdn.example.com]  # secondary CDN not derivable from URL
 ```
 
-Then rebuild:
+**`groups`** controls which proxy groups the provider feeds:
+
+| Value | Groups |
+|---|---|
+| `regional, manual` (default) | All regional url-test groups + 🎛️ 手动切换 + 💰 省流节点 |
+| `manual` | 🎛️ 手动切换 + 💰 省流节点 only — use for SSR or protocols incompatible with regional auto-select |
+
+**`extra_domains`** — secondary CDN hostnames embedded in query strings or referenced during subscription fetch, not derivable from the URL hostname itself. Generates `DOMAIN-SUFFIX` direct rules in both Clash and SR configs.
+
+---
+
+### Rebuild / 重新构建
+
 ```bash
 python3 scripts/build.py
 ```
 
-That's it. `base.yaml` and `build.py` do not need to be touched.
+---
+
+## Remove a Provider / 删除机场
+
+Delete the entry from `clash/src/secrets.yaml` and rebuild.
+
+从 `clash/src/secrets.yaml` 删除对应条目，rebuild 即可。
 
 ---
 
-## How it works
+## How it works / 工作原理
 
-`build.py` reads `clash/src/secrets.yaml` and injects three sections into `clash/src/base.yaml` at build time:
+`build.py` reads `clash/src/secrets.yaml` and injects content into templates at build time.
 
-| Marker in base.yaml | Generated content |
+### Clash (OC + Stash) — markers in `clash/src/base.yaml`
+
+| Marker | Generated content |
 |---|---|
-| `# [GENERATED: proxy-providers]` | Full `proxy-providers:` block with URLs from secrets |
+| `# [GENERATED: proxy-providers]` | Full `proxy-providers:` block with URLs, filters, health-check |
 | `[__USE_regional__]` | Provider names with `regional` in groups |
 | `[__USE_manual__]` | Provider names with `manual` in groups |
-| `# [GENERATED: direct-domains]` | `DOMAIN-SUFFIX` direct rules for each provider's subscription hostname |
+| `# [GENERATED: direct-domains]` | `DOMAIN-SUFFIX` direct rules — URL hostnames + `extra_domains` |
 
-**Default groups** (when not specified): `regional, manual` — provider appears in all regional node groups and the manual-select group.
+### Shadowrocket — markers in `shadowrocket/src/base.conf`
 
-**`groups: manual`** — provider appears only in 🎛️ 手动切换 and 💰 省流节点. Use for SSR or other protocols incompatible with regional auto-select.
+| Marker block | Generated content |
+|---|---|
+| `# [proxy-provider-direct-domains start] … end` | `DOMAIN-SUFFIX` direct rules — same hostnames as Clash |
 
----
-
-## Secondary CDN domains
-
-Some subscription URLs proxy through a CDN whose hostname is embedded in the query string (e.g. FlowerCloud → `xmancdn.com`). These cannot be auto-derived from the URL and are kept as static rules in `base.yaml`:
-
-```yaml
-  - DOMAIN-SUFFIX,xmancdn.com,🎯 全球直连
-  - DOMAIN-SUFFIX,nxonearth.com,🎯 全球直连
-```
-
-If a new provider has a secondary CDN domain, add it manually to that static block.
+SR subscription URLs are not written into the conf (managed in the SR app). Only the CDN hostnames needed for cold-start are injected.
 
 ---
 
-## Notes
+## Notes / 注意事项
 
-- `clash/src/secrets.yaml` contains real subscription URLs, local only, never commit to git
-- `clash/openclash/dist/UniFOM.yaml` and `clash/stash/dist/UniFOM.yaml` are build output, local only, never commit to git
-- `shadowrocket/dist/UniFOM.conf` contains no secrets, committed to git normally
-- SR subscription domains are managed separately in `shadowrocket/src/base.conf`
+- `clash/src/secrets.yaml` — real subscription URLs; **never commit to git** (gitignored)
+- `clash/openclash/dist/UniFOM.yaml`, `clash/stash/dist/UniFOM.yaml` — build output; **never commit to git** (gitignored)
+- `shadowrocket/dist/UniFOM.conf` — contains no secrets; committed to git normally
 - OC and Stash share `clash/src/base.yaml` — edit once, both platforms updated on next build
 - Stash requires v3.0+ for AND/OR/NOT logical rules used in the shared base
