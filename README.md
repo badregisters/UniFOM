@@ -36,7 +36,7 @@ python3 scripts/build.py
 
 ## 分支策略
 
-- `main`           : 稳定版本，包含 SR 和 OC
+- `main`           : 当前发布版本（正式版或最新 RC），SR 订阅链接始终指向此分支
 - `feat/stash-port`: Stash 适配，开发中；因 Stash geosite CDN 故障暂停验证，待恢复后合并 main
 - `feat/*`         : 其他功能开发
 - `release/*`      : 发布与 RC 稳定化
@@ -49,11 +49,17 @@ python3 scripts/build.py
 
 ## SR 订阅链接
 
+**最新版（始终跟随 main 分支）**
+
 ```
 https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf
 ```
 
 注意：raw.githubusercontent.com 有 5 分钟 CDN 缓存（max-age=300），push 后稍等即可更新。
+
+**历史版本下载**
+
+各版本独立附件见 [Releases](https://github.com/badregisters/UniFOM/releases) 页面，正式版与 RC 版均单独存档。
 
 ---
 
@@ -95,7 +101,7 @@ python3 scripts/build.py
 
 ## Branching
 
-- `main`           : stable, contains SR and OC
+- `main`           : current release (stable or latest RC); SR subscription URL always points here
 - `feat/stash-port`: Stash port, in progress; validation paused due to Stash geosite CDN outage, pending merge to main
 - `feat/*`         : other feature development
 - `release/*`      : release and RC stabilization
@@ -108,8 +114,14 @@ python3 scripts/build.py
 
 ## SR Subscription URL
 
+**Latest (always follows main branch)**
+
 ```
 https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf
 ```
 
 Note: raw.githubusercontent.com has a 5-minute CDN cache (max-age=300). Allow a short wait after pushing.
+
+**Versioned downloads**
+
+Individual release attachments (stable and RC) are available on the [Releases](https://github.com/badregisters/UniFOM/releases) page.
