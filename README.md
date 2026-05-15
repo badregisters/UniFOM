@@ -1,6 +1,6 @@
 # UniFOM — Universal FlowerCloud + oixCloud + Maying
 
-> 原项目名 MSS（Mihomo + Shadowrocket + Surge/Stash）
+> 原项目名 MSS（Mihomo + Shadowrocket + Stash/Surge）
 
 多客户端代理配置统一仓库，支持 Shadowrocket（SR）、OpenClash（OC）和 Stash。
 
