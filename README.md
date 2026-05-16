@@ -3,6 +3,28 @@
 多平台代理客户端配置统一仓库。  
 Unified repository for multi-client proxy configurations.
 
+---
+
+面向长期使用者的精细化分流方案，核心目标：
+
+- **DNS 安全**：DoH 全程加密，严格隔离境内/境外解析路径，防止 DNS 泄漏与运营商劫持
+- **精细化分流**：金融、支付、加密货币、流媒体、VoWiFi 等场景独立策略组，减少误判
+- **节点防抖**：自动测速 50ms 容差，地区组 75ms，AI 专用 Non-HK 组 100ms 高容差
+- **冷启动生存**：多级 DNS 兜底（nameserver-policy → fallback），弱网下维持基础可用性
+- **规则集工业化**：优先采用 GEOSITE/GEOIP，按需混用 Blackmatrix7 / Loyalsoldier 远程规则集
+- **多平台统一**：Shadowrocket、OpenClash (Mihomo)、Stash 共享规则体系，差异仅在平台头部
+
+A fine-grained traffic-splitting config for long-term users. Core goals:
+
+- **DNS security**: DoH end-to-end, strict CN/non-CN resolution separation, prevents DNS leaks and ISP hijacking
+- **Fine-grained splitting**: dedicated policy groups for finance, payments, crypto, streaming, VoWiFi, etc.
+- **Node debounce**: 50 ms tolerance for auto-select, 75 ms for regional groups, 100 ms for AI (Non-HK)
+- **Cold-start resilience**: multi-tier DNS fallback (nameserver-policy → fallback) for survival on weak networks
+- **Industrial rule sets**: GEOSITE/GEOIP first, supplemented by Blackmatrix7 / Loyalsoldier remote rule sets
+- **Unified multi-platform**: Shadowrocket, OpenClash (Mihomo), and Stash share one rule body; differences confined to platform headers
+
+---
+
 ## 目录结构 / Structure
 
 ```
