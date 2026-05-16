@@ -1,38 +1,7 @@
-# =========== Universal Config - Stash (Clash Premium) v1.1.0 by badregister ========
-# Last update: May 14, 2026
-# Platform: Stash (Clash Premium core) — iOS
-#
-# Changelog
-# 1. 绝对 DNS 隔离 (国内阿里DoH 国外 CloudFlare/Google DoH)
-# 2. 多机场异步聚合 (FlowerCloud, oixCloud, Maying, Nexitally, LiangXin) Proxy-Provider
-# 3. Rule-Provider 异步挂载 (ACL4SSR为主, Crypto采用 BM7)
-# 4. 策略组设置微调, 按使用频率排序
-# 5. 增量注入: 高敏金融、第三方支付、加密货币及流媒体独立分流架构
-# 6. 精简冗余本地规则 (遵循原生 String 解析标准, 弃用冗余域名后缀, 保留 ASN)
-# 7. 优化策略组选项 (全量横向内联排版)
-# 8. Maying SSR 只用于手动切换以确保 VoWiFi 稳定工作
-# 9. 修正国旗字符、编码匹配及正则逻辑 未修改分流架构
-# 10. 增量注入: VoWiFi 容灾备份通道可切换美区
-# 11. 节点防抖: 基础容差 自动测速 50ms, 其它策略组 75ms, Non-HK for AI 独立高容差 100ms
-# 12. 净化审计 注释保留 测试观察 未定稿
-# 13. 妥协: 放弃绝对 DNS 隔离思路, 全面采用国内 DoH 提高弱网生存率及国内服务解析准确性
-# 14. 策略组 emoji 批量替换
-# 15. sniffer 增加 TLS/HTTP 协议嗅探, 豁免米家产品
-# 16. 重构 dns, nameserver-policy 建立 CN 分流防线; geosite:apple 显式钉入补偿 direct-nameserver 缺失
-# 17. 优化 dns tun sniffer 设置 待观察
-# 18. 订阅filter优化, 适配台湾节点, 增加韩国节点显示
-# 19. 废弃部分文本型远程规则集, 改用 Geosite, 降低系统占用, 提高查询效率及冷启动生存率
-# 20. 重新测试筛选远程规则集, 混用 BM7 和 ACL4SSR, 格式大坑须谨慎. 优化 12306
-# 21. [v1.0.0-rc.1] Stash 移植版: Clash Premium 内核兼容
-# 22. [2026-05-14] Stash 3.0: AND/OR/NOT 逻辑规则确认支持, 与 Mihomo 统一至 clash/src/base.yaml
-#     nameserver-policy list 格式不支持 (Mihomo 专有), 降级为单条字符串
-# 23. [2026-05-14] 重构 DNS: proxy-tagged nameserver + nameserver-policy + fallback 三层架构
-#     补偿 direct-nameserver 缺失: 温启动走 geosite:cn policy 精确命中, 冷启动由 fallback 兜底
-#     fallback-filter geoip:CN 依赖本地 MMDB, 无 CDN 冷启动依赖
-# 23. [2026-05-14] 重构: 单源架构, platform/stash.yaml 承载 Stash 专属 dns 头部
-# 24. [2026-05-14] 维护原则: 以 OC 为准; 所有 Mihomo 专属指令统一加 [Mihomo] 标记;
-#     有实质行为差异的额外补充 Stash 等价实现 (direct-nameserver → geosite:apple)
-# ====================================================================================
+# platform: Stash
+# version: v1.1.0
+# updated: 2026-05-14
+# project: https://github.com/badregisters/UniFOM
 
 port: 7890
 socks-port: 7891

@@ -28,12 +28,12 @@
 
 import re
 import sys
-import shutil
 import yaml
 from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).parent.parent
+PROJECT_URL = 'https://github.com/badregisters/UniFOM'
 
 # Default filter applied to all proxy providers
 PROVIDER_FILTER = (
@@ -41,6 +41,37 @@ PROVIDER_FILTER = (
     r'台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|'
     r'喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)'
 )
+
+def parse_meta(text):
+    meta = {}
+    for line in text.splitlines():
+        m = re.match(r'^#\s+(platform|version|updated):\s*(.+)', line)
+        if m:
+            meta[m.group(1)] = m.group(2).strip()
+        elif line.strip() and not line.startswith('#'):
+            break
+    return meta
+
+def make_header(meta):
+    platform = meta.get('platform', 'Unknown')
+    version  = meta.get('version',  'unknown')
+    updated  = meta.get('updated',  'unknown')
+    return f'# {platform} | {version} | {updated} | {PROJECT_URL}\n\n'
+
+def strip_comments_and_collapse(content):
+    result = []
+    prev_blank = False
+    for line in content.splitlines(keepends=True):
+        if line.lstrip().startswith('#'):
+            continue
+        is_blank = line.strip() == ''
+        if is_blank and prev_blank:
+            continue
+        result.append(line)
+        prev_blank = is_blank
+    while result and result[0].strip() == '':
+        result.pop(0)
+    return ''.join(result)
 
 def load_providers(path):
     """Parse secrets.yaml into an ordered dict of name -> {url, groups, extra_domains}.
@@ -156,25 +187,27 @@ def build_clash(platform, providers):
         return False
 
     with open(platform_path) as f:
-        content = f.read()
+        platform_content = f.read()
     with open(base_path) as f:
         base = f.read()
 
-    # Strip Mihomo-only lines from Stash build.
-    # Lines tagged with trailing "# [Mihomo]" use Mihomo-exclusive syntax
-    # and must be dropped; Stash will reject them at parse time.
+    meta   = parse_meta(platform_content)
+    header = make_header(meta)
+
     if platform == 'stash':
         base = '\n'.join(
             line for line in base.splitlines()
             if not line.rstrip().endswith('# [Mihomo]')
         ) + '\n'
 
-    content += '\n' + base
-    content = inject_clash(content, providers)
+    combined = platform_content + '\n' + base
+    combined = inject_clash(combined, providers)
+    combined = strip_comments_and_collapse(combined)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w') as f:
-        f.write(content)
+        f.write(header)
+        f.write(combined)
 
     print(f'✓ {label} built: {output_path}')
     return True
@@ -186,10 +219,14 @@ def build_sr(providers):
     with open(src_path) as f:
         content = f.read()
 
+    meta    = parse_meta(content)
+    header  = make_header(meta)
     content = inject_sr(content, providers)
+    content = strip_comments_and_collapse(content)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w') as f:
+        f.write(header)
         f.write(content)
 
     print(f'✓ SR built: {output_path}')

@@ -1,37 +1,7 @@
-# =========== Universal Config - Mihomo (OpenClash) v1.1.0 by badregister ===========
-# Last update: May 13, 2026
-# Platform: OpenClash (Mihomo core) — OpenWrt
-#
-# Changelog
-# 1. 绝对 DNS 隔离 (国内阿里DoH 国外 CloudFlare/Google DoH)
-# 2. 多机场异步聚合 (FlowerCloud, oixCloud, Maying, Nexitally, LiangXin) Proxy-Provider
-# 3. Rule-Provider 异步挂载 (ACL4SSR为主, Crypto采用 BM7)
-# 4. 策略组设置微调, 按使用频率排序
-# 5. 增量注入: 高敏金融、第三方支付、加密货币及流媒体独立分流架构
-# 6. 精简冗余本地规则 (遵循原生 String 解析标准, 弃用冗余域名后缀, 保留 ASN)
-# 7. 优化策略组选项 (全量横向内联排版)
-# 8. Maying SSR 只用于手动切换以确保 VoWiFi 稳定工作
-# 9. 修正国旗字符、编码匹配及正则逻辑 未修改分流架构
-# 10. 增量注入: VoWiFi 容灾备份通道可切换美区; respect-rules: false 降低 DNS 预解析耗时
-# 11. 节点防抖: 基础容差 自动测速 50ms, 其它策略组 75ms, Non-HK for AI 独立高容差 100ms
-# 12. 净化审计 注释保留 测试观察 未定稿
-# 13. 妥协: 放弃绝对 DNS 隔离思路, 全面采用国内 DoH 提高弱网生存率及国内服务解析准确性
-# 14. 策略组 emoji 批量替换
-# 15. sniffer 增加 QUIC 协议, 改善 UDP 分流效率, 豁免米家产品的嗅探阻断
-# 16. 重构 dns, 使用 Mihomo 的 direct-nameserver 建立分流防线 撤销国内流氓大厂的 DNS 妥协
-# 17. 优化 dns tun sniffer 设置 待观察
-# 18. 订阅filter优化, 适配台湾节点, 增加韩国节点显示
-# 19. 废弃部分文本型远程规则集, 改用 Geosite, 降低系统占用, 提高查询效率及冷启动生存率
-# 20. 重新测试筛选远程规则集, 混用 BM7 和 ACL4SSR, 格式大坑须谨慎. 优化 12306
-# 21. [v1.1.0] 架构定稿 规则集持续测试优化
-# 22. 将可等价替换的远程规则集改为 GEOSITE:
-#     Apple/Microsoft/OneDrive/GoogleFCM/Telegram/OpenAi/YouTube/Netflix/
-#     Spotify/Epic/Steam/TikTok/Bilibili/GoogleCN/SteamCN
-# 23. [2026-05-13] 补充苹果 Akamai CDN 直连规则 (apple.com.akadns.net, mail.me.com.akadns.net)
-# 24. [2026-05-13] 补充苹果 CDN 直连规则 (ls-apple.com.akadns.net, apple-relay.fastly-edge.com)
-# 25. [2026-05-13] 苹果域名移出 fake-ip-filter, 交由 direct-nameserver 处理, 修复 CNAME 漏网并优化冷启动
-# 26. [2026-05-14] 重构: 拆分单源架构, platform/mihomo.yaml 承载 Mihomo 专属头部, 规则共享至 clash/src/base.yaml
-# ====================================================================================
+# platform: OpenClash (Mihomo)
+# version: v1.1.0
+# updated: 2026-05-13
+# project: https://github.com/badregisters/UniFOM
 
 port: 7890
 socks-port: 7891
