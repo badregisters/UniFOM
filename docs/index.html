@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniFOM · Clash 配置生成器</title>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f5;
+      --surface: #ffffff;
+      --border: #e2e2e2;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-h: #1d4ed8;
+      --danger: #dc2626;
+      --radius: 8px;
+      --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 16px 64px;
+    }
+
+    .wrap {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .site-header { margin-bottom: 28px; }
+    .site-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .site-header p { color: var(--muted); font-size: 13px; }
+    .site-header a { color: var(--accent); text-decoration: none; }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: var(--bg);
+      padding: 3px;
+      border-radius: 6px;
+      width: fit-content;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      padding: 5px 14px;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    }
+
+    /* Provider row */
+    .provider-row {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .row-num { font-size: 12px; font-weight: 600; color: var(--muted); }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .full { grid-column: 1 / -1; }
+
+    label.field-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .req { color: var(--danger); }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .15s;
+    }
+    input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
+
+    .checkbox-row { display: flex; gap: 16px; align-items: center; padding-top: 2px; }
+    .check-label {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; cursor: pointer;
+    }
+    .check-label input { accent-color: var(--accent); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px;
+      border: none; border-radius: 6px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all .15s;
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:not(:disabled):hover { background: var(--accent-h); }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg); color: var(--text); }
+    .btn-del {
+      background: transparent; color: var(--danger);
+      border: none; padding: 3px 8px; font-size: 12px; border-radius: 4px;
+    }
+    .btn-del:hover { background: #fef2f2; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* Platform */
+    .platform-row { display: flex; gap: 10px; }
+    .platform-opt {
+      flex: 1; padding: 12px 14px;
+      border: 2px solid var(--border); border-radius: var(--radius);
+      cursor: pointer; transition: all .15s; text-align: center;
+    }
+    .platform-opt:has(input:checked) { border-color: var(--accent); background: #eff6ff; }
+    .platform-opt input { display: none; }
+    .plat-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .plat-desc { font-size: 11px; color: var(--muted); }
+
+    /* Generate row */
+    .gen-row { display: flex; align-items: center; gap: 12px; }
+    #status { font-size: 13px; color: var(--muted); }
+
+    /* YAML input */
+    #yaml-input {
+      font-family: var(--mono); font-size: 12px;
+      height: 180px; resize: vertical; line-height: 1.6;
+    }
+    .yaml-actions {
+      display: flex; justify-content: flex-end; margin-bottom: 10px;
+    }
+
+    /* Output */
+    #output-ta {
+      font-family: var(--mono); font-size: 12px;
+      height: 340px; resize: vertical; line-height: 1.6;
+      background: #1e1e1e; color: #d4d4d4;
+      border: none; border-radius: var(--radius);
+      padding: 16px;
+    }
+    .output-actions { display: flex; gap: 8px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site-header">
+    <h1>UniFOM · Clash 配置生成器</h1>
+    <p>填写机场订阅，生成可直接使用的 Clash 配置文件 &nbsp;·&nbsp;
+      <a href="https://github.com/badregisters/UniFOM" target="_blank">GitHub</a>
+    </p>
+  </header>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div class="card-label">第一步 · 机场订阅</div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="form">在线填表</button>
+      <button class="tab-btn" data-tab="yaml">粘贴 YAML</button>
+    </div>
+
+    <div id="tab-form">
+      <div id="providers-list"></div>
+      <button class="btn btn-ghost btn-sm" id="add-btn" style="margin-top:4px">+ 添加机场</button>
+    </div>
+
+    <div id="tab-yaml" hidden>
+      <div class="yaml-actions">
+        <button class="btn btn-ghost btn-sm" id="yaml-to-form-btn">← 导入到填表</button>
+      </div>
+      <label class="field-label">粘贴 secrets.yaml 内容</label>
+      <textarea id="yaml-input" spellcheck="false" placeholder='FlowerCloud: "https://..."
+
+oixCloud:
+  url: "https://..."
+  groups: regional,manual
+  extra_domains: [cdn.example.com]'></textarea>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card">
+    <div class="card-label">第二步 · 目标平台</div>
+    <div class="platform-row">
+      <label class="platform-opt">
+        <input type="radio" name="platform" value="mihomo" checked>
+        <div class="plat-name">OpenClash</div>
+        <div class="plat-desc">Mihomo 内核 · 路由器</div>
+      </label>
+      <label class="platform-opt">
+        <input type="radio" name="platform" value="stash">
+        <div class="plat-name">Stash</div>
+        <div class="plat-desc">Clash Premium · iOS / macOS</div>
+      </label>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="card">
+    <div class="card-label">第三步 · 生成</div>
+    <div class="gen-row">
+      <button class="btn btn-primary" id="gen-btn">生成配置文件</button>
+      <span id="status"></span>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="card" id="output-card" hidden>
+    <div class="card-label">输出</div>
+    <textarea id="output-ta" readonly spellcheck="false"></textarea>
+    <div class="output-actions">
+      <button class="btn btn-primary btn-sm" id="dl-btn">下载 YAML</button>
+      <button class="btn btn-ghost btn-sm" id="copy-btn">复制</button>
+    </div>
+  </div>
+
+</div>
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────────
+
+const FILTER = '(?i)(香港|🇭🇰|HK|美国|🇺🇸|\\bUS\\b|日本|🇯🇵|JP|韩国|🇰🇷|KR|' +
+  '台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|马来|🇲🇾|MY|' +
+  '喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)';
+
+const RAW = 'https://raw.githubusercontent.com/badregisters/UniFOM/main/clash/src';
+
+// ── Tabs ───────────────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const t = btn.dataset.tab;
+    document.getElementById('tab-form').hidden = t !== 'form';
+    document.getElementById('tab-yaml').hidden = t !== 'yaml';
+  });
+});
+
+// ── Provider rows ──────────────────────────────────────────────────────────────
+
+let seq = 0;
+
+function addRow(data = {}) {
+  seq++;
+  const name   = data.name   || '';
+  const url    = data.url    || '';
+  const fname  = data.filename || name;
+  const groups = data.groups || ['regional', 'manual'];
+  const extra  = (data.extra_domains || []).join(', ');
+
+  const div = document.createElement('div');
+  div.className = 'provider-row';
+  div.innerHTML = `
+    <div class="row-header">
+      <span class="row-num">机场 ${seq}</span>
+      <button class="btn btn-del" onclick="this.closest('.provider-row').remove()">删除</button>
+    </div>
+    <div class="field-grid">
+      <div>
+        <label class="field-label">机场名称 <span class="req">*</span></label>
+        <input class="f-name" type="text" placeholder="FlowerCloud" value="${x(name)}"
+          oninput="syncFilename(this)">
+      </div>
+      <div>
+        <label class="field-label">本地文件名</label>
+        <input class="f-fname" type="text" placeholder="自动填充" value="${x(fname)}">
+      </div>
+      <div class="full">
+        <label class="field-label">订阅链接 <span class="req">*</span></label>
+        <input class="f-url" type="text" placeholder="https://..." value="${x(url)}">
+      </div>
+      <div>
+        <label class="field-label">归属策略组</label>
+        <div class="checkbox-row">
+          <label class="check-label">
+            <input class="f-grp" type="checkbox" value="regional" ${groups.includes('regional') ? 'checked' : ''}>
+            地区自动
+          </label>
+          <label class="check-label">
+            <input class="f-grp" type="checkbox" value="manual" ${groups.includes('manual') ? 'checked' : ''}>
+            手动切换
+          </label>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">额外直连域名（逗号分隔，可选）</label>
+        <input class="f-extra" type="text" placeholder="cdn.example.com" value="${x(extra)}">
+      </div>
+    </div>`;
+  document.getElementById('providers-list').appendChild(div);
+}
+
+function syncFilename(nameInput) {
+  nameInput.closest('.provider-row').querySelector('.f-fname').value = nameInput.value;
+}
+
+function x(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+
+document.getElementById('add-btn').addEventListener('click', () => addRow());
+addRow(); // default first row
+
+// ── YAML → Form ────────────────────────────────────────────────────────────────
+
+document.getElementById('yaml-to-form-btn').addEventListener('click', () => {
+  const text = document.getElementById('yaml-input').value.trim();
+  if (!text) return;
+  try {
+    const providers = parseSecrets(text);
+    document.getElementById('providers-list').innerHTML = '';
+    seq = 0;
+    for (const [name, info] of Object.entries(providers)) addRow({ name, ...info });
+    document.querySelector('[data-tab="form"]').click();
+  } catch (e) { alert('YAML 解析失败: ' + e.message); }
+});
+
+// ── Parse secrets.yaml ─────────────────────────────────────────────────────────
+
+function parseSecrets(yamlText) {
+  const raw = jsyaml.load(yamlText);
+  const out = {};
+  for (const [name, val] of Object.entries(raw)) {
+    if (typeof val === 'string') {
+      out[name] = { url: val, filename: name, groups: ['regional', 'manual'], extra_domains: [] };
+    } else {
+      const gr = val.groups ?? 'regional,manual';
+      const groups = typeof gr === 'string' ? gr.split(',').map(s => s.trim()) : gr.map(String);
+      const extra  = val.extra_domains ?? [];
+      out[name] = {
+        url: val.url, filename: name, groups,
+        extra_domains: typeof extra === 'string' ? [extra] : extra,
+      };
+    }
+  }
+  return out;
+}
+
+// ── Read form ──────────────────────────────────────────────────────────────────
+
+function readForm() {
+  const out = {};
+  document.querySelectorAll('.provider-row').forEach(row => {
+    const name = row.querySelector('.f-name').value.trim();
+    const url  = row.querySelector('.f-url').value.trim();
+    if (!name || !url) return;
+    const filename     = row.querySelector('.f-fname').value.trim() || name;
+    const groups       = [...row.querySelectorAll('.f-grp:checked')].map(c => c.value);
+    const extraText    = row.querySelector('.f-extra').value.trim();
+    const extra_domains = extraText ? extraText.split(',').map(s => s.trim()).filter(Boolean) : [];
+    out[name] = { url, filename, groups, extra_domains };
+  });
+  return out;
+}
+
+// ── Generation (mirrors build.py) ─────────────────────────────────────────────
+
+function genProviders(providers) {
+  const lines = ['proxy-providers:'];
+  for (const [name, p] of Object.entries(providers)) {
+    lines.push(`  ${name}:`);
+    lines.push(`    type: http`);
+    lines.push(`    url: "${p.url}"`);
+    lines.push(`    interval: 14400`);
+    lines.push(`    path: ./proxy_provider/${p.filename}.yaml`);
+    lines.push(`    filter: "${FILTER}"`);
+    lines.push(`    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}`);
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
+function directHosts(providers) {
+  const seen = new Set(), hosts = [];
+  for (const p of Object.values(providers)) {
+    try {
+      const h = new URL(p.url).hostname;
+      if (h && !seen.has(h)) { seen.add(h); hosts.push(h); }
+    } catch (_) {}
+    for (const d of (p.extra_domains || [])) {
+      if (d && !seen.has(d)) { seen.add(d); hosts.push(d); }
+    }
+  }
+  return hosts;
+}
+
+function genDirectDomains(providers) {
+  return directHosts(providers).map(h => `  - DOMAIN-SUFFIX,${h},🎯 全球直连`).join('\n');
+}
+
+function useList(providers, group) {
+  return Object.entries(providers)
+    .filter(([, p]) => p.groups.includes(group))
+    .map(([n]) => n).join(', ');
+}
+
+function inject(content, providers) {
+  content = content.replace('# [GENERATED: proxy-providers]', genProviders(providers));
+  content = content.replace('  # [GENERATED: direct-domains]', genDirectDomains(providers));
+  content = content.replace('[__USE_regional__]', `[${useList(providers, 'regional')}]`);
+  content = content.replace('[__USE_manual__]',   `[${useList(providers, 'manual')}]`);
+  return content;
+}
+
+function stripComments(content) {
+  const out = [];
+  let prevBlank = false;
+  for (const line of content.split('\n')) {
+    if (line.trimStart().startsWith('#')) continue;
+    const blank = line.trim() === '';
+    if (blank && prevBlank) continue;
+    out.push(line);
+    prevBlank = blank;
+  }
+  while (out.length && out[0].trim() === '') out.shift();
+  return out.join('\n');
+}
+
+function filterMihomo(content) {
+  return content.split('\n').filter(l => !l.trimEnd().endsWith('# [Mihomo]')).join('\n');
+}
+
+function parseMeta(text) {
+  const m = {};
+  for (const line of text.split('\n')) {
+    const r = line.match(/^#\s+(platform|version):\s*(.+)/);
+    if (r) m[r[1]] = r[2].trim();
+    else if (line.trim() && !line.startsWith('#')) break;
+  }
+  return m;
+}
+
+function today() { return new Date().toISOString().slice(0, 10); }
+
+// ── Generate ───────────────────────────────────────────────────────────────────
+
+const status = document.getElementById('status');
+
+document.getElementById('gen-btn').addEventListener('click', async () => {
+  status.textContent = '';
+
+  const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+  let providers;
+
+  if (activeTab === 'yaml') {
+    const text = document.getElementById('yaml-input').value.trim();
+    if (!text) { status.textContent = '请填写订阅信息'; return; }
+    try { providers = parseSecrets(text); }
+    catch (e) { status.textContent = 'YAML 解析失败: ' + e.message; return; }
+  } else {
+    providers = readForm();
+  }
+
+  if (!Object.keys(providers).length) { status.textContent = '请至少填写一个机场'; return; }
+
+  const platform = document.querySelector('input[name="platform"]:checked').value;
+  const genBtn = document.getElementById('gen-btn');
+  genBtn.disabled = true;
+  status.textContent = '正在拉取配置模板…';
+
+  try {
+    const [platText, baseText] = await Promise.all([
+      fetch(`${RAW}/platform/${platform}.yaml`).then(r => {
+        if (!r.ok) throw new Error(`platform/${platform}.yaml 拉取失败`); return r.text();
+      }),
+      fetch(`${RAW}/base.yaml`).then(r => {
+        if (!r.ok) throw new Error('base.yaml 拉取失败'); return r.text();
+      }),
+    ]);
+
+    const meta   = parseMeta(platText);
+    const header = `# ${meta.platform || platform} | ${meta.version || ''} | ${today()} | https://github.com/badregisters/UniFOM\n\n`;
+
+    let base = baseText;
+    if (platform === 'stash') base = filterMihomo(base);
+
+    let combined = platText + '\n' + base;
+    combined = inject(combined, providers);
+    combined = stripComments(combined);
+    const output = header + combined;
+
+    document.getElementById('output-ta').value = output;
+    document.getElementById('output-card').hidden = false;
+    document.getElementById('output-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    status.textContent = '✓ 生成完成';
+
+    const fname = platform === 'stash' ? 'UniFOM-Stash.yaml' : 'UniFOM-OC.yaml';
+    document.getElementById('dl-btn').onclick = () => {
+      const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(new Blob([output], { type: 'text/yaml' })),
+        download: fname,
+      });
+      a.click();
+    };
+  } catch (e) {
+    status.textContent = '错误: ' + e.message;
+  } finally {
+    genBtn.disabled = false;
+  }
+});
+
+// ── Copy ───────────────────────────────────────────────────────────────────────
+
+document.getElementById('copy-btn').addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('output-ta').value).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '已复制';
+    setTimeout(() => btn.textContent = '复制', 1500);
+  });
+});
+</script>
+</body>
+</html>
