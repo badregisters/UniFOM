@@ -13,6 +13,7 @@ Unified repository for multi-client proxy configurations.
 - **冷启动生存**：多级 DNS 兜底（nameserver-policy → fallback），弱网下维持基础可用性
 - **规则集工业化**：优先采用 GEOSITE/GEOIP，按需混用 Blackmatrix7 / Loyalsoldier 远程规则集
 - **多平台统一**：Shadowrocket、OpenClash (Mihomo)、Stash 共享规则体系，差异仅在平台头部
+- **Clash Universal YAML**：内置机场订阅链接，生成单一 YAML 文件即可直接导入，无需在客户端 GUI 做任何额外配置
 
 A fine-grained traffic-splitting config for long-term users. Core goals:
 
@@ -22,6 +23,7 @@ A fine-grained traffic-splitting config for long-term users. Core goals:
 - **Cold-start resilience**: multi-tier DNS fallback (nameserver-policy → fallback) for survival on weak networks
 - **Industrial rule sets**: GEOSITE/GEOIP first, supplemented by Blackmatrix7 / Loyalsoldier remote rule sets
 - **Unified multi-platform**: Shadowrocket, OpenClash (Mihomo), and Stash share one rule body; differences confined to platform headers
+- **Clash Universal YAML**: subscription URLs are baked in at build time — the output is a single self-contained YAML ready to import, no client-side GUI setup required
 
 ---
 
