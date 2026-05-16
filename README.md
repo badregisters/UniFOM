@@ -93,7 +93,6 @@ python3 scripts/build.py
 
 ## 致谢 / Acknowledgment
 
-### 中文
 
 本项目的设计理念和核心配置方案得到了 [a-nomad](https://github.com/colin-chang/YouTubeResources) 项目的深刻启发。a-nomad 项目在 Shadowrocket 配置优化、DNS 泄露防护和分流策略等方面的创新思路，为本项目提供了重要的参考价值。
 
@@ -101,7 +100,6 @@ python3 scripts/build.py
 
 在此，特别对 a-nomad 项目及其维护者表示诚挚的感谢，感谢其为开源社区贡献的宝贵资源和灵感。
 
-### English
 
 This project draws profound inspiration from the [a-nomad](https://github.com/colin-chang/YouTubeResources) project. The innovative approaches pioneered by a-nomad in Shadowrocket configuration optimization, DNS leak prevention, and fine-grained traffic splitting have provided invaluable reference for this project.
 
