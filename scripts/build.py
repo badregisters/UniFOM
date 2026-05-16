@@ -30,7 +30,7 @@ import re
 import sys
 import yaml
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, unquote
 
 ROOT = Path(__file__).parent.parent
 PROJECT_URL = 'https://github.com/badregisters/UniFOM'
@@ -121,14 +121,30 @@ def gen_proxy_providers(providers):
         ]
     return '\n'.join(lines)
 
+def _hosts_from_url(url):
+    """Extract all hostnames from a URL, including those embedded in query param values."""
+    hosts = []
+    parsed = urlparse(url)
+    if parsed.hostname:
+        hosts.append(parsed.hostname)
+    for values in parse_qs(parsed.query, keep_blank_values=True).values():
+        for v in values:
+            try:
+                sub = urlparse(unquote(v))
+                if sub.scheme in ('http', 'https') and sub.hostname:
+                    hosts.append(sub.hostname)
+            except Exception:
+                pass
+    return hosts
+
 def _all_direct_hosts(providers):
-    """Yield (host, is_extra) pairs for all direct-connect domains, deduped."""
+    """Yield hostnames for all direct-connect domains, deduped."""
     seen = set()
     for info in providers.values():
-        host = urlparse(info['url']).hostname
-        if host and host not in seen:
-            seen.add(host)
-            yield host
+        for host in _hosts_from_url(info['url']):
+            if host not in seen:
+                seen.add(host)
+                yield host
         for extra in info['extra_domains']:
             if extra and extra not in seen:
                 seen.add(extra)

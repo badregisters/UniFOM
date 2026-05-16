@@ -425,13 +425,28 @@ function genProviders(providers) {
   return lines.join('\n');
 }
 
+function hostsFromUrl(url) {
+  const hosts = [];
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname) hosts.push(parsed.hostname);
+    for (const v of parsed.searchParams.values()) {
+      try {
+        const sub = new URL(decodeURIComponent(v));
+        if ((sub.protocol === 'http:' || sub.protocol === 'https:') && sub.hostname)
+          hosts.push(sub.hostname);
+      } catch (_) {}
+    }
+  } catch (_) {}
+  return hosts;
+}
+
 function directHosts(providers) {
   const seen = new Set(), hosts = [];
   for (const p of Object.values(providers)) {
-    try {
-      const h = new URL(p.url).hostname;
-      if (h && !seen.has(h)) { seen.add(h); hosts.push(h); }
-    } catch (_) {}
+    for (const h of hostsFromUrl(p.url)) {
+      if (!seen.has(h)) { seen.add(h); hosts.push(h); }
+    }
     for (const d of (p.extra_domains || [])) {
       if (d && !seen.has(d)) { seen.add(d); hosts.push(d); }
     }
