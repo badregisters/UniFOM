@@ -37,6 +37,16 @@
 
 ---
 
+## Stash
+
+### v1.1.0 (2026-05-14)
+- 架构定稿，从 OpenClash 配置移植，规则集与策略组保持一致
+- 剔除 Mihomo 专属指令: redir-port、tproxy-port、tcp-concurrent、geo-auto-update、QUIC 嗅探、direct-nameserver、nameserver-policy 列表值
+- DNS 补偿策略: nameserver-policy (geosite:cn → 阿里 DoH) + fallback (geoip:CN → 阿里/腾讯 DoH)，弥补 Stash 不支持 direct-nameserver 的缺口
+- nameserver-policy 改用单值字符串格式 (Stash 不支持列表值)
+
+---
+
 ## OpenClash (Mihomo)
 
 ### v1.1.0 (2026-05-13)
