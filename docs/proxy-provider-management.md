@@ -1,19 +1,40 @@
-# 机场管理
+# Proxy Provider Management / 机场管理指南
 
-## 删除机场
+## Add a Provider / 新增机场
 
-以删除魅影为例，需更新 6 处：
+Edit **`clash/src/secrets.yaml`** only, then rebuild. No other files need to be touched.
 
-| 文件 | 位置 | 操作 |
-|------|------|------|
-| `openclash/src/secrets.yaml` | 找到对应条目 | 删除整行 |
-| `openclash/src/base.yaml` | `[proxy-provider-subscriptions]` | 删除整个 provider 块 |
-| `openclash/src/base.yaml` | `[proxy-provider-direct-domains]` | 删除订阅域名直连规则 |
-| `openclash/src/base.yaml` | `[proxy-provider-groups]` | 从所有 `use:` 列表中移除 |
-| `shadowrocket/src/base.conf` | `[subscription-direct-domains]` | 删除订阅域名直连规则 |
-| `scripts/build.py` | `replacements` 字典 | 删除对应占位符行 |
+仅编辑 **`clash/src/secrets.yaml`**，rebuild 即可，无需改其他文件。
 
-完成后重新构建：
+---
+
+### Entry formats / 条目格式
+
+**Simple** — regional + manual groups, no secondary CDN:
+```yaml
+NewProvider: "https://subscription-url"
+```
+
+**Extended** — all fields optional except `url`:
+```yaml
+NewProvider:
+  url: "https://subscription-url"
+  groups: manual                    # default: regional,manual
+  extra_domains: [cdn.example.com]  # secondary CDN not derivable from URL
+```
+
+**`groups`** controls which proxy groups the provider feeds:
+
+| Value | Groups |
+|---|---|
+| `regional, manual` (default) | All regional url-test groups + 🎛️ 手动切换 + 💰 省流节点 |
+| `manual` | 🎛️ 手动切换 + 💰 省流节点 only — use for SSR or protocols incompatible with regional auto-select |
+
+**`extra_domains`** — secondary CDN hostnames embedded in query strings or referenced during subscription fetch, not derivable from the URL hostname itself. Generates `DOMAIN-SUFFIX` direct rules in both Clash and SR configs.
+
+---
+
+### Rebuild / 重新构建
 
 ```bash
 python3 scripts/build.py
@@ -21,83 +42,41 @@ python3 scripts/build.py
 
 ---
 
-## 新增机场
+## Remove a Provider / 删除机场
 
-以新增 NewProvider 为例，同样 6 处：
+Delete the entry from `clash/src/secrets.yaml` and rebuild.
 
-| 文件 | 位置 | 操作 |
-|------|------|------|
-| `openclash/src/secrets.yaml` | 末尾追加 | 添加 `NewProvider: "https://actual-url"` |
-| `openclash/src/base.yaml` | `[proxy-provider-subscriptions]` | 添加含 `YOUR_NEWPROVIDER_URL` 占位符的 provider 块 |
-| `openclash/src/base.yaml` | `[proxy-provider-direct-domains]` | 添加订阅域名直连规则 |
-| `openclash/src/base.yaml` | `[proxy-provider-groups]` | 添加到所有地区 `use:` 列表 |
-| `shadowrocket/src/base.conf` | `[subscription-direct-domains]` | 添加订阅域名直连规则 |
-| `scripts/build.py` | `replacements` 字典 | 添加 `"YOUR_NEWPROVIDER_URL": secrets.get("NewProvider", "")` |
-
-完成后重新构建：
-
-```bash
-python3 scripts/build.py
-```
+从 `clash/src/secrets.yaml` 删除对应条目，rebuild 即可。
 
 ---
 
-## 注意事项
+## How it works / 工作原理
 
-- `secrets.yaml` 包含真实订阅链接，仅本地保存，禁止提交到 git
-- `openclash/dist/UniFOM.yaml` 为构建产物，仅本地保存，禁止提交到 git
-- `shadowrocket/dist/UniFOM.conf` 不含敏感信息，正常提交到 git
-- 魅影为 SSR 协议，仅出现在手动切换和省流节点组，不加入地区节点组
+`build.py` reads `clash/src/secrets.yaml` and injects content into templates at build time.
 
----
+### Clash (OC + Stash) — markers in `clash/src/base.yaml`
 
-# Proxy Provider Management
+| Marker | Generated content |
+|---|---|
+| `# [GENERATED: proxy-providers]` | Full `proxy-providers:` block with URLs, filters, health-check |
+| `[__USE_regional__]` | Provider names with `regional` in groups |
+| `[__USE_manual__]` | Provider names with `manual` in groups |
+| `# [GENERATED: direct-domains]` | `DOMAIN-SUFFIX` direct rules — URL hostnames + `extra_domains` |
 
-## Remove a Proxy Provider
+### Shadowrocket — markers in `shadowrocket/src/base.conf`
 
-Example: removing Maying. 6 files to update:
+| Marker block | Generated content |
+|---|---|
+| `# [proxy-provider-direct-domains start] … end` | `DOMAIN-SUFFIX` direct rules — same hostnames as Clash |
 
-| File | Location | Action |
-|------|----------|--------|
-| `openclash/src/secrets.yaml` | find the entry | delete line |
-| `openclash/src/base.yaml` | `[proxy-provider-subscriptions]` | delete entire provider block |
-| `openclash/src/base.yaml` | `[proxy-provider-direct-domains]` | delete subscription domain direct rule |
-| `openclash/src/base.yaml` | `[proxy-provider-groups]` | remove from all `use:` lists |
-| `shadowrocket/src/base.conf` | `[subscription-direct-domains]` | delete subscription domain direct rule |
-| `scripts/build.py` | `replacements` dict | delete corresponding placeholder line |
-
-Then rebuild:
-
-```bash
-python3 scripts/build.py
-```
+SR subscription URLs are not written into the conf (managed in the SR app). Only the CDN hostnames needed for cold-start are injected.
 
 ---
 
-## Add a Proxy Provider
+## Notes / 注意事项
 
-Example: adding NewProvider. Same 6 files:
-
-| File | Location | Action |
-|------|----------|--------|
-| `openclash/src/secrets.yaml` | append | add `NewProvider: "https://actual-url"` |
-| `openclash/src/base.yaml` | `[proxy-provider-subscriptions]` | add provider block with `YOUR_NEWPROVIDER_URL` placeholder |
-| `openclash/src/base.yaml` | `[proxy-provider-direct-domains]` | add subscription domain direct rule |
-| `openclash/src/base.yaml` | `[proxy-provider-groups]` | add to all regional `use:` lists |
-| `shadowrocket/src/base.conf` | `[subscription-direct-domains]` | add subscription domain direct rule |
-| `scripts/build.py` | `replacements` dict | add `"YOUR_NEWPROVIDER_URL": secrets.get("NewProvider", "")` |
-
-Then rebuild:
-
-```bash
-python3 scripts/build.py
-```
-
----
-
-## Notes
-
-- `secrets.yaml` contains real subscription URLs, local only, never commit to git
-- `openclash/dist/UniFOM.yaml` is build output, local only, never commit to git
-- `shadowrocket/dist/UniFOM.conf` contains no secrets, committed to git normally
-- Maying is SSR protocol, appears only in manual-select and budget-node groups, not in regional groups
+- `clash/src/secrets.yaml` — real subscription URLs; **never commit to git** (gitignored)
+- `clash/openclash/dist/UniFOM.yaml`, `clash/stash/dist/UniFOM.yaml` — build output; **never commit to git** (gitignored)
+- `shadowrocket/dist/UniFOM.conf` — contains no secrets; committed to git normally
+- OC and Stash share `clash/src/base.yaml` — edit once, both platforms updated on next build
+- Stash requires v3.0+ for AND/OR/NOT logical rules used in the shared base
