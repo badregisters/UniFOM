@@ -1,4 +1,4 @@
-# MSS
+# UniFOM
 Unified repository for multi-client config projects.
 
 ## Structure
