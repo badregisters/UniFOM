@@ -34,6 +34,11 @@ Clash YAML configs are generated client-side via the online tool — subscriptio
 
 **[→ 在线生成 Clash 配置 / Generate Clash Config](https://badregisters.github.io/UniFOM/)**
 
+本地构建请参考订阅配置模版：  
+For local builds, refer to the subscription config template:
+
+**[secrets.example.yaml](https://raw.githubusercontent.com/badregisters/UniFOM/main/clash/src/secrets.example.yaml)**
+
 ---
 
 Shadowrocket 配置不含订阅信息，提供成品直接下载：  
