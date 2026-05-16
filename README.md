@@ -29,7 +29,7 @@ A fine-grained traffic-splitting config for long-term users. Core goals:
 
 由于 Clash 系 YAML 配置中硬编码了机场订阅链接，属于高敏资产，目前不提供成品下载。YAML 脱敏方案尚未确定，如有需要请下载源码自行取用。
 
-Clash YAML configs embed subscription URLs directly and are treated as sensitive assets — no pre-built download is provided. Desensitization is not yet finalized; clone the repo and build locally as needed.
+Clash YAML configs embed subscription URLs directly and are treated as sensitive assets — no pre-built download is provided. Desensitization is not yet finalized; clone the repo and build locally.
 
 Shadowrocket 配置不含订阅信息，提供成品直接下载：  
 The Shadowrocket config contains no subscription data and is available for direct download:
@@ -88,3 +88,23 @@ python3 scripts/build.py
 - Shadowrocket : `sr-vX.Y.Z` / `sr-vX.Y.Z-rc.N`
 - OpenClash    : `oc-vX.Y.Z` / `oc-vX.Y.Z-rc.N`
 - Stash        : `stash-vX.Y.Z` / `stash-vX.Y.Z-rc.N`
+
+---
+
+## 致谢 / Acknowledgment
+
+### 中文
+
+本项目的设计理念和核心配置方案得到了 [a-nomad](https://github.com/colin-chang/YouTubeResources) 项目的深刻启发。a-nomad 项目在 Shadowrocket 配置优化、DNS 泄露防护和分流策略等方面的创新思路，为本项目提供了重要的参考价值。
+
+在充分学习和理解 a-nomad 项目优秀实践的基础之上，根据自身的具体使用习惯、运行环境特点和实际需求，对配置方案进行了深度的定制化修改和优化迭代。这些改进不仅保留了原项目的核心优势，更加入了符合个性化场景的功能增强。
+
+在此，特别对 a-nomad 项目及其维护者表示诚挚的感谢，感谢其为开源社区贡献的宝贵资源和灵感。
+
+### English
+
+This project draws profound inspiration from the [a-nomad](https://github.com/colin-chang/YouTubeResources) project. The innovative approaches pioneered by a-nomad in Shadowrocket configuration optimization, DNS leak prevention, and fine-grained traffic splitting have provided invaluable reference for this project.
+
+Building upon a thorough understanding of the excellent practices demonstrated by a-nomad, this project conducts in-depth customization and iterative optimization of the configuration scheme based on specific usage habits, runtime environment characteristics, and practical requirements. These improvements not only preserve the core advantages of the original project but also integrate functionality enhancements tailored to personalized scenarios.
+
+We hereby express our sincere gratitude to the a-nomad project and its maintainers for their outstanding contributions and inspiration to the open-source community.
