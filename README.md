@@ -25,6 +25,19 @@ A fine-grained traffic-splitting config for long-term users. Core goals:
 
 ---
 
+## 下载 / Download
+
+由于 Clash 系 YAML 配置中硬编码了机场订阅链接，属于高敏资产，目前不提供成品下载。YAML 脱敏方案尚未确定，如有需要请下载源码自行取用。
+
+Clash YAML configs embed subscription URLs directly and are treated as sensitive assets — no pre-built download is provided. Desensitization is not yet finalized; clone the repo and build locally as needed.
+
+Shadowrocket 配置不含订阅信息，提供成品直接下载：  
+The Shadowrocket config contains no subscription data and is available for direct download:
+
+**[UniFOM.conf](https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf)**
+
+---
+
 ## 目录结构 / Structure
 
 ```
