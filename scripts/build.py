@@ -154,9 +154,6 @@ def gen_direct_domains_clash(providers):
     """Generate Clash-format DOMAIN-SUFFIX direct rules (YAML list items)."""
     return '\n'.join(f'  - DOMAIN-SUFFIX,{h},🎯 全球直连' for h in _all_direct_hosts(providers))
 
-def gen_direct_domains_sr(providers):
-    """Generate SR-format DOMAIN-SUFFIX direct rules (plain text)."""
-    return '\n'.join(f'DOMAIN-SUFFIX,{h},🎯 全球直连' for h in _all_direct_hosts(providers))
 
 def use_list(providers, group):
     """Return comma-separated provider names belonging to the given group."""
@@ -176,17 +173,6 @@ def inject_clash(content, providers):
     content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual")}]')
     return content
 
-def inject_sr(content, providers):
-    """Replace the direct-domains marker block in base.conf content."""
-    start_marker = '# [proxy-provider-direct-domains start]'
-    end_marker   = '# [proxy-provider-direct-domains end]'
-    generated    = gen_direct_domains_sr(providers)
-    replacement  = f'{start_marker}\n{generated}\n{end_marker}'
-    pattern = re.compile(
-        re.escape(start_marker) + r'.*?' + re.escape(end_marker),
-        re.DOTALL,
-    )
-    return pattern.sub(replacement, content)
 
 def build_clash(platform, providers):
     platform_path = ROOT / f'clash/src/platform/{platform}.yaml'
@@ -237,7 +223,6 @@ def build_sr(providers):
 
     meta    = parse_meta(content)
     header  = make_header(meta)
-    content = inject_sr(content, providers)
     content = strip_comments_and_collapse(content)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
