@@ -42,7 +42,7 @@ For local builds, refer to the subscription config template:
 ---
 
 Shadowrocket 配置可直接下载预构建版本，节点自举区包含示例机场域名，不影响使用；如需替换机场域名或OCD用户，可自行手工修改或使用上方在线生成器：  
-A pre-built Shadowrocket config is available for direct download; the bootstrap section contains the maintainer's airport domains, which are harmless for other users. To use your own airport domains, edit the file manually or use the online tool above:
+A pre-built Shadowrocket config is available for direct download; the node bootstrap section contains example airport domains that do not affect normal usage. To replace the airport domains — or for the OCD-inclined — edit the file manually or use the online tool above:
 
 **[UniFOM.conf](https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf)**
 
