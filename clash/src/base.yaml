@@ -5,6 +5,10 @@
 # Requires: Stash 3.0+ (AND/OR/NOT logical rules), Mihomo (all versions).
 # ====================================================================================
 
+# Note: filter 字段必须使用单引号 '...'，禁用双引号 "..."
+# 原因：filter 含 \b \. 等正则转义，YAML 双引号会按 C 风格转义
+#       将 \b 解析为 U+0008 控制字符，触发 Mihomo 报错
+#       "yaml: control characters are not allowed"
 # [GENERATED: proxy-providers]
 
 proxy-groups:
