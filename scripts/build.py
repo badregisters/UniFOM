@@ -115,7 +115,7 @@ def gen_proxy_providers(providers):
             f'    url: "{info["url"]}"',
             f'    interval: 14400',
             f'    path: ./proxy_provider/{name}.yaml',
-            f'    filter: "{PROVIDER_FILTER}"',
+            f"    filter: '{PROVIDER_FILTER}'",
             f'    health-check: {{enable: true, interval: 600, url: http://www.gstatic.com/generate_204}}',
             '',
         ]
