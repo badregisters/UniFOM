@@ -248,6 +248,12 @@ def build_sr(providers):
     print(f'✓ SR built: {output_path}')
     return True
 
+TARGETS = {
+    'oc':    lambda p: build_clash('mihomo', p),
+    'stash': lambda p: build_clash('stash', p),
+    'sr':    lambda p: build_sr(p),
+}
+
 if __name__ == '__main__':
     secrets_path = ROOT / 'clash/src/secrets.yaml'
 
@@ -256,9 +262,17 @@ if __name__ == '__main__':
         print('  Create clash/src/secrets.yaml with your subscription URLs.')
         sys.exit(1)
 
-    providers = load_providers(secrets_path)
+    args = sys.argv[1:]
+    if args:
+        unknown = [a for a in args if a not in TARGETS]
+        if unknown:
+            print(f'✗ Unknown targets: {", ".join(unknown)}')
+            print(f'  Valid targets: {", ".join(TARGETS)}')
+            sys.exit(1)
+        selected = args
+    else:
+        selected = list(TARGETS)
 
-    ok_oc    = build_clash('mihomo', providers)
-    ok_stash = build_clash('stash', providers)
-    ok_sr    = build_sr(providers)
-    sys.exit(0 if (ok_oc and ok_stash and ok_sr) else 1)
+    providers = load_providers(secrets_path)
+    results = [TARGETS[t](providers) for t in selected]
+    sys.exit(0 if all(results) else 1)
