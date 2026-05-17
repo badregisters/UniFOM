@@ -1,7 +1,7 @@
 # UniFOM
 
-多平台代理客户端配置统一仓库。  
-Unified repository for multi-client proxy configurations.
+多平台代理客户端分流规则配置统一仓库。  
+Unified repository for multi-client proxy traffic-splitting configurations.
 
 ---
 
@@ -13,7 +13,7 @@ Unified repository for multi-client proxy configurations.
 - **冷启动生存**：多级 DNS 兜底（nameserver-policy → fallback），弱网下维持基础可用性
 - **规则集工业化**：优先采用 GEOSITE/GEOIP，按需混用 Blackmatrix7 / Loyalsoldier 远程规则集
 - **多平台统一**：Shadowrocket、OpenClash (Mihomo)、Stash 共享规则体系，差异仅在平台头部
-- **Clash Universal YAML**：内置机场订阅链接，生成单一 YAML 文件即可直接导入，无需在客户端 GUI 做任何额外配置
+- **Clash Universal YAML**：内置机场订阅链接，生成单一 YAML 文件即可直接导入，无需在客户端 GUI 做额外配置
 
 A fine-grained traffic-splitting config for long-term users. Core goals:
 
@@ -29,8 +29,8 @@ A fine-grained traffic-splitting config for long-term users. Core goals:
 
 ## 下载 / Download
 
-Clash 系 YAML 配置提供在线生成器，填写机场订阅链接后直接在浏览器内生成，订阅链接不经过任何服务器：  
-Clash YAML configs are generated client-side via the online tool — subscription URLs never leave your browser:
+Clash 系 YAML 配置提供在线生成器，填写机场订阅链接后直接在浏览器内生成，订阅链接不经过任何服务器，没有泄露风险：  
+Clash YAML configs are generated client-side via the online tool — subscription URLs never leave your browser, no risk of leakage:
 
 **[→ 在线生成 Clash 配置 / Generate Clash Config](https://badregisters.github.io/UniFOM/)**
 
@@ -41,8 +41,8 @@ For local builds, refer to the subscription config template:
 
 ---
 
-Shadowrocket 配置不含订阅信息，提供成品直接下载：  
-The Shadowrocket config contains no subscription data and is available for direct download:
+Shadowrocket 配置不含机场订阅信息，提供直接下载，复制链接用于规则订阅或直接导入：  
+The Shadowrocket config contains no subscription data — copy the link for rule subscription or import directly:
 
 **[UniFOM.conf](https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf)**
 
