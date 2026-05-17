@@ -84,6 +84,7 @@ scripts/
 ## 构建 / Build
 
 ```bash
+pip install -r requirements.txt
 python3 scripts/build.py
 ```
 
