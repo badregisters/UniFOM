@@ -199,7 +199,7 @@
 
   <header class="site-header">
     <h1>UniFOM · Clash 配置生成器</h1>
-    <p>填写机场订阅，生成可直接使用的 Clash 配置文件 &nbsp;·&nbsp;
+    <p>填写机场订阅，生成可直接使用的 Clash / Shadowrocket 配置文件 &nbsp;·&nbsp;
       <a href="https://github.com/badregisters/UniFOM" target="_blank">GitHub</a> &nbsp;·&nbsp;
       <a href="https://github.com/badregisters/UniFOM/blob/main/docs/index.html" target="_blank">查看源码</a>
     </p>
@@ -246,6 +246,11 @@ oixCloud:
         <input type="radio" name="platform" value="stash">
         <div class="plat-name">Clash Premium</div>
         <div class="plat-desc">Stash · iOS / macOS</div>
+      </label>
+      <label class="platform-opt">
+        <input type="radio" name="platform" value="sr">
+        <div class="plat-name">Shadowrocket</div>
+        <div class="plat-desc">SR · iOS</div>
       </label>
     </div>
   </div>
@@ -464,6 +469,17 @@ function useList(providers, group) {
     .map(([n]) => n).join(', ');
 }
 
+function injectSR(content, providers) {
+  const start = '# [proxy-provider-direct-domains start]';
+  const end   = '# [proxy-provider-direct-domains end]';
+  const lines = directHosts(providers).map(h => `DOMAIN-SUFFIX,${h},🎯 全球直连`).join('\n');
+  const replacement = `${start}\n${lines}\n${end}`;
+  return content.replace(
+    new RegExp(start.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?' + end.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+    replacement
+  );
+}
+
 function inject(content, providers) {
   content = content.replace('# [GENERATED: proxy-providers]', genProviders(providers));
   content = content.replace('  # [GENERATED: direct-domains]', genDirectDomains(providers));
@@ -529,35 +545,46 @@ document.getElementById('gen-btn').addEventListener('click', async () => {
   status.textContent = '正在拉取配置模板…';
 
   try {
-    const [platText, baseText] = await Promise.all([
-      fetch(`${RAW}/platform/${platform}.yaml`).then(r => {
-        if (!r.ok) throw new Error(`platform/${platform}.yaml 拉取失败`); return r.text();
-      }),
-      fetch(`${RAW}/base.yaml`).then(r => {
-        if (!r.ok) throw new Error('base.yaml 拉取失败'); return r.text();
-      }),
-    ]);
+    let output, fname;
 
-    const meta   = parseMeta(platText);
-    const header = `# ${meta.platform || platform} | ${meta.version || ''} | ${today()} | https://github.com/badregisters/UniFOM\n\n`;
-
-    let base = baseText;
-    if (platform === 'stash') base = filterMihomo(base);
-
-    let combined = platText + '\n' + base;
-    combined = inject(combined, providers);
-    combined = stripComments(combined);
-    const output = header + combined;
+    if (platform === 'sr') {
+      const srText = await fetch(`https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/src/base.conf`).then(r => {
+        if (!r.ok) throw new Error('base.conf 拉取失败'); return r.text();
+      });
+      const meta   = parseMeta(srText);
+      const header = `# ${meta.platform || 'Shadowrocket'} | ${meta.version || ''} | ${today()} | https://github.com/badregisters/UniFOM\n\n`;
+      let content  = injectSR(srText, providers);
+      content      = stripComments(content);
+      output = header + content;
+      fname  = 'UniFOM.conf';
+    } else {
+      const [platText, baseText] = await Promise.all([
+        fetch(`${RAW}/platform/${platform}.yaml`).then(r => {
+          if (!r.ok) throw new Error(`platform/${platform}.yaml 拉取失败`); return r.text();
+        }),
+        fetch(`${RAW}/base.yaml`).then(r => {
+          if (!r.ok) throw new Error('base.yaml 拉取失败'); return r.text();
+        }),
+      ]);
+      const meta   = parseMeta(platText);
+      const header = `# ${meta.platform || platform} | ${meta.version || ''} | ${today()} | https://github.com/badregisters/UniFOM\n\n`;
+      let base = baseText;
+      if (platform === 'stash') base = filterMihomo(base);
+      let combined = platText + '\n' + base;
+      combined = inject(combined, providers);
+      combined = stripComments(combined);
+      output = header + combined;
+      fname  = platform === 'stash' ? 'UniFOM-Stash.yaml' : 'UniFOM-OC.yaml';
+    }
 
     document.getElementById('output-ta').value = output;
     document.getElementById('output-card').hidden = false;
     document.getElementById('output-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     status.textContent = '✓ 生成完成';
 
-    const fname = platform === 'stash' ? 'UniFOM-Stash.yaml' : 'UniFOM-OC.yaml';
     document.getElementById('dl-btn').onclick = () => {
       const a = Object.assign(document.createElement('a'), {
-        href: URL.createObjectURL(new Blob([output], { type: 'text/yaml' })),
+        href: URL.createObjectURL(new Blob([output], { type: 'text/plain' })),
         download: fname,
       });
       a.click();

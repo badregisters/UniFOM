@@ -29,10 +29,10 @@ A fine-grained traffic-splitting config for long-term users. Core goals:
 
 ## 下载 / Download
 
-Clash 系 YAML 配置提供在线生成器，填写机场订阅链接后直接在浏览器内生成，订阅链接不经过任何服务器，没有泄露风险：  
-Clash YAML configs are generated client-side via the online tool — subscription URLs never leave your browser, no risk of leakage:
+Clash 和 Shadowrocket 配置均提供在线生成器，填写机场订阅链接后直接在浏览器内生成，订阅链接不经过任何服务器，没有泄露风险：  
+Clash and Shadowrocket configs are generated client-side via the online tool — subscription URLs never leave your browser, no risk of leakage:
 
-**[→ 在线生成 Clash 配置 / Generate Clash Config](https://badregisters.github.io/UniFOM/)**
+**[→ 在线生成配置 / Generate Config](https://badregisters.github.io/UniFOM/)**
 
 本地构建请参考订阅配置模版：  
 For local builds, refer to the subscription config template:
@@ -41,8 +41,8 @@ For local builds, refer to the subscription config template:
 
 ---
 
-Shadowrocket 配置不含机场订阅信息，提供直接下载，复制链接用于规则订阅或直接导入：  
-The Shadowrocket config contains no subscription data — copy the link for rule subscription or import directly:
+Shadowrocket 配置也可直接下载预构建版本，自举区包含项目维护者的机场域名，不影响使用；如需替换为自己的机场域名，使用上方在线生成器：  
+A pre-built Shadowrocket config is available for direct download; the bootstrap section contains the maintainer's airport domains, which are harmless for other users. To generate one with your own airport domains, use the online tool above:
 
 **[UniFOM.conf](https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf)**
 
