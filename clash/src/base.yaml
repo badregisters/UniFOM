@@ -121,36 +121,36 @@ rule-providers:
 
 rules:
   # === core transport layer (public DNS & Apple push) ===
-  # force remote resolution and intercept Apple Safe Browsing token
-  - DOMAIN,token.safebrowsing.apple,🍎 苹果服务
-  - IP-CIDR,17.0.0.0/8,🍎 苹果服务,no-resolve
-  - IP-CIDR,8.8.8.8/32,🚀 节点选择,no-resolve
-  - IP-CIDR,1.1.1.1/32,🚀 节点选择,no-resolve
+  - DOMAIN,token.safebrowsing.apple,🍎 苹果服务  # Safe Browsing token 走苹果策略组，强制远程解析防污染
+  - IP-CIDR,17.0.0.0/8,🍎 苹果服务,no-resolve  # Apple 全段 IP（APNs + CDN）
+  - IP-CIDR,8.8.8.8/32,🚀 节点选择,no-resolve  # Google Public DNS，走代理保证可达
+  - IP-CIDR,1.1.1.1/32,🚀 节点选择,no-resolve  # Cloudflare DNS，同上
 
   # === subscription bootstrap cold-start (full physical direct) ===
   # [GENERATED: direct-domains]
 
   # === GitHub hardcoded rules (improve cold-start survivability) ===
+  # 冷启动时规则集尚未加载，提前硬编码保证 GitHub 可达（规则集本身也从 GitHub 拉取）
   - DOMAIN,gist.github.com,🚀 节点选择
   - DOMAIN,raw.githubusercontent.com,🚀 节点选择
   - DOMAIN-SUFFIX,github.com,🚀 节点选择
   - DOMAIN-SUFFIX,githubusercontent.com,🚀 节点选择
-  - DOMAIN-SUFFIX,githubassets.com,🚀 节点选择
-  - DOMAIN-SUFFIX,github.io,🚀 节点选择
-  - GEOSITE,github,🚀 节点选择
+  - DOMAIN-SUFFIX,githubassets.com,🚀 节点选择  # GitHub 静态资源 CDN
+  - DOMAIN-SUFFIX,github.io,🚀 节点选择         # GitHub Pages
+  - GEOSITE,github,🚀 节点选择                  # 兜底：覆盖规则集里的完整 GitHub 域名列表
 
   # === VoWiFi dedicated lane (UDP traversal, SIP, ePDG auth) ===
-  - DST-PORT,5060,📞 VoWiFi
-  - DST-PORT,5061,📞 VoWiFi
-  - DOMAIN-SUFFIX,t-mobile.com,📞 VoWiFi
-  - DOMAIN-SUFFIX,3gppnetwork.org,📞 VoWiFi
-  - DOMAIN-KEYWORD,epdg.epc,📞 VoWiFi
-  - DOMAIN-KEYWORD,ims,📞 VoWiFi
-  - AND,((NETWORK,UDP),(OR,((DST-PORT,500),(DST-PORT,4500)))),📞 VoWiFi
+  - DST-PORT,5060,📞 VoWiFi  # SIP 信令（明文）
+  - DST-PORT,5061,📞 VoWiFi  # SIP-TLS 信令（加密）
+  - DOMAIN-SUFFIX,t-mobile.com,📞 VoWiFi       # T-Mobile VoWiFi 网关
+  - DOMAIN-SUFFIX,3gppnetwork.org,📞 VoWiFi    # 3GPP 标准 ePDG 域名格式
+  - DOMAIN-KEYWORD,epdg.epc,📞 VoWiFi          # ePDG（演进分组数据网关）鉴权
+  - DOMAIN-KEYWORD,ims,📞 VoWiFi               # IMS（IP 多媒体子系统）核心域名
+  - AND,((NETWORK,UDP),(OR,((DST-PORT,500),(DST-PORT,4500)))),📞 VoWiFi  # IKEv2/IPSec 密钥协商（UDP 500/4500）
 
   # === LAN anti-leak and direct passthrough ===
-  - RULE-SET,LocalAreaNetwork,🎯 全球直连
-  - RULE-SET,UnBan,🎯 全球直连
+  - RULE-SET,LocalAreaNetwork,🎯 全球直连  # RFC 1918 私有地址 + localhost，防止内网流量走代理
+  - RULE-SET,UnBan,🎯 全球直连            # 解除曾被 BanAD 误杀的正常域名
 
   # === game platform and auth API intercepts ===
   # Activision (CODM, etc.)
@@ -178,21 +178,21 @@ rules:
   - DOMAIN-KEYWORD,crashlytics,🎮 游戏平台
 
   # === sensitive assets routing (cross-border finance / crypto) ===
-  - DOMAIN-KEYWORD,wise,🦉 Wise
-  - DOMAIN-SUFFIX,transferwise.com,🦉 Wise
-  - DOMAIN-KEYWORD,paypal,🅿️ PayPal
-  - DOMAIN-KEYWORD,hsbc,🏦 香港金融
-  - DOMAIN-KEYWORD,bochk,🏦 香港金融
-  - DOMAIN-KEYWORD,cmbwinglung,🏦 香港金融
-  - DOMAIN-KEYWORD,hangseng,🏦 香港金融
-  - DOMAIN-KEYWORD,hkbea,🏦 香港金融
-  - DOMAIN-SUFFIX,sc.com,🏦 香港金融
-  - DOMAIN-SUFFIX,citibank.com.hk,🏦 香港金融
-  - DOMAIN-SUFFIX,za.group,🏦 香港金融
-  - DOMAIN-SUFFIX,mox.com,🏦 香港金融
-  - DOMAIN-SUFFIX,livibank.com,🏦 香港金融
-  - DOMAIN-SUFFIX,welab.bank,🏦 香港金融
-  - RULE-SET,Crypto_Rules,🪙 Crypto
+  - DOMAIN-KEYWORD,wise,🦉 Wise              # Wise 国际转账
+  - DOMAIN-SUFFIX,transferwise.com,🦉 Wise   # Wise 旧域名
+  - DOMAIN-KEYWORD,paypal,🅿️ PayPal          # PayPal
+  - DOMAIN-KEYWORD,hsbc,🏦 香港金融           # 汇丰银行
+  - DOMAIN-KEYWORD,bochk,🏦 香港金融          # 中银香港
+  - DOMAIN-KEYWORD,cmbwinglung,🏦 香港金融    # 招商永隆银行
+  - DOMAIN-KEYWORD,hangseng,🏦 香港金融       # 恒生银行
+  - DOMAIN-KEYWORD,hkbea,🏦 香港金融          # 东亚银行
+  - DOMAIN-SUFFIX,sc.com,🏦 香港金融          # 渣打银行
+  - DOMAIN-SUFFIX,citibank.com.hk,🏦 香港金融 # 花旗香港
+  - DOMAIN-SUFFIX,za.group,🏦 香港金融        # ZA Bank（众安银行）
+  - DOMAIN-SUFFIX,mox.com,🏦 香港金融         # Mox Bank（渣打虚拟银行）
+  - DOMAIN-SUFFIX,livibank.com,🏦 香港金融    # livi bank（中银虚拟银行）
+  - DOMAIN-SUFFIX,welab.bank,🏦 香港金融      # WeLab Bank（汇立银行）
+  - RULE-SET,Crypto_Rules,🪙 Crypto           # 加密货币交易所域名规则集
 
   # === custom overrides start ===
   # Windows RDP — 走微软策略组直连，避免代理节点封锁 3389 端口
@@ -218,52 +218,55 @@ rules:
   # === custom overrides end ===
 
   # === CN tech giants hardcoded direct (Tencent / Alibaba / ASN exemptions) ===
-  - IP-ASN,132203,🎯 全球直连,no-resolve
-  - IP-ASN,131830,🎯 全球直连,no-resolve
-  - IP-ASN,45090,🎯 全球直连,no-resolve
-  - IP-ASN,37963,🎯 全球直连,no-resolve
-  - IP-ASN,45102,🎯 全球直连,no-resolve
-  - IP-ASN,133775,🎯 全球直连,no-resolve
+  # GEOIP:CN 未必覆盖所有海外托管的国内厂商 IP，ASN 豁免作为补充
+  - IP-ASN,132203,🎯 全球直连,no-resolve  # Tencent Cloud（国际）
+  - IP-ASN,131830,🎯 全球直连,no-resolve  # Tencent Cloud（香港/海外节点）
+  - IP-ASN,45090,🎯 全球直连,no-resolve   # Shenzhen Tencent（国内主干）
+  - IP-ASN,37963,🎯 全球直连,no-resolve   # Alibaba Cloud（阿里云国内）
+  - IP-ASN,45102,🎯 全球直连,no-resolve   # Alibaba Cloud（阿里云国际）
+  - IP-ASN,133775,🎯 全球直连,no-resolve  # Alibaba Cloud（香港/东南亚）
 
   # === CN tech giants HTTPDNS anti-pollution ===
-  - DOMAIN-KEYWORD,httpdns,📇 HTTPDNS
-  - IP-CIDR,119.29.29.29/32,📇 HTTPDNS,no-resolve
-  - IP-CIDR,182.254.116.116/32,📇 HTTPDNS,no-resolve
-  - IP-CIDR,1.2.4.8/32,📇 HTTPDNS,no-resolve
-  - IP-CIDR,119.28.28.28/32,📇 HTTPDNS,no-resolve
-  - IP-CIDR,223.5.5.5/32,📇 HTTPDNS,no-resolve
-  - IP-CIDR,223.6.6.6/32,📇 HTTPDNS,no-resolve
+  # 国内厂商 HTTPDNS 绕过系统 DNS 直接解析，会污染境外域名解析结果，统一拦截
+  - DOMAIN-KEYWORD,httpdns,📇 HTTPDNS          # 关键词兜底拦截各厂商 HTTPDNS 域名
+  - IP-CIDR,119.29.29.29/32,📇 HTTPDNS,no-resolve   # DNSPod（腾讯）
+  - IP-CIDR,182.254.116.116/32,📇 HTTPDNS,no-resolve # DNSPod（腾讯备用）
+  - IP-CIDR,1.2.4.8/32,📇 HTTPDNS,no-resolve         # CNNIC SDNS
+  - IP-CIDR,119.28.28.28/32,📇 HTTPDNS,no-resolve    # DNSPod（腾讯第三 IP）
+  - IP-CIDR,223.5.5.5/32,📇 HTTPDNS,no-resolve       # AliDNS（阿里）
+  - IP-CIDR,223.6.6.6/32,📇 HTTPDNS,no-resolve       # AliDNS（阿里备用）
 
   # === geo-locked services (Truth Social US-only) ===
+  # Truth Social 强制美区 IP 才可访问，其他节点会被重定向或拒绝
   - DOMAIN-SUFFIX,truthsocial.com,🇺🇸 美国节点
-  - DOMAIN-SUFFIX,tmtgcorp.com,🇺🇸 美国节点
+  - DOMAIN-SUFFIX,tmtgcorp.com,🇺🇸 美国节点    # Truth Social 母公司 TMTG 域名
   - DOMAIN-KEYWORD,truthsocial,🇺🇸 美国节点
 
   # === rule-set full mount (GEOSITE + ACL4SSR + BM7) ===
-  - GEOSITE,googlefcm,📢 谷歌FCM
-  - GEOSITE,telegram,✈️ 电报消息
-  - GEOSITE,openai,🤖 AI 服务
-  - RULE-SET,AI,🤖 AI 服务
-  - GEOSITE,apple,🍎 苹果服务
-  - GEOSITE,microsoft,🪟 微软服务
-  - GEOSITE,onedrive,☁️ 微软云盘
-  - GEOSITE,tiktok,📱 TikTok
-  - GEOSITE,youtube,▶️ 油管视频
-  - GEOSITE,netflix,🎥 奈飞视频
-  - GEOSITE,spotify,🎧 Spotify
-  - GEOSITE,epicgames,🎮 游戏平台
-  - GEOSITE,steam,🎮 游戏平台
-  - RULE-SET,ProxyMedia,🌍 国外媒体
-  - RULE-SET,ProxyGFWlist,🚀 节点选择
-  - GEOSITE,bilibili,📺 哔哩哔哩
-  - RULE-SET,ChinaMedia,🎯 全球直连
-  - GEOSITE,google-cn,🎯 全球直连
-  - GEOSITE,steam@cn,🎯 全球直连
-  - RULE-SET,Download,🎯 全球直连
-  - GEOSITE,category-ads-all,🛑 广告拦截
+  - GEOSITE,googlefcm,📢 谷歌FCM          # Google Firebase Cloud Messaging 推送服务
+  - GEOSITE,telegram,✈️ 电报消息           # Telegram IP + 域名完整列表
+  - GEOSITE,openai,🤖 AI 服务              # OpenAI / ChatGPT
+  - RULE-SET,AI,🤖 AI 服务                 # ACL4SSR AI 规则集（补充 Claude、Gemini 等）
+  - GEOSITE,apple,🍎 苹果服务              # Apple 全域名（App Store、iCloud、Siri 等）
+  - GEOSITE,microsoft,🪟 微软服务          # Microsoft 全域名
+  - GEOSITE,onedrive,☁️ 微软云盘           # OneDrive 专项（从 microsoft 集合中独立）
+  - GEOSITE,tiktok,📱 TikTok              # TikTok 国际版
+  - GEOSITE,youtube,▶️ 油管视频            # YouTube + Google Video
+  - GEOSITE,netflix,🎥 奈飞视频            # Netflix
+  - GEOSITE,spotify,🎧 Spotify            # Spotify
+  - GEOSITE,epicgames,🎮 游戏平台          # Epic Games Store
+  - GEOSITE,steam,🎮 游戏平台              # Steam（含 CDN 域名）
+  - RULE-SET,ProxyMedia,🌍 国外媒体        # ACL4SSR 国外流媒体规则集（非上述专项）
+  - RULE-SET,ProxyGFWlist,🚀 节点选择      # Loyalsoldier GFW 被封域名列表
+  - GEOSITE,bilibili,📺 哔哩哔哩           # 哔哩哔哩（含港澳台域名）
+  - RULE-SET,ChinaMedia,🎯 全球直连        # 国内流媒体（爱奇艺、优酷、芒果等）
+  - GEOSITE,google-cn,🎯 全球直连          # Google 在中国大陆提供服务的域名（dl.google.com 等）
+  - GEOSITE,steam@cn,🎯 全球直连           # Steam 中国区 CDN，直连提速
+  - RULE-SET,Download,🎯 全球直连          # 下载类域名（软件更新、镜像站等），直连节省流量
+  - GEOSITE,category-ads-all,🛑 广告拦截   # v2fly 广告域名集合
 
   # === fallback ===
-  - GEOSITE,cn,🎯 全球直连
-  - DOMAIN-SUFFIX,cn,🎯 全球直连
-  - GEOIP,CN,🎯 全球直连,no-resolve
-  - MATCH,🐟 漏网之鱼
+  - GEOSITE,cn,🎯 全球直连           # v2fly 中国域名数据库（覆盖面最广）
+  - DOMAIN-SUFFIX,cn,🎯 全球直连     # .cn 顶级域兜底，防 GEOSITE 漏网
+  - GEOIP,CN,🎯 全球直连,no-resolve  # 中国大陆 IP 段直连（MaxMind GeoIP2）
+  - MATCH,🐟 漏网之鱼                # 最终兜底，未匹配流量走漏网之鱼策略组
