@@ -195,6 +195,7 @@ rules:
   - RULE-SET,Crypto_Rules,🪙 Crypto
 
   # === custom overrides start ===
+  # Windows RDP — 走微软策略组直连，避免代理节点封锁 3389 端口
   - DST-PORT,3389,🪟 微软服务
   # Apple CDN domains via third-party CDN (theoretically redundant after fake-ip-filter removal, kept during observation period)
   # - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
