@@ -195,6 +195,7 @@ rules:
   - RULE-SET,Crypto_Rules,🪙 Crypto
 
   # === custom overrides start ===
+  - DST-PORT,3389,🪟 微软服务
   # Apple CDN domains via third-party CDN (theoretically redundant after fake-ip-filter removal, kept during observation period)
   # - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,mail.me.com.akadns.net,🍎 苹果服务
