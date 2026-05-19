@@ -28,7 +28,7 @@
 
 **Shadowrocket 预构建版**：节点自举区含示例机场域名，不影响使用，可直接导入；如需替换域名，使用上方在线生成器或手动修改
 
-**[→ UniFOM.conf](https://github.com/badregisters/UniFOM/releases/download/sr-v1.1.1/UniFOM.conf)**
+**[→ UniFOM.conf](https://github.com/badregisters/UniFOM/releases/download/sr-v1.2.0/UniFOM.conf)**
 
 **本地构建（Clash）**：
 1. 复制 `clash/src/secrets.example.yaml` → `clash/src/secrets.yaml`，填写机场订阅链接
