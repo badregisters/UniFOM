@@ -1,100 +1,143 @@
 # UniFOM
 
-多平台代理客户端分流规则配置统一仓库。  
-Unified repository for multi-client proxy traffic-splitting configurations.
+![version](https://img.shields.io/github/v/tag/badregisters/UniFOM?label=latest&style=flat-square)
+![license](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![platform](https://img.shields.io/badge/Platform-Clash%20%7C%20Shadowrocket-lightgrey?style=flat-square)
+
+多平台代理客户端分流规则配置统一仓库 · Unified multi-client proxy traffic-splitting configurations
 
 ---
 
-面向长期使用者的精细化分流方案，核心目标：
-
-- **DNS 安全**：DoH 全程加密，严格隔离境内/境外解析路径，防止 DNS 泄漏与运营商劫持
-- **精细化分流**：金融、支付、加密货币、流媒体、VoWiFi 等场景独立策略组，减少误判
-- **节点防抖**：自动测速 50ms 容差，地区组 75ms，AI 专用 Non-HK 组 100ms 高容差
-- **冷启动生存**：多级 DNS 兜底（nameserver-policy → fallback），弱网下维持基础可用性
-- **规则集工业化**：优先采用 GEOSITE/GEOIP，按需混用 Blackmatrix7 / Loyalsoldier 远程规则集
-- **多平台统一**：Shadowrocket、OpenClash (Mihomo)、Stash 共享规则体系，差异仅在平台头部
-- **Clash Universal YAML**：内置机场订阅链接，生成单一 YAML 文件即可直接导入，无需在客户端 GUI 做额外配置
-
-A fine-grained traffic-splitting config for long-term users. Core goals:
-
-- **DNS security**: DoH end-to-end, strict CN/non-CN resolution separation, prevents DNS leaks and ISP hijacking
-- **Fine-grained splitting**: dedicated policy groups for finance, payments, crypto, streaming, VoWiFi, etc.
-- **Node debounce**: 50 ms tolerance for auto-select, 75 ms for regional groups, 100 ms for AI (Non-HK)
-- **Cold-start resilience**: multi-tier DNS fallback (nameserver-policy → fallback) for survival on weak networks
-- **Industrial rule sets**: GEOSITE/GEOIP first, supplemented by Blackmatrix7 / Loyalsoldier remote rule sets
-- **Unified multi-platform**: Shadowrocket, OpenClash (Mihomo), and Stash share one rule body; differences confined to platform headers
-- **Clash Universal YAML**: subscription URLs are baked in at build time — the output is a single self-contained YAML ready to import, no client-side GUI setup required
+| 特性 | 说明 |
+|:-----|:-----|
+| DNS 安全 | DoH 全程加密，严格隔离境内/境外解析路径，防 DNS 泄漏与运营商劫持 |
+| 精细化分流 | 金融、支付、加密货币、流媒体、VoWiFi、RDP 独立策略组，减少误判 |
+| 节点防抖 | 自动测速 50ms 容差 / 地区组 75ms / AI 专用 Non-HK 组 100ms 高容差 |
+| 冷启动生存 | GitHub 域名硬编码 + 多级 DNS 兜底（nameserver-policy → fallback），弱网维持基础可用 |
+| 工业化规则集 | GEOSITE/GEOIP 优先，按需混用 BM7 / Loyalsoldier / ACL4SSR |
+| 多平台统一 | Shadowrocket、Mihomo (OpenClash)、Stash 共享规则体系，差异仅在平台头部 |
+| 在线生成器 | 订阅链接纯浏览器内处理，不经过任何服务器，无泄露风险 |
 
 ---
 
-## 下载 / Download
+## 快速开始
 
-Clash 和 Shadowrocket 配置均提供在线生成器，填写机场订阅链接后直接在浏览器内生成，订阅链接不经过任何服务器，没有泄露风险：  
-Clash and Shadowrocket configs are generated client-side via the online tool — subscription URLs never leave your browser, no risk of leakage:
+**在线生成（推荐）**：填写机场订阅链接后直接在浏览器内生成，订阅链接不经过任何服务器
 
 **[→ 在线生成配置 / Generate Config](https://badregisters.github.io/UniFOM/)**
 
-本地构建请参考订阅配置模版：  
-For local builds, refer to the subscription config template:
+**Shadowrocket 预构建版**：节点自举区含示例机场域名，不影响使用，可直接导入；如需替换域名，使用上方在线生成器或手动修改
 
-**[secrets.example.yaml](https://raw.githubusercontent.com/badregisters/UniFOM/main/clash/src/secrets.example.yaml)**
+**[→ UniFOM.conf](https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf)**
 
----
-
-Shadowrocket 配置可直接下载预构建版本，节点自举区包含示例机场域名，不影响使用；如需替换机场域名或OCD用户，可自行手工修改或使用上方在线生成器：  
-A pre-built Shadowrocket config is available for direct download; the node bootstrap section contains example airport domains that do not affect normal usage. To replace the airport domains — or for the OCD-inclined — edit the file manually or use the online tool above:
-
-**[UniFOM.conf](https://raw.githubusercontent.com/badregisters/UniFOM/main/shadowrocket/dist/UniFOM.conf)**
+**本地构建（Clash）**：
+1. 复制 `clash/src/secrets.example.yaml` → `clash/src/secrets.yaml`，填写机场订阅链接
+2. `pip install -r requirements.txt && python3 scripts/build.py`
+3. 输出文件分别位于 `clash/openclash/dist/` 和 `clash/stash/dist/`
 
 ---
 
-## 目录结构 / Structure
+## 策略组
+
+### 核心
+
+| 策略组 | 类型 | 说明 |
+|:-------|:----:|:-----|
+| 🚀 节点选择 | select | 主入口，手动选择或自动测速 |
+| 📡 自动测速 | url-test 50ms | 全地区节点中最优选 |
+| 🎛️ 手动切换 | select | 全量节点手动选 |
+| 💰 省流节点 | url-test 75ms | 过滤 0.1x / 1x 倍率节点 |
+| 🗺️ Non-HK | url-test 100ms | 排除香港节点，AI 专用（规避 OpenAI 封锁） |
+| 🐟 漏网之鱼 | select | 未匹配流量的最终 fallback |
+| 🎯 全球直连 | select | 强制直连 |
+| 🛑 广告拦截 | select | 默认 REJECT |
+
+### 地区
+
+| 🇭🇰 香港 | 🇹🇼 台湾 | 🇯🇵 日本 | 🇰🇷 韩国 | 🇸🇬 狮城 | 🇺🇸 美国 | 🇬🇧 英国 | 🇲🇾 马来 | 🇺🇳 小众 |
+|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
+| url-test 75ms | url-test 75ms | url-test 75ms | url-test 75ms | url-test 75ms | url-test 75ms | url-test 75ms | url-test 75ms | select |
+
+### 服务
+
+| 策略组 | 默认节点 | 类别 |
+|:-------|:---------|:-----|
+| 🤖 AI 服务 | Non-HK | AI |
+| ▶️ 油管视频 | 节点选择 | 流媒体 |
+| 🎥 奈飞视频 | 节点选择 | 流媒体 |
+| 📱 TikTok | 节点选择 | 流媒体 |
+| 🎧 Spotify | 香港节点 | 流媒体 |
+| 🌍 国外媒体 | 节点选择 | 流媒体 |
+| 📺 哔哩哔哩 | 全球直连 | 国内媒体 |
+| 🌏 国内媒体 | 全球直连 | 国内媒体 |
+| 📺 巴哈姆特 | 台湾节点 | 流媒体 |
+| 🎶 网易音乐 | 全球直连 | 国内媒体 |
+| ✈️ 电报消息 | 美国节点 | 社交 |
+| 🍎 苹果服务 | 全球直连 | 平台 |
+| 🪟 微软服务 | 全球直连 | 平台 |
+| ☁️ 微软云盘 | 全球直连 | 平台 |
+| 🎮 游戏平台 | 香港节点 | 游戏 |
+| 🏦 香港金融 | 香港节点 | 金融 |
+| 🅿️ PayPal | 全球直连 | 金融 |
+| 🦉 Wise | 全球直连 | 金融 |
+| 🪙 Crypto | 狮城节点 | 金融 |
+| 📞 VoWiFi | 全球直连 | 通话 |
+| 🖥️ FXRDP | 全球直连 | 远程桌面 |
+| 📢 谷歌FCM | 节点选择 | 推送 |
+| 📇 HTTPDNS | REJECT | 安全 |
+
+---
+
+## 规则优先级
+
+| # | 类别 | 说明 |
+|--:|:-----|:-----|
+| 1 | 传输层基础 | Apple APNs、Google/Cloudflare DNS IP 段 |
+| 2 | 冷启动保障 | GitHub 域名硬编码（规则集拉取前生效） |
+| 3 | VoWiFi 专道 | SIP/IKEv2/ePDG 端口与域名 |
+| 4 | 内网直连 | RFC 1918 私有地址 + UnBan 误杀恢复 |
+| 5 | 游戏平台 | Activision、Hoyoverse、Ubisoft 等硬编码 |
+| 6 | 金融 / 支付 | Wise、PayPal、港银、Crypto 规则集 |
+| 7 | 自定义覆写 | RDP 端口、HTTPDNS 拦截、AI 精准域名 |
+| 8 | 腾讯/阿里 ASN | 国内厂商海外托管 IP 强制直连 |
+| 9 | HTTPDNS 拦截 | 国内厂商 DNS IP 段封锁 |
+| 10 | 地理锁定服务 | Truth Social 美区强制 |
+| 11 | 规则集挂载 | FCM、Telegram、AI、Apple、微软、流媒体等 |
+| 12 | GFW 列表 | ProxyGFWlist |
+| 13 | 国内媒体 | ChinaMedia、GEOSITE:cn、.cn 后缀 |
+| 14 | GeoIP CN | 中国大陆 IP 段直连 |
+| 15 | 漏网之鱼 | 未匹配流量 |
+
+---
+
+## 目录结构
 
 ```
 clash/
   src/
-    base.yaml              - 共享规则集 / 代理提供商 / 策略组 (所有 Clash 平台通用)
-                             shared rules / providers / groups (all Clash platforms)
+    base.yaml              - 共享规则集 / 代理提供商 / 策略组（所有 Clash 平台通用）
     secrets.yaml           - 订阅链接，已 gitignore，仅本地使用
-                             subscription URLs, gitignored, local only
     platform/
-      mihomo.yaml          - Mihomo (OpenClash) 专属头部: 端口、TUN、Geo、嗅探、DNS
-                             Mihomo (OpenClash) header: port, tun, geo, sniffer, dns
-      stash.yaml           - Stash (Clash Premium) 专属头部: 端口、TUN、嗅探、DNS
-                             Stash (Clash Premium) header: port, tun, sniffer, dns
-  openclash/
-    dist/UniFOM.yaml       - OC 可部署输出，已 gitignore，仅本地使用
-                             OC deployable output, gitignored, local only
-  stash/
-    dist/UniFOM.yaml       - Stash 可部署输出，已 gitignore，仅本地使用
-                             Stash deployable output, gitignored, local only
+      mihomo.yaml          - Mihomo (OpenClash) 专属头部：端口、TUN、Geo、嗅探、DNS
+      stash.yaml           - Stash (Clash Premium) 专属头部：端口、TUN、嗅探、DNS
+  openclash/dist/          - OC 可部署输出，已 gitignore，仅本地使用
+  stash/dist/              - Stash 可部署输出，已 gitignore，仅本地使用
 
 shadowrocket/
-  src/base.conf            - SR 配置源文件 (纳入 git 管理)
-                             SR source of truth (in git)
-  dist/UniFOM.conf         - SR 可部署输出 (纳入 git 管理)
-                             SR deployable output (in git)
+  src/base.conf            - SR 配置源文件（纳入 git 管理）
+  dist/UniFOM.conf         - SR 可部署输出（纳入 git 管理）
 
 scripts/
   build.py                 - 拼接平台头部 + base.yaml，注入订阅信息；同步生成 SR dist
-                             concatenates platform header + base.yaml, injects secrets;
-                             also generates SR dist
 ```
 
-## 构建 / Build
+## 分支策略
 
-```bash
-pip install -r requirements.txt
-python3 scripts/build.py
-```
+- `main`      : 稳定版
+- `feat/*`    : 功能开发
+- `release/*` : 发布与 RC 稳定化
 
-## 分支策略 / Branching
-
-- `main`      : 稳定版 / stable
-- `feat/*`    : 功能开发 / feature development
-- `release/*` : 发布与 RC 稳定化 / release and RC stabilization
-
-## 版本标签 / Tags
+## 版本标签
 
 - Shadowrocket : `sr-vX.Y.Z` / `sr-vX.Y.Z-rc.N`
 - OpenClash    : `oc-vX.Y.Z` / `oc-vX.Y.Z-rc.N`
@@ -102,18 +145,10 @@ python3 scripts/build.py
 
 ---
 
-## 致谢 / Acknowledgment
+## 致谢
 
-
-本项目的设计理念和核心配置方案得到了 [a-nomad](https://github.com/colin-chang/YouTubeResources) 项目的深刻启发。a-nomad 项目在 Shadowrocket 配置优化、DNS 泄露防护和分流策略等方面的创新思路，为本项目提供了重要的参考价值。
-
-在充分学习和理解 a-nomad 项目优秀实践的基础之上，根据自身的具体使用习惯、运行环境特点和实际需求，对配置方案进行了深度的定制化修改和优化迭代。这些改进不仅保留了原项目的核心优势，更加入了符合个性化场景的功能增强。
-
-在此，特别对 a-nomad 项目及其维护者表示诚挚的感谢，感谢其为开源社区贡献的宝贵资源和灵感。
-
-
-This project draws profound inspiration from the [a-nomad](https://github.com/colin-chang/YouTubeResources) project. The innovative approaches pioneered by a-nomad in Shadowrocket configuration optimization, DNS leak prevention, and fine-grained traffic splitting have provided invaluable reference for this project.
-
-Building upon a thorough understanding of the excellent practices demonstrated by a-nomad, this project conducts in-depth customization and iterative optimization of the configuration scheme based on specific usage habits, runtime environment characteristics, and practical requirements. These improvements not only preserve the core advantages of the original project but also integrate functionality enhancements tailored to personalized scenarios.
-
-We hereby express our sincere gratitude to the a-nomad project and its maintainers for their outstanding contributions and inspiration to the open-source community.
+- [a-nomad](https://github.com/colin-chang/YouTubeResources) — 配置理念与 DNS 泄漏防护方案的核心参考
+- [blackmatrix7](https://github.com/blackmatrix7/ios_rule_script)
+- [Loyalsoldier](https://github.com/Loyalsoldier/surge-rules)
+- [ACL4SSR](https://github.com/ACL4SSR/ACL4SSR)
+- [SKK.moe](https://ruleset.skk.moe)
