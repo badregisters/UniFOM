@@ -2,6 +2,14 @@
 
 ## Shadowrocket
 
+### v1.2.0 (2026-05-20)
+- Rule-set CDN 迁移: Loyalsoldier 规则集全部从 jsDelivr 切换为 raw.githubusercontent.com 直链，消除 CDN 缓存延迟和封锁风险
+- `🇺🇳 小众节点` 新增印度节点匹配 (印度 / 🇮🇳 / India)
+- `💰 省流节点` 过滤器补充 0.1x 倍率节点
+- `Non-HK` 正则修正: `US` 改为 `\bUS\b` 避免误匹配 ASUS 等字符串
+- 新增 `🖥️ FXRDP` 策略组 + DST-PORT 3389 规则，远程桌面专道
+- 新增 `🏦 香港金融`、`🅿️ PayPal`、`🦉 Wise` 独立策略组
+
 ### v1.1.1-rc.1 (2026-05-16)
 - DNS 测试: 阿里 DoH + 腾讯 DoH; fallback 阿里/腾讯明文
 
@@ -39,15 +47,29 @@
 
 ## Stash
 
+### v1.2.0 (2026-05-20) — 首个稳定版
+- DNS 三层防泄露架构: primary 境外 DoH (1.1.1.1 / dns.google)，CN 域名经 nameserver-policy geosite:cn 精准路由至国内 DoH，境外域名查询不再接触 CN DoH
+- nameserver-policy 升级为双 CN DoH 列表值 (alidns + doh.pub)，提高冗余性（修正历史记录: Stash 实际上支持 nameserver-policy 列表值）
+- 启用 AND 复合规则 (Stash 3.0.0+ 支持): VoWiFi IKEv2/IPSec 端口匹配 + 游戏 UDP 端口分流
+- 所有 IP 类规则 (GEOIP / IP-ASN / IP-CIDR) 均携带 no-resolve，彻底消除 fake-ip 模式下 IP 规则触发预解析导致的 DNS 泄露
+- 继承共享规则集全部更新: 新增 🖥️ FXRDP、🏦 香港金融、🅿️ PayPal、🦉 Wise 策略组；小众节点新增印度；省流节点补充 0.1x 过滤
+
 ### v1.1.0 (2026-05-14)
 - 架构定稿，从 OpenClash 配置移植，规则集与策略组保持一致
-- 剔除 Mihomo 专属指令: redir-port、tproxy-port、tcp-concurrent、geo-auto-update、QUIC 嗅探、direct-nameserver、nameserver-policy 列表值
+- 剔除 Mihomo 专属指令: redir-port、tproxy-port、tcp-concurrent、geo-auto-update、QUIC 嗅探、direct-nameserver
 - DNS 补偿策略: nameserver-policy (geosite:cn → 阿里 DoH) + fallback (geoip:CN → 阿里/腾讯 DoH)，弥补 Stash 不支持 direct-nameserver 的缺口
-- nameserver-policy 改用单值字符串格式 (Stash 不支持列表值)
 
 ---
 
 ## OpenClash (Mihomo)
+
+### v1.2.0 (2026-05-20)
+- DNS 架构重构: nameserver 通过 `#proxy-group` 标签强制经代理查询境外 DoH，彻底隔离 CN DoH 与境外域名
+- 新增 `direct-nameserver` + `direct-nameserver-follow-policy: true`，国内域名解析走 CN DoH 直连通道
+- 新增 `proxy-server-nameserver`，代理节点域名解析独立路径，避免循环解析
+- nameserver-policy 沿用 Mihomo `geosite:cn,private` 复合键语法 + 双 CN DoH 列表值
+- 新增 rule-providers: ProxyMedia (BM7)、Crypto_Rules (BM7)、LocalAreaNetwork，规则集覆盖面扩展
+- 继承共享规则集全部更新: 新增 🖥️ FXRDP、🏦 香港金融、🅿️ PayPal、🦉 Wise 策略组；小众节点新增印度；省流节点补充 0.1x 过滤
 
 ### v1.1.0 (2026-05-13)
 - 架构定稿，规则集持续测试优化
