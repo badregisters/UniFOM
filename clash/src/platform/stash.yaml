@@ -71,31 +71,13 @@ dns:
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
-  # [Mihomo] proxy-server-nameserver:
-  #   - https://dns.alidns.com/dns-query
-  #   - https://doh.pub/dns-query
-  # [Mihomo] direct-nameserver — Stash does not support this directive.
-  # Compensated via nameserver-policy (geosite:cn → CN DoH) + fallback (geoip:CN → CN DoH).
-  # [Mihomo] proxy-server-nameserver:
-  #   - https://dns.alidns.com/dns-query
-  #   - https://doh.pub/dns-query
-  # [Mihomo] direct-nameserver-follow-policy: true
-  # [tier 1] foreign DoH — queried for all non-CN domains; 1.1.1.1 is accessible in CN via PoP
-  # Note: #proxy-group tagging is Mihomo-only; Stash uses direct DoH here
+  # Stash cannot tag nameserver with #proxy-group (Mihomo-only), so foreign DoH (1.1.1.1)
+  # goes direct — unreliable on CN mobile networks. In fake-ip mode this is fine:
+  # proxied domains never need local DNS resolution (proxy resolves them);
+  # only DIRECT connections need real IPs, and those are CN domains served correctly by CN DoH.
+  # Trade-off: CN DoH sees foreign domain queries — unavoidable under Stash constraints.
   nameserver:
-    - "https://1.1.1.1/dns-query"
-    - "https://dns.google/dns-query"
-  # [tier 2] CN domain override — geosite:cn pins domestic domains to CN DoH
-  # Note: comma-separated geosite keys (geosite:cn,private) are Mihomo-only; use single geosite key here
-  # Note: list values in nameserver-policy are supported per official docs, but cause !!seq parse errors
-  # in practice — using single string until confirmed working with user's Stash version
+    - "https://dns.alidns.com/dns-query"
+    - "https://doh.pub/dns-query"
   nameserver-policy:
     "geosite:cn": "https://dns.alidns.com/dns-query"
-  # [tier 3] cold-start fallback — if 1.1.1.1 unreachable, CN-IP responses fall back to CN DoH
-  # Note: fallback/fallback-filter are Clash Premium-inherited fields; behaves correctly in Stash
-  fallback:
-    - https://dns.alidns.com/dns-query
-    - https://doh.pub/dns-query
-  fallback-filter:
-    geoip: true
-    geoip-code: CN
