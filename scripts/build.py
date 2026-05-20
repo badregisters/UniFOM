@@ -5,16 +5,21 @@
 #   python3 scripts/build.py
 #
 # Inputs:
-#   clash/src/platform/mihomo.yaml - Mihomo-specific header (port, tun, geo, sniffer, dns)
-#   clash/src/platform/stash.yaml  - Stash-specific header
-#   clash/src/base.yaml            - shared body with injection markers
-#   clash/src/secrets.yaml         - provider list with URLs (gitignored, local only)
-#   shadowrocket/src/base.conf     - SR config template
+#   clash/src/platform/mihomo.yaml      - Mihomo-specific header (port, tun, geo, sniffer, dns)
+#   clash/src/platform/stash.yaml       - Stash-specific header
+#   clash/src/base.yaml                 - shared body with injection markers
+#   clash/src/secrets.yaml              - provider list with URLs (gitignored, local only)
+#   shadowrocket/src/base.conf          - SR config template
+#   surge/src/platform/ios.conf         - Surge iOS header
+#   surge/src/platform/macos.conf       - Surge macOS header
+#   surge/src/base.conf                 - Surge shared policy groups + rules
 #
 # Outputs:
-#   clash/openclash/dist/UniFOM.yaml - deployable OC config (gitignored, local only)
-#   clash/stash/dist/UniFOM.yaml     - deployable Stash config (gitignored, local only)
-#   shadowrocket/dist/UniFOM.conf    - deployable SR config (in git)
+#   clash/openclash/dist/UniFOM.yaml    - deployable OC config (gitignored, local only)
+#   clash/stash/dist/UniFOM.yaml        - deployable Stash config (gitignored, local only)
+#   shadowrocket/dist/UniFOM.conf       - deployable SR config (in git)
+#   surge/ios/dist/UniFOM.conf          - deployable Surge iOS config (gitignored, local only)
+#   surge/macos/dist/UniFOM.conf        - deployable Surge macOS config (gitignored, local only)
 #
 # secrets.yaml format:
 #   Simple entry (defaults to regional + manual groups):
@@ -74,12 +79,13 @@ def strip_comments_and_collapse(content):
     return ''.join(result)
 
 def load_providers(path):
-    """Parse secrets.yaml into an ordered dict of name -> {url, groups, extra_domains}.
+    """Parse secrets.yaml into an ordered dict of name -> {url, surge_url, groups, extra_domains}.
 
     Simple entry:   FlowerCloud: "https://..."
     Extended entry: FlowerCloud:
                       url: "https://..."
-                      groups: manual          # or [manual, budget]
+                      surge_url: "https://..."   # optional Surge-format subscription
+                      groups: manual             # or [manual, budget]
                       extra_domains: [xmancdn.com]
 
     Default groups when not specified: [regional, manual]
@@ -90,7 +96,7 @@ def load_providers(path):
     providers = {}
     for name, value in raw.items():
         if isinstance(value, str):
-            providers[name] = {'url': value, 'groups': ['regional', 'manual'], 'extra_domains': []}
+            providers[name] = {'url': value, 'surge_url': None, 'groups': ['regional', 'manual'], 'extra_domains': []}
         elif isinstance(value, dict):
             groups_raw = value.get('groups', 'regional,manual')
             if isinstance(groups_raw, str):
@@ -102,7 +108,12 @@ def load_providers(path):
             extra = value.get('extra_domains', [])
             if isinstance(extra, str):
                 extra = [extra]
-            providers[name] = {'url': value['url'], 'groups': groups, 'extra_domains': list(extra)}
+            providers[name] = {
+                'url': value['url'],
+                'surge_url': value.get('surge_url'),
+                'groups': groups,
+                'extra_domains': list(extra),
+            }
     return providers
 
 def gen_proxy_providers(providers):
@@ -250,10 +261,77 @@ def build_sr(providers):
     print(f'✓ SR built: {output_path}')
     return True
 
+def inject_surge(content, providers):
+    """Inject subscription URL and direct-domain rules into Surge base.conf.
+
+    Replaces:
+      [__SURGE_URL__]  — first airport that has a surge_url (comma-separated if multiple)
+      # [proxy-provider-direct-domains start/end]  — DOMAIN-SUFFIX direct rules
+    """
+    # Collect all surge URLs (airports that have surge_url defined)
+    surge_urls = [info['surge_url'] for info in providers.values() if info.get('surge_url')]
+    if not surge_urls:
+        print('  ⚠  No surge_url found in secrets.yaml — [__SURGE_URL__] left as placeholder')
+        surge_url_str = '[__SURGE_URL__]'
+    else:
+        surge_url_str = surge_urls[0]   # single airport: use directly
+        # TODO: multi-airport support via include-other-group (Phase 2+)
+
+    content = content.replace('[__SURGE_URL__]', surge_url_str)
+
+    # Inject direct-domain rules (same as SR format)
+    start_marker = '# [proxy-provider-direct-domains start]'
+    end_marker   = '# [proxy-provider-direct-domains end]'
+    generated    = gen_direct_domains_sr(providers)
+    replacement  = f'{start_marker}\n{generated}\n{end_marker}'
+    pattern = re.compile(
+        re.escape(start_marker) + r'.*?' + re.escape(end_marker),
+        re.DOTALL,
+    )
+    return pattern.sub(replacement, content)
+
+
+def build_surge(platform, providers):
+    platform_path = ROOT / f'surge/src/platform/{platform}.conf'
+    base_path     = ROOT / 'surge/src/base.conf'
+
+    if platform == 'ios':
+        output_path = ROOT / 'surge/ios/dist/UniFOM.conf'
+        label = 'Surge iOS'
+    elif platform == 'macos':
+        output_path = ROOT / 'surge/macos/dist/UniFOM.conf'
+        label = 'Surge macOS'
+    else:
+        print(f'✗ Unknown Surge platform: {platform}')
+        return False
+
+    with open(platform_path) as f:
+        platform_content = f.read()
+    with open(base_path) as f:
+        base = f.read()
+
+    meta   = parse_meta(platform_content)
+    header = make_header(meta)
+
+    combined = platform_content + '\n' + base
+    combined = inject_surge(combined, providers)
+    combined = strip_comments_and_collapse(combined)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, 'w') as f:
+        f.write(header)
+        f.write(combined)
+
+    print(f'✓ {label} built: {output_path}')
+    return True
+
+
 TARGETS = {
-    'oc':    lambda p: build_clash('mihomo', p),
-    'stash': lambda p: build_clash('stash', p),
-    'sr':    lambda p: build_sr(p),
+    'oc':          lambda p: build_clash('mihomo', p),
+    'stash':       lambda p: build_clash('stash', p),
+    'sr':          lambda p: build_sr(p),
+    'surge-ios':   lambda p: build_surge('ios', p),
+    'surge-macos': lambda p: build_surge('macos', p),
 }
 
 if __name__ == '__main__':

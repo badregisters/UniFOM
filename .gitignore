@@ -9,6 +9,8 @@ clash/src/secrets.yaml
 # 构建输出 (含真实订阅链接，仅本地使用)
 clash/openclash/dist/
 clash/stash/dist/
+surge/ios/dist/
+surge/macos/dist/
 
 # shadowrocket/dist/ 纳入 git 管理 (不含订阅信息)
 
