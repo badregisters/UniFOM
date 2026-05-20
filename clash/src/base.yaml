@@ -160,7 +160,7 @@ rules:
   # Activision (CODM, etc.)
   - DOMAIN-SUFFIX,activision.com,🎮 游戏平台
   - DOMAIN-SUFFIX,callofduty.com,🎮 游戏平台
-  - AND,((NETWORK,UDP),(DST-PORT,7500-7650)),🎮 游戏平台 # UDP 7500-7650 game ports (Stash 3.0.0+ and Mihomo both support AND rules)
+  - AND,((NETWORK,UDP),(DST-PORT,7500-7650)),🎮 游戏平台 # DST-PORT range unsupported in Stash # [Mihomo]
   # Genshin Impact
   - DOMAIN-SUFFIX,hoyoverse.com,🎮 游戏平台
   - DOMAIN-SUFFIX,hoyolab.com,🎮 游戏平台
