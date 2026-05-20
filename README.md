@@ -3,6 +3,7 @@
 ![version](https://img.shields.io/github/v/tag/badregisters/UniFOM?label=latest&style=flat-square)
 ![license](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![platform](https://img.shields.io/badge/Platform-Clash%20%7C%20Shadowrocket-lightgrey?style=flat-square)
+![stash](https://img.shields.io/badge/Stash-discontinued-red?style=flat-square)
 
 多平台代理客户端分流规则配置统一仓库 · Unified multi-client proxy traffic-splitting configurations
 
@@ -141,7 +142,13 @@ scripts/
 
 - Shadowrocket : `sr-vX.Y.Z` / `sr-vX.Y.Z-rc.N`
 - OpenClash    : `oc-vX.Y.Z` / `oc-vX.Y.Z-rc.N`
-- Stash        : `stash-vX.Y.Z` / `stash-vX.Y.Z-rc.N`
+- Stash        : `stash-vX.Y.Z` — 最终版本 `stash-v1.2.0`，已停止维护
+
+## Stash 停止维护说明
+
+Stash 基于 Clash Premium 内核，其 DNS 架构无法满足本项目对 DNS 泄露防护的要求：境外域名的 DNS 查询无法经由代理节点发出，`follow-rule` 选项在节点地址为域名时存在不可回避的死锁。详见 [docs/dns-leak-platform-notes.md](docs/dns-leak-platform-notes.md)。
+
+代码与历史记录完整保留，最终可用版本为 [`stash-v1.2.0`](https://github.com/badregisters/UniFOM/tree/stash-v1.2.0)。
 
 ---
 
