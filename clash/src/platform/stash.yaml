@@ -85,13 +85,12 @@ dns:
   nameserver:
     - "https://1.1.1.1/dns-query"
     - "https://dns.google/dns-query"
-  # [tier 2] CN domain override — geosite:cn pins domestic domains to CN DoH (dual servers for redundancy)
+  # [tier 2] CN domain override — geosite:cn pins domestic domains to CN DoH
   # Note: comma-separated geosite keys (geosite:cn,private) are Mihomo-only; use single geosite key here
-  # Note: list values in nameserver-policy ARE supported in Stash (confirmed from official docs)
+  # Note: list values in nameserver-policy are supported per official docs, but cause !!seq parse errors
+  # in practice — using single string until confirmed working with user's Stash version
   nameserver-policy:
-    "geosite:cn":
-      - "https://dns.alidns.com/dns-query"
-      - "https://doh.pub/dns-query"
+    "geosite:cn": "https://dns.alidns.com/dns-query"
   # [tier 3] cold-start fallback — if 1.1.1.1 unreachable, CN-IP responses fall back to CN DoH
   # Note: fallback/fallback-filter are Clash Premium-inherited fields; behaves correctly in Stash
   fallback:
