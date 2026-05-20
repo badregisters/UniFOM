@@ -169,6 +169,13 @@
     .platform-opt input { display: none; }
     .plat-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
     .plat-desc { font-size: 11px; color: var(--muted); }
+    .platform-opt--discontinued {
+      text-decoration: none; color: inherit;
+      opacity: .5; cursor: pointer;
+      border-style: dashed;
+    }
+    .platform-opt--discontinued:hover { opacity: .75; border-color: var(--danger); }
+    .platform-opt--discontinued .plat-desc { color: var(--danger); }
 
     /* Generate row */
     .gen-row { display: flex; align-items: center; gap: 12px; }
@@ -242,11 +249,12 @@ oixCloud:
         <div class="plat-name">Mihomo 内核</div>
         <div class="plat-desc">OpenClash · 路由器</div>
       </label>
-      <label class="platform-opt">
-        <input type="radio" name="platform" value="stash">
+      <a class="platform-opt platform-opt--discontinued"
+         href="https://github.com/badregisters/UniFOM/blob/main/docs/dns-leak-platform-notes.md"
+         target="_blank" rel="noopener">
         <div class="plat-name">Clash Premium</div>
-        <div class="plat-desc">Stash · iOS / macOS</div>
-      </label>
+        <div class="plat-desc">Stash · 已停止维护 ↗</div>
+      </a>
       <label class="platform-opt">
         <input type="radio" name="platform" value="sr">
         <div class="plat-name">Shadowrocket</div>
