@@ -2,7 +2,7 @@
 
 ![version](https://img.shields.io/github/v/tag/badregisters/UniFOM?label=latest&style=flat-square)
 ![license](https://img.shields.io/badge/License-MIT-green?style=flat-square)
-![platform](https://img.shields.io/badge/Platform-Clash%20%7C%20Shadowrocket-lightgrey?style=flat-square)
+![platform](https://img.shields.io/badge/Platform-Clash%20%7C%20Shadowrocket%20%7C%20Surge-lightgrey?style=flat-square)
 ![stash](https://img.shields.io/badge/Stash-discontinued-red?style=flat-square)
 
 多平台代理客户端分流规则配置统一仓库 · Unified multi-client proxy traffic-splitting configurations
@@ -16,7 +16,7 @@
 | 节点防抖 | 自动测速 50ms 容差 / 地区组 75ms / AI 专用 Non-HK 组 100ms 高容差 |
 | 冷启动生存 | GitHub 域名硬编码 + 多级 DNS 兜底（nameserver-policy → fallback），弱网维持基础可用 |
 | 工业化规则集 | GEOSITE/GEOIP 优先，按需混用 BM7 / Loyalsoldier / ACL4SSR |
-| 多平台统一 | Shadowrocket、Mihomo (OpenClash)、Stash 共享规则体系，差异仅在平台头部 |
+| 多平台统一 | Shadowrocket、Mihomo (OpenClash)、Surge 共享规则体系，差异仅在平台头部 |
 | 在线生成器 | 订阅链接纯浏览器内处理，不经过任何服务器，无泄露风险 |
 
 ---
@@ -31,10 +31,10 @@
 
 **[→ UniFOM.conf](https://github.com/badregisters/UniFOM/releases/download/sr-v1.2.0/UniFOM.conf)**
 
-**本地构建（Clash）**：
-1. 复制 `clash/src/secrets.example.yaml` → `clash/src/secrets.yaml`，填写机场订阅链接
+**本地构建（Clash / Surge）**：
+1. 复制 `clash/src/secrets.example.yaml` → `clash/src/secrets.yaml`，填写机场订阅链接；Surge 用户另填 `surge_url` 字段
 2. `pip install -r requirements.txt && python3 scripts/build.py`
-3. 输出文件分别位于 `clash/openclash/dist/` 和 `clash/stash/dist/`
+3. Clash 输出位于 `clash/openclash/dist/`；Surge 输出位于 `surge/ios/dist/` 和 `surge/macos/dist/`
 
 ---
 
@@ -120,16 +120,24 @@ clash/
     secrets.yaml           - 订阅链接，已 gitignore，仅本地使用
     platform/
       mihomo.yaml          - Mihomo (OpenClash) 专属头部：端口、TUN、Geo、嗅探、DNS
-      stash.yaml           - Stash (Clash Premium) 专属头部：端口、TUN、嗅探、DNS
+      stash.yaml           - Stash (Clash Premium) 专属头部，已停止维护
   openclash/dist/          - OC 可部署输出，已 gitignore，仅本地使用
-  stash/dist/              - Stash 可部署输出，已 gitignore，仅本地使用
 
 shadowrocket/
   src/base.conf            - SR 配置源文件（纳入 git 管理）
   dist/UniFOM.conf         - SR 可部署输出（纳入 git 管理）
 
+surge/
+  src/
+    base.conf              - 共享策略组 + 规则（Surge 语法，iOS / macOS 通用）
+    platform/
+      ios.conf             - Surge iOS 专属头部：General、DNS
+      macos.conf           - Surge macOS 专属头部：General、DNS、系统代理端口
+  ios/dist/                - Surge iOS 可部署输出，已 gitignore，仅本地使用
+  macos/dist/              - Surge macOS 可部署输出，已 gitignore，仅本地使用
+
 scripts/
-  build.py                 - 拼接平台头部 + base.yaml，注入订阅信息；同步生成 SR dist
+  build.py                 - 拼接平台头部 + base，注入订阅信息；生成 SR / Surge / OC dist
 ```
 
 ## 分支策略
@@ -142,7 +150,8 @@ scripts/
 
 - Shadowrocket : `sr-vX.Y.Z` / `sr-vX.Y.Z-rc.N`
 - OpenClash    : `oc-vX.Y.Z` / `oc-vX.Y.Z-rc.N`
-- Stash        : `stash-vX.Y.Z` — 最终版本 `stash-v1.2.0`，已停止维护
+- Surge        : `surge-vX.Y.Z` / `surge-vX.Y.Z-rc.N`
+- Stash        : 已停止维护，详见下方说明
 
 ## Stash 停止维护说明
 
