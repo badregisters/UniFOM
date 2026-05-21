@@ -68,6 +68,11 @@ def strip_comments_and_collapse(content):
     for line in content.splitlines(keepends=True):
         if line.lstrip().startswith('#'):
             continue
+        # Strip inline comments: whitespace + # + anything to EOL.
+        # Safe: meaningful # in values (e.g. nameserver group "...#🚀 节点选择")
+        # is never preceded by whitespace, so won't be matched.
+        stripped = re.sub(r'\s+#.*$', '', line.rstrip('\n'))
+        line = stripped + ('\n' if line.endswith('\n') else '')
         is_blank = line.strip() == ''
         if is_blank and prev_blank:
             continue
