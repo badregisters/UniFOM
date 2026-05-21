@@ -247,7 +247,7 @@ def build_clash(platform, providers, suffix=''):
         gist_id = os.environ.get(gist_env)
         if gist_id:
             result = subprocess.run(
-                ['gh', 'gist', 'edit', gist_id, str(output_path)],
+                ['gh', 'gist', 'edit', gist_id, '--filename', output_path.name, str(output_path)],
                 capture_output=True, text=True
             )
             if result.returncode == 0:
