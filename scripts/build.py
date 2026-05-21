@@ -26,7 +26,9 @@
 #       groups: manual          # comma-separated string or YAML list; default: regional,manual
 #       extra_domains: [xmancdn.com]  # secondary CDN domains not derivable from URL
 
+import os
 import re
+import subprocess
 import sys
 import yaml
 from pathlib import Path
@@ -228,6 +230,19 @@ def build_clash(platform, providers):
         f.write(combined)
 
     print(f'✓ {label} built: {output_path}')
+
+    if platform == 'mihomo':
+        gist_id = os.environ.get('OC_GIST_ID')
+        if gist_id:
+            result = subprocess.run(
+                ['gh', 'gist', 'edit', gist_id, str(output_path)],
+                capture_output=True, text=True
+            )
+            if result.returncode == 0:
+                print(f'✓ OC synced to Gist: {gist_id}')
+            else:
+                print(f'✗ Gist sync failed: {result.stderr.strip()}')
+
     return True
 
 def build_sr(providers):
