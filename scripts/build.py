@@ -33,6 +33,7 @@ import re
 import subprocess
 import sys
 import yaml
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -57,10 +58,11 @@ def parse_meta(text):
     return meta
 
 def make_header(meta):
-    platform = meta.get('platform', 'Unknown')
-    version  = meta.get('version',  'unknown')
-    updated  = meta.get('updated',  'unknown')
-    return f'# {platform} | {version} | {updated} | {PROJECT_URL}\n\n'
+    platform  = meta.get('platform', 'Unknown')
+    version   = meta.get('version',  'unknown')
+    updated   = meta.get('updated',  'unknown')
+    generated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    return f'# {platform} | {version} | {updated} | {PROJECT_URL}\n# Generated: {generated}\n\n'
 
 def strip_comments_and_collapse(content):
     result = []
