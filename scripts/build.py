@@ -12,12 +12,13 @@
 #   shadowrocket/src/base.conf     - SR config template
 #
 # Outputs:
-#   clash/openclash/dist/UniFOM.yaml - deployable OC config (gitignored, local only)
-#   clash/stash/dist/UniFOM.yaml     - deployable Stash config (gitignored, local only)
-#   shadowrocket/dist/UniFOM.conf    - deployable SR config (in git)
+#   clash/openclash/dist/UniFOM.yaml        - deployable OC config, all providers (gitignored, local only)
+#   clash/openclash/dist/UniFOM-shared.yaml - deployable OC config, shared providers only (gitignored, local only)
+#   clash/stash/dist/UniFOM.yaml            - deployable Stash config (gitignored, local only)
+#   shadowrocket/dist/UniFOM.conf           - deployable SR config (in git)
 #
 # secrets.yaml format:
-#   Simple entry (defaults to regional + manual groups):
+#   Simple entry (defaults to regional + manual groups, not shared):
 #     FlowerCloud: "https://..."
 #
 #   Extended entry (all fields optional except url):
@@ -25,6 +26,7 @@
 #       url: "https://..."
 #       groups: manual          # comma-separated string or YAML list; default: regional,manual
 #       extra_domains: [xmancdn.com]  # secondary CDN domains not derivable from URL
+#       shared: true            # include in oc-shared build; default: false
 
 import os
 import re
@@ -92,7 +94,7 @@ def load_providers(path):
     providers = {}
     for name, value in raw.items():
         if isinstance(value, str):
-            providers[name] = {'url': value, 'groups': ['regional', 'manual'], 'extra_domains': []}
+            providers[name] = {'url': value, 'groups': ['regional', 'manual'], 'extra_domains': [], 'shared': False}
         elif isinstance(value, dict):
             groups_raw = value.get('groups', 'regional,manual')
             if isinstance(groups_raw, str):
@@ -104,7 +106,8 @@ def load_providers(path):
             extra = value.get('extra_domains', [])
             if isinstance(extra, str):
                 extra = [extra]
-            providers[name] = {'url': value['url'], 'groups': groups, 'extra_domains': list(extra)}
+            shared = bool(value.get('shared', False))
+            providers[name] = {'url': value['url'], 'groups': groups, 'extra_domains': list(extra), 'shared': shared}
     return providers
 
 def gen_proxy_providers(providers):
@@ -192,16 +195,18 @@ def inject_clash(content, providers):
     return content
 
 
-def build_clash(platform, providers):
+def build_clash(platform, providers, suffix=''):
     platform_path = ROOT / f'clash/src/platform/{platform}.yaml'
     base_path     = ROOT / 'clash/src/base.yaml'
 
     if platform == 'mihomo':
-        output_path = ROOT / 'clash/openclash/dist/UniFOM.yaml'
-        label = 'OC'
+        output_path = ROOT / f'clash/openclash/dist/UniFOM{suffix}.yaml'
+        label    = f'OC{suffix}' if suffix else 'OC'
+        gist_env = 'OC_SHARED_GIST_ID' if suffix else 'OC_GIST_ID'
     elif platform == 'stash':
-        output_path = ROOT / 'clash/stash/dist/UniFOM.yaml'
-        label = 'Stash'
+        output_path = ROOT / f'clash/stash/dist/UniFOM{suffix}.yaml'
+        label    = f'Stash{suffix}' if suffix else 'Stash'
+        gist_env = None
     else:
         print(f'✗ Unknown platform: {platform}')
         return False
@@ -231,15 +236,15 @@ def build_clash(platform, providers):
 
     print(f'✓ {label} built: {output_path}')
 
-    if platform == 'mihomo':
-        gist_id = os.environ.get('OC_GIST_ID')
+    if gist_env:
+        gist_id = os.environ.get(gist_env)
         if gist_id:
             result = subprocess.run(
                 ['gh', 'gist', 'edit', gist_id, str(output_path)],
                 capture_output=True, text=True
             )
             if result.returncode == 0:
-                print(f'✓ OC synced to Gist: {gist_id}')
+                print(f'✓ {label} synced to Gist: {gist_id}')
             else:
                 print(f'✗ Gist sync failed: {result.stderr.strip()}')
 
@@ -266,9 +271,10 @@ def build_sr(providers):
     return True
 
 TARGETS = {
-    'oc':    lambda p: build_clash('mihomo', p),
-    'stash': lambda p: build_clash('stash', p),
-    'sr':    lambda p: build_sr(p),
+    'oc':        lambda p: build_clash('mihomo', p),
+    'oc-shared': lambda p: build_clash('mihomo', {k: v for k, v in p.items() if v['shared']}, suffix='-shared'),
+    'stash':     lambda p: build_clash('stash', p),
+    'sr':        lambda p: build_sr(p),
 }
 
 if __name__ == '__main__':
