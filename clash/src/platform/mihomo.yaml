@@ -14,6 +14,10 @@ ipv6: false
 unified-delay: true
 tcp-concurrent: true
 
+profile:
+  store-selected: true
+  store-fake-ip: true # persist fake-ip map across restarts, reduces cold-start DNS churn
+
 tun:
   enable: true
   stack: mixed

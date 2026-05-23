@@ -154,6 +154,13 @@ rules:
 
   # === LAN anti-leak and direct passthrough ===
   - RULE-SET,LocalAreaNetwork,🎯 全球直连 # RFC 1918 私有地址 + localhost, 防止内网流量走代理
+  - IP-CIDR,100.64.0.0/10,🎯 全球直连,no-resolve # 运营商 CGNAT(RFC 6598), 走代理必然失败
+  - IP-CIDR,224.0.0.0/4,🎯 全球直连,no-resolve # IPv4 组播(mDNS/SSDP/IGMP), 无需代理
+  - IP-CIDR,240.0.0.0/4,🎯 全球直连,no-resolve # IANA 保留段, 防止异常流量被错误路由
+  - IP-CIDR6,::1/128,🎯 全球直连,no-resolve # IPv6 loopback
+  - IP-CIDR6,fc00::/7,🎯 全球直连,no-resolve # IPv6 ULA 私有地址(对应 IPv4 RFC 1918)
+  - IP-CIDR6,fe80::/10,🎯 全球直连,no-resolve # IPv6 链路本地地址(路由器邻居发现)
+  - IP-CIDR6,ff00::/8,🎯 全球直连,no-resolve # IPv6 组播
   - RULE-SET,UnBan,🎯 全球直连 # 解除曾被 BanAD 误杀的正常域名
 
   # === game platform and auth API intercepts ===
