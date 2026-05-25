@@ -1,7 +1,24 @@
 # platform: OpenClash (Mihomo)
 # version: v1.2.0
-# updated: 2026-05-20
+# updated: 2026-05-25
 # project: https://github.com/badregisters/UniFOM
+#
+# ── OpenClash 字段接管说明 ────────────────────────────────────────────────────
+# 以下字段在 OpenClash 环境下会被插件覆盖或接管，与本文件设置可能不一致：
+#
+# [tun 段]  auto-route / dns-hijack / tproxy-port / stack 等由 OpenClash
+#           「网络栈」设置接管并重写；本文件的 tun 设置仅作为 fallback 基准。
+#           stack 此处设为 gvisor，须与 OC GUI「网络栈」选项保持一致。
+#
+# [dns 段]  是否生效取决于 OpenClash「DNS 设置」是否关闭接管；
+#           若 OC 开启 DNS 接管，本段 listen 端口与 nameserver 均会被覆盖。
+#
+# [geo]     GEO 数据库下载由本 yaml 的 geox-url 负责；
+#           OpenClash「GEO 数据库订阅」tab 应关闭自动更新，避免与本配置冲突。
+#
+# [其他]    mixed-port / external-controller / secret / authentication /
+#           profile / ntp 等由 OpenClash 注入，不在本文件管理。
+# ─────────────────────────────────────────────────────────────────────────────
 
 port: 7890
 socks-port: 7891
@@ -20,7 +37,7 @@ profile:
 
 tun:
   enable: true
-  stack: mixed
+  stack: gvisor
   dns-hijack:
     - any:53
     - tcp://any:53
