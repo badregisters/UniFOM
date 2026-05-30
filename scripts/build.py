@@ -199,6 +199,7 @@ def inject_clash(content, providers):
     )
     content = content.replace('[__USE_regional__]', f'[{use_list(providers, "regional")}]')
     content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual")}]')
+    content = content.replace('[__USE_ai__]',       f'[{use_list(providers, "ai")}]')
     return content
 
 

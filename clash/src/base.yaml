@@ -15,7 +15,7 @@ proxy-groups:
   - {name: 🚀 节点选择, type: select, proxies: [📡 自动测速, 💰 省流节点, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, DIRECT]}
   - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [__USE_regional__]}
   - {name: 🎛️ 手动切换, type: select, use: [__USE_manual__]}
-  - {name: 🤖 AI 服务, type: select, proxies: [🇺🇸 美国节点, 🗺️ Non-HK, 🎛️ 手动切换, 🇯🇵 日本节点, 🇹🇼 台湾节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇬🇧 英国节点]}
+  - {name: 🤖 AI 服务, type: select, proxies: [🇺🇸 美国节点, 🧠 AI 节点, 🎛️ 手动切换, 🇯🇵 日本节点, 🇹🇼 台湾节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇬🇧 英国节点]}
   - {name: ▶️ 油管视频, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   # FXRDP 独立策略组: vless 节点测速优秀, 但疑似对 RDP(TCP 3389) 支持有限, 待观察;
   # 自动测速组频繁选中 vless 时 RDP 偶发不通, 其余协议(AnyTLS/Hysteria/SS-2022) 表现正常.
@@ -46,7 +46,7 @@ proxy-groups:
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, 🎯 全球直连]}
   # [proxy-provider-groups start] add provider to all use: lists below
   - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: '实验性|(?i)0\.1x|(?i)0\.5x', use: [__USE_manual__]}
-  - {name: 🗺️ Non-HK, type: url-test, tolerance: 100, filter: '(?i)(🇹🇼|台|Tai|TW|🇯🇵|日|Japan|JP|🇰🇷|韩|Korea|KR|🇸🇬|新|Singapore|SG|🇺🇸|美|States|\bUS\b|🇬🇧|英|Kingdom|UK)', use: [__USE_regional__]}
+  - {name: 🧠 AI 节点, type: url-test, tolerance: 100, filter: '(?i)(🇹🇼|台|Tai|TW|🇯🇵|日|Japan|JP|🇰🇷|韩|Korea|KR|🇸🇬|新|Singapore|SG|🇺🇸|美|States|\bUS\b|🇬🇧|英|Kingdom|UK)', use: [__USE_ai__]}
   - {name: 🇭🇰 香港节点, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_regional__]}
   - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_regional__]}
   - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_regional__]}
