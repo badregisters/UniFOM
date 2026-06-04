@@ -204,8 +204,6 @@ rules:
   - RULE-SET,Crypto_Rules,🪙 Crypto # 加密货币交易所域名规则集
 
   # === custom overrides start ===
-  # Windows RDP — 默认直连(兼容境内 VPS), 境外 VPS 如需走代理改指向对应区域组
-  - DST-PORT,3389,🎯 全球直连
   # Apple CDN domains via third-party CDN (theoretically redundant after fake-ip-filter removal, kept during observation period)
   # - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,mail.me.com.akadns.net,🍎 苹果服务
