@@ -17,10 +17,6 @@ proxy-groups:
   - {name: 🎛️ 手动切换, type: select, use: [__USE_manual__]}
   - {name: 🧠 AI 节点, type: select, proxies: [🇺🇸 美国·AI, 🇯🇵 日本·AI, 🇬🇧 英国·AI, 🎛️ 手动切换]}
   - {name: ▶️ 油管视频, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
-  # FXRDP 独立策略组: vless 节点测速优秀, 但疑似对 RDP(TCP 3389) 支持有限, 待观察;
-  # 自动测速组频繁选中 vless 时 RDP 偶发不通, 其余协议(AnyTLS/Hysteria/SS-2022) 表现正常.
-  # 默认直连兼容境内 VPS, 境外 VPS 手动切换至对应地区节点.
-  - {name: 🖥️ FXRDP, type: select, proxies: [🎯 全球直连, 🇸🇬 狮城节点, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇺🇸 美国节点, 🇯🇵 日本节点, 🎛️ 手动切换]}
   - {name: ✈️ 电报消息, type: select, proxies: [🇺🇸 美国节点, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: 🎧 Spotify, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎛️ 手动切换, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: 🍎 苹果服务, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
@@ -208,8 +204,8 @@ rules:
   - RULE-SET,Crypto_Rules,🪙 Crypto # 加密货币交易所域名规则集
 
   # === custom overrides start ===
-  # Windows RDP — 走 FXRDP 策略组, 默认直连, 境外 VPS 可手动切换至对应节点
-  - DST-PORT,3389,🖥️ FXRDP
+  # Windows RDP — 默认直连(兼容境内 VPS), 境外 VPS 如需走代理改指向对应区域组
+  - DST-PORT,3389,🎯 全球直连
   # Apple CDN domains via third-party CDN (theoretically redundant after fake-ip-filter removal, kept during observation period)
   # - DOMAIN-SUFFIX,apple.com.akadns.net,🍎 苹果服务
   # - DOMAIN-SUFFIX,mail.me.com.akadns.net,🍎 苹果服务
