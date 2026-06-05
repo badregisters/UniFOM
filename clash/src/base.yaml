@@ -16,6 +16,7 @@ proxy-groups:
   - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [__USE_regional__]}
   - {name: 🎛️ 手动切换, type: select, use: [__USE_manual__]}
   - {name: 🧠 AI 节点, type: select, proxies: [🇺🇸 美国·AI, 🇯🇵 日本·AI, 🇬🇧 英国·AI, 🎛️ 手动切换]}
+  - {name: 🚄 Speedtest, type: select, proxies: [📡 自动测速, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: ▶️ 油管视频, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: ✈️ 电报消息, type: select, proxies: [🇺🇸 美国节点, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: 🎧 Spotify, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎛️ 手动切换, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
@@ -119,6 +120,14 @@ rule-providers:
     format: yaml
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Download/Download.yaml"
     path: ./rule_provider/Download.yaml
+    interval: 86400
+
+  Speedtest:
+    type: http
+    behavior: classical
+    format: yaml
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Speedtest/Speedtest.yaml"
+    path: ./rule_provider/Speedtest.yaml
     interval: 86400
 
 rules:
@@ -263,6 +272,7 @@ rules:
   - GEOSITE,spotify,🎧 Spotify # Spotify
   - GEOSITE,epicgames,🎮 游戏平台 # Epic Games Store
   - GEOSITE,steam,🎮 游戏平台 # Steam(含 CDN 域名)
+  - RULE-SET,Speedtest,🚄 Speedtest # 测速服务(Ookla Speedtest / Fast.com 等)
   - RULE-SET,ProxyMedia,🌍 国外媒体 # ACL4SSR 国外流媒体规则集(非上述专项)
   - RULE-SET,ProxyGFWlist,🚀 节点选择 # Loyalsoldier GFW 被封域名列表
   - GEOSITE,bilibili,📺 哔哩哔哩 # 哔哩哔哩(含港澳台域名)
