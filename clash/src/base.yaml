@@ -31,7 +31,7 @@ proxy-groups:
   - {name: 🎶 网易音乐, type: select, proxies: [🎯 全球直连, 🚀 节点选择]}
   - {name: 🎮 游戏平台, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎯 全球直连, 🎛️ 手动切换, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: 🏦 香港金融, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎯 全球直连]}
-  - {name: 🅿️ PayPal, type: select, proxies: [🎯 全球直连, 🇺🇸 美国节点, 🇬🇧 英国节点, 🚀 节点选择]}
+  - {name: 🅿️ PayPal, type: select, proxies: [🇺🇸 美国节点, 🇬🇧 英国节点, 🇭🇰 香港节点, 🎛️ 手动切换]}
   - {name: 🦉 Wise, type: select, proxies: [🎯 全球直连, 🇬🇧 英国节点, 🇺🇸 美国节点, 🇭🇰 香港节点, 🇸🇬 狮城节点, 🎛️ 手动切换]}
   - {name: 🪙 Crypto, type: select, proxies: [🇸🇬 狮城节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎯 全球直连]}
   - {name: 📞 VoWiFi, type: select, proxies: [🎯 全球直连, 🎛️ 手动切换, 🇺🇸 美国节点, 🚀 节点选择]}
