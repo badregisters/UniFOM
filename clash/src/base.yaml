@@ -16,7 +16,7 @@ proxy-groups:
   - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [__USE_regional__]}
   - {name: 🎛️ 手动切换, type: select, use: [__USE_manual__]}
   - {name: 🧠 AI 服务, type: select, proxies: [🇺🇸 美国节点, 🇯🇵 日本节点, 🇬🇧 英国节点, 🎛️ 手动切换]}
-  - {name: 🚄 Speedtest, type: select, proxies: [📡 自动测速, 🎯 全球直连, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 🚄 Speedtest, type: select, proxies: [🎯 全球直连, 📡 自动测速, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: ▶️ 油管视频, type: select, proxies: [💰 省流节点, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: ✈️ 电报消息, type: select, proxies: [🇺🇸 美国节点, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: 🎧 Spotify, type: select, proxies: [💰 省流节点, 🇭🇰 香港节点, 🚀 节点选择, 🎛️ 手动切换, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
@@ -42,7 +42,7 @@ proxy-groups:
   - {name: 📺 巴哈姆特, type: select, proxies: [💰 省流节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, 🎯 全球直连]}
   # [proxy-provider-groups start] add provider to all use: lists below
-  - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: '实验性|(?i)0\.1x|(?i)0\.5x|(?i)(^|[^.0-9])1x', use: [__USE_manual__]}
+  - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: '实验性|(?i)0\.1x|(?i)0\.5x|(?i)(^|[^.0-9])1x', use: [__USE_economy__]}
   - {name: 🇭🇰 香港节点, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_regional__]}
   - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_regional__]}
   - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_regional__]}
