@@ -101,7 +101,7 @@ def load_providers(path):
     providers = {}
     for name, value in raw.items():
         if isinstance(value, str):
-            providers[name] = {'url': value, 'groups': ['regional', 'manual'], 'extra_domains': [], 'shared': False}
+            providers[name] = {'url': value, 'groups': ['regional', 'manual'], 'extra_domains': [], 'shared': False, 'full': True}
         elif isinstance(value, dict):
             groups_raw = value.get('groups', 'regional,manual')
             if isinstance(groups_raw, str):
@@ -114,7 +114,8 @@ def load_providers(path):
             if isinstance(extra, str):
                 extra = [extra]
             shared = bool(value.get('shared', False))
-            providers[name] = {'url': value['url'], 'groups': groups, 'extra_domains': list(extra), 'shared': shared}
+            full = bool(value.get('full', True))
+            providers[name] = {'url': value['url'], 'groups': groups, 'extra_domains': list(extra), 'shared': shared, 'full': full}
     return providers
 
 def gen_proxy_providers(providers):
@@ -279,10 +280,10 @@ def build_sr(providers):
     return True
 
 TARGETS = {
-    'oc':        lambda p: build_clash('mihomo', p),
+    'oc':        lambda p: build_clash('mihomo', {k: v for k, v in p.items() if v['full']}),
     'oc-shared': lambda p: build_clash('mihomo', {k: v for k, v in p.items() if v['shared']}, suffix='-shared'),
-    'stash':     lambda p: build_clash('stash', p),
-    'sr':        lambda p: build_sr(p),
+    'stash':     lambda p: build_clash('stash', {k: v for k, v in p.items() if v['full']}),
+    'sr':        lambda p: build_sr({k: v for k, v in p.items() if v['full']}),
 }
 
 if __name__ == '__main__':
