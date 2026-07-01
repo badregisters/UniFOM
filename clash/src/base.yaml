@@ -42,7 +42,7 @@ proxy-groups:
   - {name: 📺 巴哈姆特, type: select, proxies: [💰 省流节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, 🎯 全球直连]}
   # [proxy-provider-groups start] add provider to all use: lists below
-  - {name: 💰 省流节点, type: url-test, tolerance: 75, use: [__USE_economy__]}
+  - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: '实验性|(?i)(^|[^.0-9])1x|BGP|流媒体', use: [__USE_economy__]}
   - {name: 🇭🇰 香港节点, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_regional__]}
   - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_regional__]}
   - {name: 🇯🇵 日本节点, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_regional__]}

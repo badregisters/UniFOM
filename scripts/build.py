@@ -101,7 +101,7 @@ def load_providers(path):
     providers = {}
     for name, value in raw.items():
         if isinstance(value, str):
-            providers[name] = {'url': value, 'groups': ['regional', 'manual'], 'extra_domains': [], 'shared': False, 'full': True, 'economy_filter': None}
+            providers[name] = {'url': value, 'groups': ['regional', 'manual'], 'extra_domains': [], 'shared': False, 'full': True}
         elif isinstance(value, dict):
             groups_raw = value.get('groups', 'regional,manual')
             if isinstance(groups_raw, str):
@@ -115,19 +115,11 @@ def load_providers(path):
                 extra = [extra]
             shared = bool(value.get('shared', False))
             full = bool(value.get('full', True))
-            economy_filter = value.get('economy_filter')
-            providers[name] = {'url': value['url'], 'groups': groups, 'extra_domains': list(extra), 'shared': shared, 'full': full, 'economy_filter': economy_filter}
+            providers[name] = {'url': value['url'], 'groups': groups, 'extra_domains': list(extra), 'shared': shared, 'full': full}
     return providers
 
 def gen_proxy_providers(providers):
-    """Generate the full proxy-providers: YAML block.
-
-    Economy-tagged providers get a second '-economy' entry: same
-    subscription URL, own filter (economy_filter, or PROVIDER_FILTER when
-    unset i.e. "all normally-usable nodes"). This feeds 省流节点 directly
-    via use: without adding any visible proxy-groups, since providers
-    aren't policy groups and never show up in the OC/Clash UI.
-    """
+    """Generate the full proxy-providers: YAML block."""
     lines = ['proxy-providers:']
     for name, info in providers.items():
         lines += [
@@ -140,19 +132,6 @@ def gen_proxy_providers(providers):
             f'    health-check: {{enable: true, interval: 1800, url: https://cp.cloudflare.com/generate_204}}',
             '',
         ]
-        if 'economy' in info['groups']:
-            eco_name = f'{name}-economy'
-            eco_filter = info['economy_filter'] or PROVIDER_FILTER
-            lines += [
-                f'  {eco_name}:',
-                f'    type: http',
-                f'    url: "{info["url"]}"',
-                f'    interval: 86400',
-                f'    path: ./proxy_provider/{eco_name}.yaml',
-                f"    filter: '{eco_filter}'",
-                f'    health-check: {{enable: true, interval: 1800, url: https://cp.cloudflare.com/generate_204}}',
-                '',
-            ]
     return '\n'.join(lines)
 
 def _hosts_from_url(url):
@@ -209,10 +188,6 @@ def use_list(providers, group):
     """Return comma-separated provider names belonging to the given group."""
     return ', '.join(n for n, i in providers.items() if group in i['groups'])
 
-def economy_provider_list(providers):
-    """Return comma-separated '-economy' shadow provider names for 省流节点's use: list."""
-    return ', '.join(f'{n}-economy' for n, i in providers.items() if 'economy' in i['groups'])
-
 def inject_clash(content, providers):
     """Replace all generation markers in base.yaml content."""
     content = content.replace(
@@ -225,7 +200,7 @@ def inject_clash(content, providers):
     )
     content = content.replace('[__USE_regional__]', f'[{use_list(providers, "regional")}]')
     content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual")}]')
-    content = content.replace('[__USE_economy__]',  f'[{economy_provider_list(providers)}]')
+    content = content.replace('[__USE_economy__]',  f'[{use_list(providers, "economy")}]')
     return content
 
 
