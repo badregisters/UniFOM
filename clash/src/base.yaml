@@ -39,7 +39,7 @@ proxy-groups:
   - {name: 🛑 广告拦截, type: select, proxies: [REJECT, 🎯 全球直连]}
   - {name: 📢 谷歌FCM, type: select, proxies: [🚀 节点选择, 🎯 全球直连, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: 📇 HTTPDNS, type: select, proxies: [REJECT, 🎯 全球直连, 🚀 节点选择]}
-  - {name: 📺 巴哈姆特, type: select, proxies: [💰 省流节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎛️ 手动切换]}
+  - {name: 📺 巴哈姆特, type: select, proxies: [🇹🇼 台湾节点, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, 🎯 全球直连]}
   # [proxy-provider-groups start] add provider to all use: lists below
   - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: '实验性|(?i)(^|[^.0-9])1x|BGP|流媒体', use: [__USE_economy__]}
@@ -125,6 +125,14 @@ rule-providers:
     format: yaml
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Speedtest/Speedtest.yaml"
     path: ./rule_provider/Speedtest.yaml
+    interval: 86400
+
+  NetEaseMusic:
+    type: http
+    behavior: classical
+    format: yaml
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/NetEaseMusic/NetEaseMusic.yaml"
+    path: ./rule_provider/NetEaseMusic.yaml
     interval: 86400
 
 rules:
@@ -272,8 +280,10 @@ rules:
   - RULE-SET,Speedtest,🚄 Speedtest # 测速服务(Ookla Speedtest / Fast.com 等)
   - RULE-SET,ProxyMedia,🌍 国外媒体 # ACL4SSR 国外流媒体规则集(非上述专项)
   - RULE-SET,ProxyGFWlist,🚀 节点选择 # Loyalsoldier GFW 被封域名列表
+  - GEOSITE,bahamut,📺 巴哈姆特 # 巴哈姆特动画疯(锁台湾 IP, 走台湾节点)
   - GEOSITE,bilibili,📺 哔哩哔哩 # 哔哩哔哩(含港澳台域名)
-  - RULE-SET,ChinaMedia,🎯 全球直连 # 国内流媒体(爱奇艺, 优酷, 芒果等)
+  - RULE-SET,ChinaMedia,🌏 国内媒体 # 国内流媒体(爱奇艺, 优酷, 芒果等)
+  - RULE-SET,NetEaseMusic,🎶 网易音乐 # 网易云音乐(版权歌曲解锁需配合节点)
   - GEOSITE,google-cn,🎯 全球直连 # Google 在中国大陆提供服务的域名(dl.google.com 等)
   - GEOSITE,steam@cn,🎯 全球直连 # Steam 中国区 CDN, 直连提速
   - RULE-SET,Download,🎯 全球直连 # 下载类域名(软件更新, 镜像站等), 直连节省流量
