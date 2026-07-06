@@ -213,7 +213,6 @@ def inject_clash(content, providers, shared=False):
     )
     content = content.replace('[__USE_regional__]', f'[{use_list(providers, "regional", shared)}]')
     content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual", shared)}]')
-    content = content.replace('[__USE_ai__]',       f'[{use_list(providers, "ai", shared)}]')
     content = content.replace('[__USE_economy__]',  f'[{use_list(providers, "economy", shared)}]')
     content = content.replace('[__USE_finance__]',  f'[{use_list(providers, "finance", shared)}]')
     content = content.replace('[__USE_premium__]',  f'[{use_list(providers, "premium", shared)}]')

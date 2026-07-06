@@ -15,7 +15,7 @@ proxy-groups:
   - {name: 🚀 节点选择, type: select, proxies: [📡 自动测速, 🎬 影音节点, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, DIRECT]}
   - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [__USE_regional__]}
   - {name: 🎛️ 手动切换, type: select, use: [__USE_manual__]}
-  - {name: 🧠 AI 服务, type: select, proxies: [🇯🇵 日本·AI, 🇺🇸 美国·AI, 🇹🇼 台湾·AI, 🎛️ 手动切换]}
+  - {name: 🧠 AI 服务, type: select, proxies: [🇯🇵 日本·优选, 🇺🇸 美国·优选, 🇹🇼 台湾·优选, 🎛️ 手动切换]}
   - {name: 🚄 Speedtest, type: select, proxies: [🎯 全球直连, 📡 自动测速, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: ▶️ 油管视频, type: select, proxies: [🎬 影音节点, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
   - {name: ✈️ 电报消息, type: select, proxies: [🇺🇸 美国节点, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
@@ -68,9 +68,6 @@ proxy-groups:
   - {name: 🇲🇾 马来·次选, type: url-test, tolerance: 100, filter: "(?i)(🇲🇾|马|Malaysia|MY|MA)", use: [__USE_standard__]}
   - {name: 🇲🇾 马来节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇲🇾 马来·优选, 🇲🇾 马来·次选]}
   - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)", use: [__USE_regional__]}
-  - {name: 🇺🇸 美国·AI, type: url-test, tolerance: 75, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_ai__]}
-  - {name: 🇯🇵 日本·AI, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_ai__]}
-  - {name: 🇹🇼 台湾·AI, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_ai__]}
   - {name: 🇭🇰 香港·金融, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_finance__]}
   # [proxy-provider-groups end]
 
