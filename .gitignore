@@ -6,6 +6,9 @@
 # 含真实订阅链接，禁止提交
 clash/src/secrets.yaml
 
+# 跨机器交接笔记（可能包含 secrets.yaml 内容），禁止提交
+HANDOFF.md
+
 # 构建输出 (含真实订阅链接，仅本地使用)
 clash/openclash/dist/
 clash/stash/dist/
