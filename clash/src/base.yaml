@@ -29,7 +29,7 @@ proxy-groups:
   - {name: 📺 哔哩哔哩, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🌏 国内媒体, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🎶 网易音乐, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换]}
-  - {name: 🎮 游戏平台, type: select, proxies: [🇭🇰 香港节点, 🇯🇵 日本节点, 🎯 全球直连, 🇹🇼 台湾节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点]}
+  - {name: 🎮 游戏平台, type: select, proxies: [🇭🇰 香港·游戏, 🇹🇼 台湾·游戏, 🇸🇬 狮城·游戏, 🇯🇵 日本·游戏, 🎛️ 手动切换]}
   - {name: 🏦 香港金融, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎯 全球直连]}
   - {name: 🅿️ PayPal, type: select, proxies: [🇺🇸 美国节点, 🇬🇧 英国节点, 🇭🇰 香港节点, 🎛️ 手动切换]}
   - {name: 🦉 Wise, type: select, proxies: [🎯 全球直连, 🇬🇧 英国节点, 🇺🇸 美国节点, 🇭🇰 香港节点, 🇸🇬 狮城节点, 🎛️ 手动切换]}
@@ -55,6 +55,10 @@ proxy-groups:
   - {name: 🇺🇸 美国·AI, type: url-test, tolerance: 75, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_ai__]}
   - {name: 🇯🇵 日本·AI, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_ai__]}
   - {name: 🇹🇼 台湾·AI, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_ai__]}
+  - {name: 🇭🇰 香港·游戏, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_gaming__]}
+  - {name: 🇹🇼 台湾·游戏, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_gaming__]}
+  - {name: 🇸🇬 狮城·游戏, type: url-test, tolerance: 75, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_gaming__]}
+  - {name: 🇯🇵 日本·游戏, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_gaming__]}
   # [proxy-provider-groups end]
 
 rule-providers:
