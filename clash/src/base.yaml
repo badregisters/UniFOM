@@ -30,7 +30,7 @@ proxy-groups:
   - {name: 🌏 国内媒体, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🎶 网易音乐, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🎮 游戏平台, type: select, proxies: [🇭🇰 香港节点, 🇯🇵 日本节点, 🚀 节点选择, 🎛️ 手动切换, 🎯 全球直连]}
-  - {name: 🏦 香港金融, type: select, proxies: [🇭🇰 香港·金融, 🚀 节点选择, 🎯 全球直连]}
+  - {name: 🏦 香港金融, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎯 全球直连]}
   - {name: 🅿️ PayPal, type: select, proxies: [🇺🇸 美国节点, 🇬🇧 英国节点, 🇭🇰 香港节点, 🎛️ 手动切换]}
   - {name: 🦉 Wise, type: select, proxies: [🎯 全球直连, 🇬🇧 英国节点, 🇺🇸 美国节点, 🇭🇰 香港节点, 🇸🇬 狮城节点, 🎛️ 手动切换]}
   - {name: 🪙 Crypto, type: select, proxies: [🇸🇬 狮城节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎯 全球直连]}
@@ -68,7 +68,6 @@ proxy-groups:
   - {name: 🇲🇾 马来·次选, type: url-test, tolerance: 100, filter: "(?i)(🇲🇾|马|Malaysia|MY|MA)", use: [__USE_standard__]}
   - {name: 🇲🇾 马来节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇲🇾 马来·优选, 🇲🇾 马来·次选]}
   - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)", use: [__USE_regional__]}
-  - {name: 🇭🇰 香港·金融, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_finance__]}
   # [proxy-provider-groups end]
 
 rule-providers:
