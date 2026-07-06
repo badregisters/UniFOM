@@ -30,7 +30,7 @@ proxy-groups:
   - {name: 🌏 国内媒体, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🎶 网易音乐, type: select, proxies: [🎯 全球直连, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🎮 游戏平台, type: select, proxies: [🎮 游戏节点, 🎛️ 手动切换]}
-  - {name: 🏦 香港金融, type: select, proxies: [🇭🇰 香港节点, 🚀 节点选择, 🎯 全球直连]}
+  - {name: 🏦 香港金融, type: select, proxies: [🇭🇰 香港·金融, 🚀 节点选择, 🎯 全球直连]}
   - {name: 🅿️ PayPal, type: select, proxies: [🇺🇸 美国节点, 🇬🇧 英国节点, 🇭🇰 香港节点, 🎛️ 手动切换]}
   - {name: 🦉 Wise, type: select, proxies: [🎯 全球直连, 🇬🇧 英国节点, 🇺🇸 美国节点, 🇭🇰 香港节点, 🇸🇬 狮城节点, 🎛️ 手动切换]}
   - {name: 🪙 Crypto, type: select, proxies: [🇸🇬 狮城节点, 🇹🇼 台湾节点, 🚀 节点选择, 🎯 全球直连]}
@@ -56,6 +56,7 @@ proxy-groups:
   - {name: 🇯🇵 日本·AI, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_ai__]}
   - {name: 🇹🇼 台湾·AI, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_ai__]}
   - {name: 🎮 游戏节点, type: url-test, tolerance: 75, use: [__USE_gaming__]}
+  - {name: 🇭🇰 香港·金融, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_finance__]}
   # [proxy-provider-groups end]
 
 rule-providers:
