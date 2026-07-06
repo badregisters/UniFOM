@@ -98,24 +98,29 @@ def load_providers(path):
     with open(path) as f:
         raw = yaml.safe_load(f)
 
+    def parse_groups(value, default):
+        if isinstance(value, str):
+            return [g.strip() for g in value.split(',')]
+        if isinstance(value, list):
+            return [str(g) for g in value]
+        return list(default)
+
     providers = {}
     for name, value in raw.items():
         if isinstance(value, str):
-            providers[name] = {'url': value, 'groups': ['regional', 'manual'], 'extra_domains': [], 'shared': False, 'full': True}
+            providers[name] = {'url': value, 'groups': ['regional', 'manual'],
+                               'shared_groups': None, 'extra_domains': [], 'shared': False, 'full': True}
         elif isinstance(value, dict):
-            groups_raw = value.get('groups', 'regional,manual')
-            if isinstance(groups_raw, str):
-                groups = [g.strip() for g in groups_raw.split(',')]
-            elif isinstance(groups_raw, list):
-                groups = [str(g) for g in groups_raw]
-            else:
-                groups = ['regional', 'manual']
+            groups = parse_groups(value.get('groups'), ['regional', 'manual'])
+            # Optional shared-only group override; falls back to `groups` when absent.
+            shared_groups = parse_groups(value['shared_groups'], groups) if 'shared_groups' in value else None
             extra = value.get('extra_domains', [])
             if isinstance(extra, str):
                 extra = [extra]
             shared = bool(value.get('shared', False))
             full = bool(value.get('full', True))
-            providers[name] = {'url': value['url'], 'groups': groups, 'extra_domains': list(extra), 'shared': shared, 'full': full}
+            providers[name] = {'url': value['url'], 'groups': groups, 'shared_groups': shared_groups,
+                               'extra_domains': list(extra), 'shared': shared, 'full': full}
     return providers
 
 def gen_proxy_providers(providers):
@@ -184,11 +189,19 @@ def inject_sr(content, providers):
     )
     return pattern.sub(replacement, content)
 
-def use_list(providers, group):
-    """Return comma-separated provider names belonging to the given group."""
-    return ', '.join(n for n, i in providers.items() if group in i['groups'])
+def use_list(providers, group, shared=False):
+    """Return comma-separated provider names belonging to the given group.
 
-def inject_clash(content, providers):
+    When shared=True, a provider's `shared_groups` override (if set) takes
+    precedence over its default `groups`, leaving the full build untouched.
+    """
+    def groups_of(info):
+        if shared and info.get('shared_groups') is not None:
+            return info['shared_groups']
+        return info['groups']
+    return ', '.join(n for n, i in providers.items() if group in groups_of(i))
+
+def inject_clash(content, providers, shared=False):
     """Replace all generation markers in base.yaml content."""
     content = content.replace(
         '# [GENERATED: proxy-providers]',
@@ -198,14 +211,14 @@ def inject_clash(content, providers):
         '  # [GENERATED: direct-domains]',
         gen_direct_domains_clash(providers)
     )
-    content = content.replace('[__USE_regional__]', f'[{use_list(providers, "regional")}]')
-    content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual")}]')
-    content = content.replace('[__USE_ai__]',       f'[{use_list(providers, "ai")}]')
-    content = content.replace('[__USE_economy__]',  f'[{use_list(providers, "economy")}]')
+    content = content.replace('[__USE_regional__]', f'[{use_list(providers, "regional", shared)}]')
+    content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual", shared)}]')
+    content = content.replace('[__USE_ai__]',       f'[{use_list(providers, "ai", shared)}]')
+    content = content.replace('[__USE_economy__]',  f'[{use_list(providers, "economy", shared)}]')
     return content
 
 
-def build_clash(platform, providers, suffix=''):
+def build_clash(platform, providers, suffix='', shared=False):
     platform_path = ROOT / f'clash/src/platform/{platform}.yaml'
     base_path     = ROOT / 'clash/src/base.yaml'
 
@@ -236,7 +249,7 @@ def build_clash(platform, providers, suffix=''):
         ) + '\n'
 
     combined = platform_content + '\n' + base
-    combined = inject_clash(combined, providers)
+    combined = inject_clash(combined, providers, shared)
     combined = strip_comments_and_collapse(combined)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -282,7 +295,7 @@ def build_sr(providers):
 
 TARGETS = {
     'oc':        lambda p: build_clash('mihomo', {k: v for k, v in p.items() if v['full']}),
-    'oc-shared': lambda p: build_clash('mihomo', {k: v for k, v in p.items() if v['shared']}, suffix='-shared'),
+    'oc-shared': lambda p: build_clash('mihomo', {k: v for k, v in p.items() if v['shared']}, suffix='-shared', shared=True),
     'stash':     lambda p: build_clash('stash', {k: v for k, v in p.items() if v['full']}),
     'sr':        lambda p: build_sr({k: v for k, v in p.items() if v['full']}),
 }
