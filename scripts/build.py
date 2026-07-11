@@ -109,7 +109,8 @@ def load_providers(path):
     for name, value in raw.items():
         if isinstance(value, str):
             providers[name] = {'url': value, 'groups': ['regional', 'manual'],
-                               'shared_groups': None, 'extra_domains': [], 'shared': False, 'full': True}
+                               'shared_groups': None, 'extra_domains': [], 'shared': False, 'full': True,
+                               'provider_filter': PROVIDER_FILTER}
         elif isinstance(value, dict):
             groups = parse_groups(value.get('groups'), ['regional', 'manual'])
             # Optional shared-only group override; falls back to `groups` when absent.
@@ -119,8 +120,10 @@ def load_providers(path):
                 extra = [extra]
             shared = bool(value.get('shared', False))
             full = bool(value.get('full', True))
+            provider_filter = value.get('provider_filter') or PROVIDER_FILTER
             providers[name] = {'url': value['url'], 'groups': groups, 'shared_groups': shared_groups,
-                               'extra_domains': list(extra), 'shared': shared, 'full': full}
+                               'extra_domains': list(extra), 'shared': shared, 'full': full,
+                               'provider_filter': provider_filter}
     return providers
 
 def gen_proxy_providers(providers):
@@ -133,7 +136,7 @@ def gen_proxy_providers(providers):
             f'    url: "{info["url"]}"',
             f'    interval: 86400',
             f'    path: ./proxy_provider/{name}.yaml',
-            f"    filter: '{PROVIDER_FILTER}'",
+            f"    filter: '{info['provider_filter']}'",
             f'    health-check: {{enable: true, interval: 1800, url: https://cp.cloudflare.com/generate_204}}',
             '',
         ]
