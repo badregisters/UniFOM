@@ -46,36 +46,28 @@ proxy-groups:
   - {name: 🎬 影音节点, type: url-test, tolerance: 75, filter: '实验性|(?i)(^|[^.0-9])1x|流媒体|Fusion', use: [__USE_economy__]}
   - {name: 🇭🇰 香港·优选, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_premium__]}
   - {name: 🇭🇰 香港·标准, type: url-test, tolerance: 100, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_standard__]}
-  - {name: 🇭🇰 香港·Fusion优选, type: url-test, tolerance: 75, filter: "(?i)((?:🇭🇰|港|Hong|HK).*Fusion|Fusion.*(?:🇭🇰|港|Hong|HK))", use: [__USE_fusion__]}
-  - {name: 🇭🇰 香港节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇭🇰 香港·优选, 🇭🇰 香港·Fusion优选, 🇭🇰 香港·标准]}
+  - {name: 🇭🇰 香港节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇭🇰 香港·优选, 🇭🇰 香港·标准]}
   - {name: 🇹🇼 台湾·优选, type: url-test, tolerance: 75, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_premium__]}
   - {name: 🇹🇼 台湾·标准, type: url-test, tolerance: 100, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_standard__]}
-  - {name: 🇹🇼 台湾·Fusion优选, type: url-test, tolerance: 75, filter: "(?i)((?:🇹🇼|台|Tai|TW).*Fusion|Fusion.*(?:🇹🇼|台|Tai|TW))", use: [__USE_fusion__]}
-  - {name: 🇹🇼 台湾节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇹🇼 台湾·优选, 🇹🇼 台湾·Fusion优选, 🇹🇼 台湾·标准]}
+  - {name: 🇹🇼 台湾节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇹🇼 台湾·优选, 🇹🇼 台湾·标准]}
   - {name: 🇯🇵 日本·优选, type: url-test, tolerance: 75, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_premium__]}
   - {name: 🇯🇵 日本·标准, type: url-test, tolerance: 100, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_standard__]}
-  - {name: 🇯🇵 日本·Fusion优选, type: url-test, tolerance: 75, filter: "(?i)((?:🇯🇵|日|Japan|JP).*Fusion|Fusion.*(?:🇯🇵|日|Japan|JP))", use: [__USE_fusion__]}
-  - {name: 🇯🇵 日本节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇯🇵 日本·优选, 🇯🇵 日本·Fusion优选, 🇯🇵 日本·标准]}
+  - {name: 🇯🇵 日本节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇯🇵 日本·优选, 🇯🇵 日本·标准]}
   - {name: 🇰🇷 韩国·优选, type: url-test, tolerance: 75, filter: "(?i)(🇰🇷|韩|Korea|KR)", use: [__USE_premium__]}
   - {name: 🇰🇷 韩国·标准, type: url-test, tolerance: 100, filter: "(?i)(🇰🇷|韩|Korea|KR)", use: [__USE_standard__]}
-  - {name: 🇰🇷 韩国·Fusion优选, type: url-test, tolerance: 75, filter: "(?i)((?:🇰🇷|韩|Korea|KR).*Fusion|Fusion.*(?:🇰🇷|韩|Korea|KR))", use: [__USE_fusion__]}
-  - {name: 🇰🇷 韩国节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇰🇷 韩国·优选, 🇰🇷 韩国·Fusion优选, 🇰🇷 韩国·标准]}
+  - {name: 🇰🇷 韩国节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇰🇷 韩国·优选, 🇰🇷 韩国·标准]}
   - {name: 🇸🇬 狮城·优选, type: url-test, tolerance: 75, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_premium__]}
   - {name: 🇸🇬 狮城·标准, type: url-test, tolerance: 100, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_standard__]}
-  - {name: 🇸🇬 狮城·Fusion优选, type: url-test, tolerance: 75, filter: "(?i)((?:🇸🇬|新|Singapore|SG).*Fusion|Fusion.*(?:🇸🇬|新|Singapore|SG))", use: [__USE_fusion__]}
-  - {name: 🇸🇬 狮城节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇸🇬 狮城·优选, 🇸🇬 狮城·Fusion优选, 🇸🇬 狮城·标准]}
+  - {name: 🇸🇬 狮城节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇸🇬 狮城·优选, 🇸🇬 狮城·标准]}
   - {name: 🇺🇸 美国·优选, type: url-test, tolerance: 75, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_premium__]}
   - {name: 🇺🇸 美国·标准, type: url-test, tolerance: 100, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_standard__]}
-  - {name: 🇺🇸 美国·Fusion优选, type: url-test, tolerance: 75, filter: '(?i)((?:🇺🇸|美|States|\bUS\b).*Fusion|Fusion.*(?:🇺🇸|美|States|\bUS\b))', use: [__USE_fusion__]}
-  - {name: 🇺🇸 美国节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇺🇸 美国·优选, 🇺🇸 美国·Fusion优选, 🇺🇸 美国·标准]}
+  - {name: 🇺🇸 美国节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇺🇸 美国·优选, 🇺🇸 美国·标准]}
   - {name: 🇬🇧 英国·优选, type: url-test, tolerance: 75, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_premium__]}
   - {name: 🇬🇧 英国·标准, type: url-test, tolerance: 100, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_standard__]}
-  - {name: 🇬🇧 英国·Fusion优选, type: url-test, tolerance: 75, filter: "(?i)((?:🇬🇧|英|Kingdom|UK).*Fusion|Fusion.*(?:🇬🇧|英|Kingdom|UK))", use: [__USE_fusion__]}
-  - {name: 🇬🇧 英国节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇬🇧 英国·优选, 🇬🇧 英国·Fusion优选, 🇬🇧 英国·标准]}
+  - {name: 🇬🇧 英国节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇬🇧 英国·优选, 🇬🇧 英国·标准]}
   - {name: 🇲🇾 马来·优选, type: url-test, tolerance: 75, filter: "(?i)(🇲🇾|马|Malaysia|MY|MA)", use: [__USE_premium__]}
   - {name: 🇲🇾 马来·标准, type: url-test, tolerance: 100, filter: "(?i)(🇲🇾|马|Malaysia|MY|MA)", use: [__USE_standard__]}
-  - {name: 🇲🇾 马来·Fusion优选, type: url-test, tolerance: 75, filter: "(?i)((?:🇲🇾|马|Malaysia|MY|MA).*Fusion|Fusion.*(?:🇲🇾|马|Malaysia|MY|MA))", use: [__USE_fusion__]}
-  - {name: 🇲🇾 马来节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇲🇾 马来·优选, 🇲🇾 马来·Fusion优选, 🇲🇾 马来·标准]}
+  - {name: 🇲🇾 马来节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇲🇾 马来·优选, 🇲🇾 马来·标准]}
   - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)", use: [__USE_manual__]}
   # [proxy-provider-groups end]
 
