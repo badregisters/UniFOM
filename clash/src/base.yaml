@@ -42,8 +42,7 @@ proxy-groups:
   - {name: 📺 巴哈姆特, type: select, proxies: [🇹🇼 台湾节点, 🚀 节点选择, 🎛️ 手动切换]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇰🇷 韩国节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇲🇾 马来节点, 🇺🇳 小众节点, 🎯 全球直连]}
   # [proxy-provider-groups start] add provider to all use: lists below
-  # Fusion 关键字仅 oix 专用内核可识别；公版 mihomo 内核下 oix 只暴露 Edge 节点，不会命中
-  - {name: 🎬 影音节点, type: url-test, tolerance: 75, filter: '实验性|(?i)(^|[^.0-9])1x|流媒体|Fusion', use: [__USE_economy__]}
+  - {name: 🎬 影音节点, type: url-test, tolerance: 75, filter: '实验性|(?i)(^|[^.0-9])1x|流媒体', use: [__USE_economy__]}
   - {name: 🇭🇰 香港·优选, type: url-test, tolerance: 75, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_premium__]}
   - {name: 🇭🇰 香港·标准, type: url-test, tolerance: 100, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_standard__]}
   - {name: 🇭🇰 香港节点, type: fallback, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇭🇰 香港·优选, 🇭🇰 香港·标准]}
