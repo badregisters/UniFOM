@@ -19,16 +19,33 @@ NewProvider: "https://subscription-url"
 ```yaml
 NewProvider:
   url: "https://subscription-url"
-  groups: manual                    # default: regional,manual
+  groups: manual,economy            # default: regional,manual
+  shared_groups: manual,premium     # optional: oc-shared-only override of `groups`
+  provider_filter: '(?i)(...)'      # optional: per-provider override of the fetch-time filter
+  shared: true                      # include in oc-shared build; default: false
+  full: true                        # include in personal oc/stash/sr build; default: true
   extra_domains: [cdn.example.com]  # secondary CDN not derivable from URL
 ```
 
-**`groups`** controls which proxy groups the provider feeds:
+**`groups`** controls which proxy groups the provider feeds. Multiple tags may be combined (comma-separated or YAML list):
 
-| Value | Groups |
+| Tag | Feeds |
 |---|---|
-| `regional, manual` (default) | All regional url-test groups + 🎛️ 手动切换 + 💰 省流节点 |
-| `manual` | 🎛️ 手动切换 + 💰 省流节点 only — use for SSR or protocols incompatible with regional auto-select |
+| `regional` | 📡 自动测速 |
+| `manual` | 🎛️ 手动切换 |
+| `economy` | 🎬 影音节点 |
+| `premium` | 「优选」层 of every fallback region group (🇭🇰/🇹🇼/🇯🇵/🇰🇷/🇸🇬/🇺🇸/🇬🇧/🇲🇾) |
+| `standard` | 「标准」层 of every fallback region group — auto-degrade target when 优选 health check fails |
+
+Default when `groups` is omitted: `regional,manual`. Tiering (`premium`/`standard`) is a static declaration in `secrets.yaml`, not a real-time quality measurement — health checks only decide *when* to fall back, not *which* provider is trustworthy.
+
+**`shared_groups`** — optional override of `groups` that applies **only** when building `oc-shared` (personal `oc`/`stash`/`sr` builds ignore it). Typical use: a provider sits in `standard` for the personal build but is the *only* `premium` provider for the shared build, e.g. when the personal `premium` provider has `shared: false` and would otherwise leave `oc-shared`'s premium tier empty.
+
+**`provider_filter`** — optional override of the default region-tag filter (`PROVIDER_FILTER` in `build.py`) applied when fetching that provider's remote node list. Falls back to the shared default when omitted. Use when a provider's catalog needs an additional keyword match beyond plain region tagging (e.g. requiring a protocol-label substring alongside the region tag, so only a subset of that provider's nodes ever enters the local cache).
+
+**`shared`** — include this provider in the `oc-shared` build. Default `false` (personal-only).
+
+**`full`** — include this provider in the personal `oc`/`stash`/`sr` builds. Default `true`. Combine `full: false` + `shared: true` for a provider that should exist only in the shared distribution.
 
 **`extra_domains`** — secondary CDN hostnames embedded in query strings or referenced during subscription fetch, not derivable from the URL hostname itself. Generates `DOMAIN-SUFFIX` direct rules in both Clash and SR configs.
 
@@ -58,10 +75,15 @@ Delete the entry from `clash/src/secrets.yaml` and rebuild.
 
 | Marker | Generated content |
 |---|---|
-| `# [GENERATED: proxy-providers]` | Full `proxy-providers:` block with URLs, filters, health-check |
+| `# [GENERATED: proxy-providers]` | Full `proxy-providers:` block with URLs, per-provider filter, health-check |
 | `[__USE_regional__]` | Provider names with `regional` in groups |
 | `[__USE_manual__]` | Provider names with `manual` in groups |
+| `[__USE_economy__]` | Provider names with `economy` in groups |
+| `[__USE_premium__]` | Provider names with `premium` in groups |
+| `[__USE_standard__]` | Provider names with `standard` in groups |
 | `# [GENERATED: direct-domains]` | `DOMAIN-SUFFIX` direct rules — URL hostnames + `extra_domains` |
+
+All `__USE_*__` markers resolve per-build: `oc-shared` uses a provider's `shared_groups` when set, otherwise falls back to `groups` — every other target (`oc`, `stash`, `sr`) always uses `groups` directly.
 
 ### Shadowrocket — markers in `shadowrocket/src/base.conf`
 
