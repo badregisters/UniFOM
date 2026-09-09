@@ -33,7 +33,7 @@ NewProvider:
 |---|---|
 | `regional` | 📡 自动测速 |
 | `manual` | 🎛️ 手动切换 |
-| `economy` | 🎬 影音节点 |
+| `economy` | 💰 省流节点 |
 | `premium` | 「优选」层 of every fallback region group (🇭🇰/🇹🇼/🇯🇵/🇰🇷/🇸🇬/🇺🇸/🇬🇧/🇲🇾) |
 | `standard` | 「标准」层 of every fallback region group — auto-degrade target when 优选 health check fails |
 
