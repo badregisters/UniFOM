@@ -21,9 +21,12 @@
 - 规则集优先级修正：`NetEaseMusic` 提至 `ChinaMedia` 之前（原 40% 域名被抢）
 - 游戏规则移除过于宽泛的 CODM 关键词
 
-**已验证不可行（记录以免重复尝试）**
-- `tun-excluded-routes` 加入 `0.0.0.0/31` 无法隐藏 iOS 状态栏 VPN 图标，已回退；
-  该功能只能用 App 内「Exclude Routes」开关，配置文件无法替代
+**排查结论与失败记录**
+- `tun-excluded-routes` 加入 `0.0.0.0/31` 无法隐藏 iOS 状态栏 VPN 图标，已回退。
+  真实原因不在配置层，而是客户端 Tunnel 设置中的 **Enforce Routes**
+  （`NEVPNProtocol.enforceRoutes`）开启后按强制全量 VPN 处理，覆盖了 `excludedRoutes`。
+  该属性由 App 写入系统 VPN profile，配置文件无对应项。SR 与 Clash by Hako
+  共用同一套 NetworkExtension 基础设施，此结论两端通用
 - 启用 `ipv6 = true` 未能解决蜂窝网络下的 IPv6 黑洞，假设被证伪，已回退
 
 ### v1.2.0 (2026-05-20)
@@ -122,11 +125,18 @@
   `bahamut` 提至 `ProxyMedia` 前（换 Classical 版后其含 bahamut.com.tw，不提前会 100% 遮蔽）
 - GitHub 冷启动硬编码规则去重并修正来源注释（保留冗余以锁定优先级，防未来误伤）
 
-**已验证不可行（记录以免重复尝试）**
-- iOS 隐藏状态栏 VPN 图标：`tun.route-exclude-address: [0.0.0.0/31]` 经三次实测无效。
-  sing-box for Apple 的 `ExtensionPlatformInterface.swift` 确有 `excludeDefaultRoute`
-  分支追加该路由，Hako 的 `bind/hako/tun.go` 也确实透传该字段，但 Clash by Hako
-  客户端（源码未开源）未产生同等效果。Shadowrocket 需继续使用 App 内开关
+**排查结论：iOS 隐藏状态栏 VPN 图标不属于配置层问题**
+- 曾三次尝试用 `tun.route-exclude-address: [0.0.0.0/31]` 隐藏角标，均实测无效并回退。
+  配置链路本身没有问题：Hako `bind/hako/tun.go` 的 `GetInet4RouteExcludeAddress()`
+  确实透传该字段，Swift 侧也确实写入 `ipv4Settings.excludedRoutes`
+- 真实原因是客户端 Tunnel 设置中的 **Enforce Routes** 开关（`NEVPNProtocol.enforceRoutes`）。
+  按 Apple 文档，该属性「supersedes the system routing table and scoping operations by apps」，
+  开启后系统按强制全量 VPN 处理，角标必然显示，`excludedRoutes` 在这一层被覆盖
+- 该属性由 App 在保存 VPN 配置时写入系统 profile，**不经过 core，yaml 无任何对应字段**
+  （`TunOptions` 接口仅暴露地址 / MTU / DNS / route-address / route-exclude-address /
+  auto-route / strict-route）。关闭它可隐藏角标，代价是应用可绕过隧道、
+  `excludeLocalNetworks` 连带失效，属防泄漏强度换观感，本项目选择维持开启
+- 附带更正：`tun.strict-route` 与该开关无关，sing-box for Apple 全仓库未消费 `strictRoute`
 
 ### v1.3.0 (2026-07-12)
 **地区组分层架构（本版核心）**
