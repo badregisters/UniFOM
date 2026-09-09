@@ -158,8 +158,6 @@ rules:
 
   # === GitHub hardcoded rules (improve cold-start survivability) ===
   # 冷启动时规则集尚未加载, 提前硬编码保证 GitHub 可达(规则集本身也从 GitHub 拉取)
-  - DOMAIN,gist.github.com,🚀 节点选择
-  - DOMAIN,raw.githubusercontent.com,🚀 节点选择
   - DOMAIN-SUFFIX,github.com,🚀 节点选择
   - DOMAIN-SUFFIX,githubusercontent.com,🚀 节点选择
   - DOMAIN-SUFFIX,githubassets.com,🚀 节点选择 # GitHub 静态资源 CDN
@@ -293,9 +291,9 @@ rules:
   - GEOSITE,steam@cn,🎯 全球直连 # Steam 中国区 CDN, 直连提速
   - GEOSITE,steam,🎮 游戏平台 # Steam(含 CDN 域名)
   - RULE-SET,Speedtest,🚄 Speedtest # 测速服务(Ookla Speedtest / Fast.com 等)
-  - RULE-SET,ProxyMedia,🌍 国外媒体 # ACL4SSR 国外流媒体规则集(非上述专项)
+  - RULE-SET,ProxyMedia,🌍 国外媒体 # blackmatrix7 国外流媒体规则集(非上述专项)
   - GEOSITE,bahamut,📺 巴哈姆特 # 巴哈姆特动画疯(锁台湾 IP, 走台湾节点)
-  - RULE-SET,ProxyGFWlist,🚀 节点选择 # Loyalsoldier GFW 被封域名列表
+  - RULE-SET,ProxyGFWlist,🚀 节点选择 # ACL4SSR GFW 被封域名列表
   - GEOSITE,bilibili,📺 哔哩哔哩 # 哔哩哔哩(含港澳台域名)
   - RULE-SET,ChinaMedia,🌏 国内媒体 # 国内流媒体(爱奇艺, 优酷, 芒果等)
   - RULE-SET,NetEaseMusic,🎶 网易音乐 # 网易云音乐(版权歌曲解锁需配合节点)
