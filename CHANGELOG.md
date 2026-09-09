@@ -2,6 +2,30 @@
 
 ## Shadowrocket
 
+### v1.3.0 (2026-09-09)
+**策略组**
+- 新增 `🐦 X` 策略组，默认香港节点（美国节点常打不开视频）
+- `💰 省流节点` 更名 `🎬 影音节点`，筛选条件定为 `实验性 | 1x 倍率 | 流媒体`
+- 新增 `🚄 Speedtest` 策略组，默认全球直连
+- 移除 `🖥️ FXRDP` 策略组及 DST-PORT 3389 规则，RDP 改由 GEOIP 自动分流
+- 移除 `🇰🇷 韩国节点`、`🇲🇾 马来节点` 策略组及对应筛选正则
+- `🎮 游戏平台` 候选补充新加坡、台湾，默认香港
+- `Non-HK` → `🧠 AI 节点` → `🧠 AI 服务` 更名重构，默认节点最终定为日本
+- `📺 哔哩哔哩`/`🌏 国内媒体`/`🎶 网易音乐` 简化为 直连 + 节点选择 + 手动切换
+- `🅿️ PayPal` 默认美国，依次英国 / 香港 / 手动
+
+**规则修正**
+- 修复原神国际服 `dispatchosglobal.yuanshen.com` 被误判直连（新增 `DOMAIN-KEYWORD,osglobal`）
+- 收窄 `DOMAIN-KEYWORD,ims` → `ims.mnc`：原三字母子串匹配误伤 whimsical / claims / sims / dimsum 等
+- 收窄 `DOMAIN-KEYWORD,wise` → `DOMAIN-SUFFIX,wise.com`：原误伤 otherwise / likewise / bitwise / cloudwise 等
+- 规则集优先级修正：`NetEaseMusic` 提至 `ChinaMedia` 之前（原 40% 域名被抢）
+- 游戏规则移除过于宽泛的 CODM 关键词
+
+**已验证不可行（记录以免重复尝试）**
+- `tun-excluded-routes` 加入 `0.0.0.0/31` 无法隐藏 iOS 状态栏 VPN 图标，已回退；
+  该功能只能用 App 内「Exclude Routes」开关，配置文件无法替代
+- 启用 `ipv6 = true` 未能解决蜂窝网络下的 IPv6 黑洞，假设被证伪，已回退
+
 ### v1.2.0 (2026-05-20)
 - Rule-set CDN 迁移: Loyalsoldier 规则集全部从 jsDelivr 切换为 raw.githubusercontent.com 直链，消除 CDN 缓存延迟和封锁风险
 - `🇺🇳 小众节点` 新增印度节点匹配 (印度 / 🇮🇳 / India)
@@ -62,6 +86,77 @@
 ---
 
 ## OpenClash (Mihomo)
+
+### v1.4.0 (2026-09-09)
+**策略组**
+- 新增 `🐦 X` 策略组，默认香港节点（美国节点常打不开视频）
+- `🎮 游戏平台` 候选补充新加坡、台湾
+- 移除 `🇰🇷 韩国节点`、`🇲🇾 马来节点` 策略组及对应筛选正则
+- `🧠 AI 服务` 默认节点几经调整（日本 → 台湾 → 日本），最终定为日本
+
+**机场分层**
+- 优选层 = 花云 + 墙洞；标准层 = 魅影 + 良心云
+- `📡 自动测速` 改为花云 + 墙洞（原花云 + 魅影）
+- 地区 fallback 组显式设 `lazy: false`，避免闲置超过 interval 后健康状态过期。
+  查证 Mihomo 源码：`lazy` 非「从不检测」，而是「闲置超过一个 interval 才跳过」，
+  且 `Touch` 仅在真实流量 `DialContext` 时发生；父组探测走 `Now()` 不会级联激活内层子组，
+  故内层优选/标准子组无需设置。实测开销约 7MB/天
+
+**订阅**
+- 花云订阅由 SS-2022 换为 Trojan，并改用机场原始订阅直连，不再经 subconverter 转换层
+
+**规则修正**
+- 修复原神国际服 `dispatchosglobal.yuanshen.com` 被 `GEOSITE:cn` 误判直连
+- 收窄 `DOMAIN-KEYWORD,ims` → `ims.mnc`：原三字母子串匹配在规则集域名池中误伤 31 个无关域名
+  （whimsical / claims / sims / dimsum 等），且位置靠前会强制其走 VoWiFi 组（默认直连）
+- 收窄 `DOMAIN-KEYWORD,wise` → `DOMAIN-SUFFIX,wise.com`：原误伤 39 个域名
+  （otherwise / likewise / bitwise / cloudwise 等）
+- `ProxyMedia` 改用 `GlobalMedia_Classical.yaml`：原 `GlobalMedia.yaml` 实为纯 IP 版
+  （918 IP-CIDR + 26 keyword，0 条域名规则），与 `behavior: classical` 不匹配，
+  导致 Disney+ / Hulu / HBO / Prime Video / DAZN 等无独立 GEOSITE 分类的服务
+  无法进入 `🌍 国外媒体`，改后恢复
+- 规则集优先级修正（括号内为修正前实测遮蔽率）：
+  `category-ads-all` 提至最前（26%，244/910 条广告未拦截）、
+  `google-cn` 提至 `ProxyGFWlist` 前（72%）、
+  `NetEaseMusic` 提至 `ChinaMedia` 前（40%）、
+  `bahamut` 提至 `ProxyMedia` 前（换 Classical 版后其含 bahamut.com.tw，不提前会 100% 遮蔽）
+- GitHub 冷启动硬编码规则去重并修正来源注释（保留冗余以锁定优先级，防未来误伤）
+
+**已验证不可行（记录以免重复尝试）**
+- iOS 隐藏状态栏 VPN 图标：`tun.route-exclude-address: [0.0.0.0/31]` 经三次实测无效。
+  sing-box for Apple 的 `ExtensionPlatformInterface.swift` 确有 `excludeDefaultRoute`
+  分支追加该路由，Hako 的 `bind/hako/tun.go` 也确实透传该字段，但 Clash by Hako
+  客户端（源码未开源）未产生同等效果。Shadowrocket 需继续使用 App 内开关
+
+### v1.3.0 (2026-07-12)
+**地区组分层架构（本版核心）**
+- 地区组由单层 `url-test` 改为两层 `fallback`：`优选`（premium 标签机场）健康检查失败后
+  自动降级到 `标准`（standard 标签机场），恢复后自动切回
+- 新增 `premium` / `standard` 分组标签；`次选` 更名为 `标准`
+- `🧠 AI 服务`、`🏦 香港金融`、`🎮 游戏平台` 的专属标签（`ai` / `finance` / `gaming`）
+  先后引入后全部撤销，改为直接复用地区分层组，减少标签体系复杂度
+- `🇺🇳 小众节点` 改用 `manual` 标签，覆盖全部机场
+
+**策略组**
+- `💰 省流节点` 更名 `🎬 影音节点`，筛选逻辑几经调整（0.1x / 0.5x / 1x / 实验性 / 流媒体 / BGP）
+- 新增 `🚄 Speedtest` 策略组
+- 移除 `🖥️ FXRDP` 策略组及 DST-PORT 3389 规则，RDP 改由 GEOIP 自动分流
+- `Non-HK` → `🧠 AI 节点` → `🧠 AI 服务` 更名与重构
+- 补全空壳组导流：巴哈姆特 / 国内媒体 / 网易音乐
+
+**构建与机场管理**
+- 新增 `oc-shared` target，输出共享版 dist；build 后自动同步至 Secret Gist
+- 新增 `shared_groups` 字段：仅共享版生效的分组覆盖，解决共享版地区组空壳导致
+  Mihomo 加载报错（`use` 或 `proxies` 缺失）
+- 新增 `full` 字段：控制机场是否纳入个人完整版，可实现「仅共享版」
+- 新增 `provider_filter` 字段：按机场覆盖订阅拉取时的过滤正则
+- dist 输出剥离行内注释，文件头增加生成时间
+- `proxy-provider` interval 由 14400 改为 86400；health-check 改用 Cloudflare HTTPS
+  端点、interval 调整为 1800
+
+**机场**
+- 移除奶昔（Nexitally）
+- 墙洞（oixCloud）降级为仅手动切换，后随分层架构调整
 
 ### v1.2.0 (2026-05-20)
 - DNS 架构重构: nameserver 通过 `#proxy-group` 标签强制经代理查询境外 DoH，彻底隔离 CN DoH 与境外域名
