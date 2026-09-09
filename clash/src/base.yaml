@@ -70,7 +70,9 @@ rule-providers:
     type: http
     behavior: classical
     format: yaml
-    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia.yaml"
+    # 必须用 _Classical 变体: 同目录的 GlobalMedia.yaml 是纯 IP 版(0 条域名规则),
+    # 与 behavior: classical 不匹配, 会导致域名维度完全失效
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia_Classical.yaml"
     path: ./rule_provider/ProxyMedia.yaml
     interval: 86400
 
@@ -170,7 +172,7 @@ rules:
   - DOMAIN-SUFFIX,t-mobile.com,📞 VoWiFi # T-Mobile VoWiFi 网关
   - DOMAIN-SUFFIX,3gppnetwork.org,📞 VoWiFi # 3GPP 标准 ePDG 域名格式
   - DOMAIN-KEYWORD,epdg.epc,📞 VoWiFi # ePDG(演进分组数据网关) 鉴权
-  - DOMAIN-KEYWORD,ims,📞 VoWiFi # IMS(IP 多媒体子系统) 核心域名
+  - DOMAIN-KEYWORD,ims.mnc,📞 VoWiFi # IMS 核心域名(3GPP 格式 ims.mncXXX.mccXXX); 不可写作 ims — 子串匹配会误伤 whimsical/claims/sims/dimsum 等
   - AND,((NETWORK,UDP),(OR,((DST-PORT,500),(DST-PORT,4500)))),📞 VoWiFi # IKEv2/IPSec 密钥协商(UDP 500/4500)
 
   # === LAN anti-leak and direct passthrough ===
@@ -212,7 +214,7 @@ rules:
   - DOMAIN-KEYWORD,crashlytics,🎮 游戏平台
 
   # === sensitive assets routing (cross-border finance / crypto) ===
-  - DOMAIN-KEYWORD,wise,🦉 Wise # Wise 国际转账
+  - DOMAIN-SUFFIX,wise.com,🦉 Wise # Wise 国际转账; 不可写作 DOMAIN-KEYWORD,wise — 会误伤 otherwise/likewise/bitwise/cloudwise 等
   - DOMAIN-SUFFIX,transferwise.com,🦉 Wise # Wise 旧域名
   - DOMAIN-KEYWORD,paypal,🅿️ PayPal # PayPal
   - DOMAIN-KEYWORD,hsbc,🏦 香港金融 # 汇丰银行
@@ -275,6 +277,8 @@ rules:
   - DOMAIN-KEYWORD,truthsocial,🇺🇸 美国节点
 
   # === rule-set full mount (GEOSITE + ACL4SSR + BM7) ===
+  # 广告拦截必须排在所有宽口径规则集之前, 否则会被 ProxyGFWlist / ChinaMedia 抢走(实测 244/910 条)
+  - GEOSITE,category-ads-all,🛑 广告拦截 # v2fly 广告域名集合
   - GEOSITE,googlefcm,📢 谷歌FCM # Google Firebase Cloud Messaging 推送服务
   - GEOSITE,telegram,✈️ 电报消息 # Telegram IP + 域名完整列表
   - GEOSITE,twitter,🐦 X # X / Twitter(含 x.com, twimg 等)
@@ -291,15 +295,14 @@ rules:
   - GEOSITE,steam@cn,🎯 全球直连 # Steam 中国区 CDN, 直连提速
   - GEOSITE,steam,🎮 游戏平台 # Steam(含 CDN 域名)
   - RULE-SET,Speedtest,🚄 Speedtest # 测速服务(Ookla Speedtest / Fast.com 等)
+  - GEOSITE,bahamut,📺 巴哈姆特 # 巴哈姆特动画疯(锁台湾 IP); 须早于 ProxyMedia — Classical 版含 bahamut.com.tw, 排后面会被全吃
   - RULE-SET,ProxyMedia,🌍 国外媒体 # blackmatrix7 国外流媒体规则集(非上述专项)
-  - GEOSITE,bahamut,📺 巴哈姆特 # 巴哈姆特动画疯(锁台湾 IP, 走台湾节点)
+  - GEOSITE,google-cn,🎯 全球直连 # Google 在中国大陆提供服务的域名(dl.google.com 等); 须早于 ProxyGFWlist, 否则 72% 被抢去走代理
   - RULE-SET,ProxyGFWlist,🚀 节点选择 # ACL4SSR GFW 被封域名列表
   - GEOSITE,bilibili,📺 哔哩哔哩 # 哔哩哔哩(含港澳台域名)
+  - RULE-SET,NetEaseMusic,🎶 网易音乐 # 网易云音乐; 须早于 ChinaMedia, 否则 40% 被抢去国内媒体组
   - RULE-SET,ChinaMedia,🌏 国内媒体 # 国内流媒体(爱奇艺, 优酷, 芒果等)
-  - RULE-SET,NetEaseMusic,🎶 网易音乐 # 网易云音乐(版权歌曲解锁需配合节点)
-  - GEOSITE,google-cn,🎯 全球直连 # Google 在中国大陆提供服务的域名(dl.google.com 等)
   - RULE-SET,Download,🎯 全球直连 # 下载类域名(软件更新, 镜像站等), 直连节省流量
-  - GEOSITE,category-ads-all,🛑 广告拦截 # v2fly 广告域名集合
 
   # === fallback ===
   - GEOSITE,cn,🎯 全球直连 # v2fly 中国域名数据库(覆盖面最广)
