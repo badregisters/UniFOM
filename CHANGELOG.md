@@ -2,11 +2,23 @@
 
 ## Shadowrocket
 
-### v1.3.0 (2026-09-09)
+### v1.4.0 (2026-09-16)
 **策略组**
 - `🍎 苹果服务` 一度改为节点选择后回退全球直连，改由新增的 `🍏 苹果智能` 精准分流
 - 新增 `🍏 苹果智能` 策略组，候选 日本 / 台湾 / 狮城 / 美国 / 香港，默认日本
 - `🎬 影音节点` 恢复原名 `💰 省流节点`，筛选逻辑不变
+
+**规则修正**
+- 新增 12 条 Apple Intelligence / Siri AI 定向规则，域名依据 Apple 官方企业网络文档
+  (support.apple.com/en-us/101555)。其中 `apple-relay.cloudflare.com`、
+  `apple-relay.fastly-edge.com`、`cp4.cloudflare.com` 是 Private Cloud Compute 的
+  第三方中继（OHTTP，中继看得见 IP 看不见内容，苹果反之），**不在苹果域名树下**，
+  Loyalsoldier `apple.txt` / `icloud.txt` 均覆盖不到，此前一路落到 `FINAL` 兜底
+- 移除 akadns 段中错位的 `DOMAIN-SUFFIX,apple-relay.fastly-edge.com`
+  （并非 akadns 域名，已由上述新段覆盖）
+
+### v1.3.0 (2026-09-09)
+**策略组**
 - 新增 `🐦 X` 策略组，默认香港节点（美国节点常打不开视频）
 - `💰 省流节点` 更名 `🎬 影音节点`，筛选条件定为 `实验性 | 1x 倍率 | 流媒体`
 - 新增 `🚄 Speedtest` 策略组，默认全球直连
