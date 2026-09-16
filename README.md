@@ -1,6 +1,7 @@
 # UniFOM
 
-![version](https://img.shields.io/github/v/tag/badregisters/UniFOM?label=latest&style=flat-square)
+![openclash](https://img.shields.io/github/v/tag/badregisters/UniFOM?filter=oc-*&sort=semver&label=OpenClash&color=blue&style=flat-square)
+![shadowrocket](https://img.shields.io/github/v/tag/badregisters/UniFOM?filter=sr-*&sort=semver&label=Shadowrocket&color=blue&style=flat-square)
 ![license](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![platform](https://img.shields.io/badge/Platform-Clash%20%7C%20Shadowrocket-lightgrey?style=flat-square)
 ![stash](https://img.shields.io/badge/Stash-discontinued-red?style=flat-square)
