@@ -4,7 +4,8 @@
 
 ### v1.3.0 (2026-09-09)
 **策略组**
-- `🍎 苹果服务` 默认改为节点选择（原全球直连）
+- `🍎 苹果服务` 一度改为节点选择后回退全球直连，改由新增的 `🍏 苹果智能` 精准分流
+- 新增 `🍏 苹果智能` 策略组，候选 日本 / 台湾 / 狮城 / 美国 / 香港，默认日本
 - `🎬 影音节点` 恢复原名 `💰 省流节点`，筛选逻辑不变
 - 新增 `🐦 X` 策略组，默认香港节点（美国节点常打不开视频）
 - `💰 省流节点` 更名 `🎬 影音节点`，筛选条件定为 `实验性 | 1x 倍率 | 流媒体`
@@ -17,6 +18,13 @@
 - `🅿️ PayPal` 默认美国，依次英国 / 香港 / 手动
 
 **规则修正**
+- 新增 12 条 Apple Intelligence / Siri AI 定向规则，域名依据 Apple 官方企业网络文档
+  (support.apple.com/en-us/101555)。其中 `apple-relay.cloudflare.com`、
+  `apple-relay.fastly-edge.com`、`cp4.cloudflare.com` 是 Private Cloud Compute 的
+  第三方中继（OHTTP，中继看得见 IP 看不见内容，苹果反之），**不在苹果域名树下**，
+  `GEOSITE,apple` / Loyalsoldier apple.txt 均覆盖不到，此前一路落到 `MATCH,🐟 漏网之鱼` 兜底。
+  另须早于 apple 规则集：`geosite apple@cn` 把 `guzzoni` / `siri` / `ml.cdn-apple.com`
+  标成了 `@cn`，排在后面会被判直连
 - 修复原神国际服 `dispatchosglobal.yuanshen.com` 被误判直连（新增 `DOMAIN-KEYWORD,osglobal`）
 - 收窄 `DOMAIN-KEYWORD,ims` → `ims.mnc`：原三字母子串匹配误伤 whimsical / claims / sims / dimsum 等
 - 收窄 `DOMAIN-KEYWORD,wise` → `DOMAIN-SUFFIX,wise.com`：原误伤 otherwise / likewise / bitwise / cloudwise 等
@@ -94,7 +102,8 @@
 
 ### v1.4.0 (2026-09-09)
 **策略组**
-- `🍎 苹果服务` 默认改为节点选择（原全球直连）
+- `🍎 苹果服务` 一度改为节点选择后回退全球直连，改由新增的 `🍏 苹果智能` 精准分流
+- 新增 `🍏 苹果智能` 策略组，候选 日本 / 台湾 / 狮城 / 美国 / 香港，默认日本
 - `🎬 影音节点` 恢复原名 `💰 省流节点`，筛选逻辑不变
 - 新增 `🐦 X` 策略组，默认香港节点（美国节点常打不开视频）
 - `🎮 游戏平台` 候选补充新加坡、台湾
@@ -113,6 +122,13 @@
 - 花云订阅由 SS-2022 换为 Trojan，并改用机场原始订阅直连，不再经 subconverter 转换层
 
 **规则修正**
+- 新增 12 条 Apple Intelligence / Siri AI 定向规则，域名依据 Apple 官方企业网络文档
+  (support.apple.com/en-us/101555)。其中 `apple-relay.cloudflare.com`、
+  `apple-relay.fastly-edge.com`、`cp4.cloudflare.com` 是 Private Cloud Compute 的
+  第三方中继（OHTTP，中继看得见 IP 看不见内容，苹果反之），**不在苹果域名树下**，
+  `GEOSITE,apple` / Loyalsoldier apple.txt 均覆盖不到，此前一路落到 `MATCH,🐟 漏网之鱼` 兜底。
+  另须早于 apple 规则集：`geosite apple@cn` 把 `guzzoni` / `siri` / `ml.cdn-apple.com`
+  标成了 `@cn`，排在后面会被判直连
 - 修复原神国际服 `dispatchosglobal.yuanshen.com` 被 `GEOSITE:cn` 误判直连
 - 收窄 `DOMAIN-KEYWORD,ims` → `ims.mnc`：原三字母子串匹配在规则集域名池中误伤 31 个无关域名
   （whimsical / claims / sims / dimsum 等），且位置靠前会强制其走 VoWiFi 组（默认直连）
