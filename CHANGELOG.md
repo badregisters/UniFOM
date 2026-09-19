@@ -122,10 +122,22 @@
 
 ## OpenClash (Mihomo)
 
-### v1.5.4 (2026-09-17)
-**策略组**
-- `✨ Siri AI` 的日本、台湾、狮城、美国、香港候选改为同地区的
-  `·优选` 组，避免回退到标准机场节点。默认仍为日本，候选顺序不变
+### v1.5.4 (2026-09-19)
+**排查结论：`tun.strict-route`，OpenClash 不生效，Clash by Hako 待验证**
+- `tun.strict-route` 由 `true` 改为 `false`
+- 确认 OpenClash 上此字段无论写什么值都不生效：`yml_change.sh` 启动时整块替换
+  `tun:` 段，`strict-route` 固定硬编码 `false`，只有 `stack` 取自 GUI「网络栈」。
+  此设置只对 Clash Mi / Clash by Hako / Stash 等不经过该插件的独立客户端生效
+- Clash by Hako 上：`strict-route: false` + App 内「Hide VPN Icon」开 +
+  「HomeKit Compatibility」关 → 路由拓扑为「默认路由 0.0.0.0/0 + 排除 0.0.0.0/31」，
+  与 Shadowrocket 上已验证生效的隐藏方案（App 内 `Exclude Routes 0.0.0.0/31`
+  开关）结构相同，理论上应可隐藏状态栏 VPN 图标
+- 实测：连续两次重连后图标仍未隐藏。诊断日志显示异常：
+  `homeKitCompatibility=false` 但 `splitTable=true`，且日志多出
+  `excludeAPNsRoute` 字段——均不存在于当前公开仓库源码
+  （TokenPLS/Hako-Client @ main，2026-09-07 版），说明设备实际运行的
+  App 版本比公开源码更新，现有源码无法进一步排查。结论保留待验证，
+  未确认 Hako 上此方案是否真正生效
 
 ### v1.5.3 (2026-09-16)
 **策略组**
