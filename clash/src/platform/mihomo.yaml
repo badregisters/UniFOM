@@ -43,7 +43,7 @@ tun:
     - tcp://any:53
   auto-route: true
   auto-detect-interface: true
-  strict-route: true
+  strict-route: false
 
 geo-auto-update: true
 geo-update-interval: 24

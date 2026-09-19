@@ -22,7 +22,7 @@ tun:
     - tcp://any:53
   auto-route: true
   auto-detect-interface: true
-  strict-route: true
+  strict-route: false
 
 # [Mihomo] geo-auto-update: true
 # [Mihomo] geo-update-interval: 24
