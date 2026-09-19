@@ -251,7 +251,7 @@ rules:
   - DOMAIN-SUFFIX,api.genuine-software.autodesk.com,REJECT
   - DOMAIN-SUFFIX,genuine-software2.autodesk.com,REJECT
   # === Apple Intelligence / Siri AI (域名依据 Apple 官方 support.apple.com/en-us/101555) ===
-  # 须早于 apple 规则集: geosite apple@cn 把 guzzoni / siri / ml.cdn 标成了 @cn, 排在后面会被判直连
+  # 须早于 apple 规则集: 该集合含 guzzoni / siri / ml.cdn 等域名, 排在后面会被捞进 🍎 苹果服务(默认直连)
   - DOMAIN,guzzoni.apple.com,✨ Siri AI                        # Siri 与听写请求
   - DOMAIN-SUFFIX,smoot.apple.com,✨ Siri AI                   # 搜索建议(Siri/Spotlight/Lookup/Safari/News); 含 guzzoni.smoot
   - DOMAIN-SUFFIX,siri.apple.com,✨ Siri AI                    # probe / seed* 等 Siri 端点
