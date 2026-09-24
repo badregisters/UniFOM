@@ -15,7 +15,7 @@ proxy-groups:
   - {name: 🚀 节点选择, type: select, proxies: [📡 自动测速, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇺🇳 小众节点, 💰 省流节点, DIRECT]}
   - {name: 📡 自动测速, type: url-test, tolerance: 50, use: [__USE_regional__]}
   - {name: 🎛️ 手动切换, type: select, use: [__USE_manual__]}
-  - {name: 🧠 AI 服务, type: select, proxies: [🇯🇵 日本·优选, 🇹🇼 台湾·优选, 🇸🇬 狮城·优选, 🇺🇸 美国·优选, 🎛️ 手动切换]}
+  - {name: 🧠 AI 服务, type: select, proxies: [🇺🇸 美国·优选, 🇯🇵 日本·优选, 🇹🇼 台湾·优选, 🇸🇬 狮城·优选, 🎛️ 手动切换]}
   - {name: 💰 省流节点, type: url-test, tolerance: 75, filter: '实验性|(?i)(^|[^.0-9])1x|流媒体', use: [__USE_economy__]}
   - {name: 🚄 Speedtest, type: select, proxies: [🎯 全球直连, 📡 自动测速, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇺🇳 小众节点]}
   - {name: ▶️ 油管视频, type: select, proxies: [💰 省流节点, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇺🇳 小众节点]}
