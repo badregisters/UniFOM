@@ -189,6 +189,21 @@ static RawConfig defaultConfigNoOverwrite() {
 
 ---
 
+## 补充：`ipv6` / `dns.ipv6` 开关
+
+审计范围原本聚焦 `tun:`/`sniffer:`，漏了顶层 `ipv6:`（`RawConfig.IPv6`，控制出站是否允许走 IPv6）和 `dns.ipv6`（`RawDNS.IPv6`，控制是否解析 AAAA 记录）这两个字段。两者在 mihomo 源码里都是真实生效的字段，但客户端层面的命运跟 `tun:` 段是同一个规律：
+
+| 客户端 | 结果 | 依据 |
+|---|---|---|
+| **OpenClash** | 无条件失效 | `Value['ipv6'] = enable_ipv6`，随后 `Value['ipv6'] = true if dns_ipv6` 再次强制——两次赋值均来自 UCI，跟 `dns.ipv6`（同样在 `yml_change.sh:486` 被覆盖）是同一批 UCI 驱动的字段。`yml_change.sh:447,486-487` |
+| **CMFA** | 无条件失效 | `TunService.kt`：`if (store.allowIpv6) { addAddress(TUN_GATEWAY6, ...) }`——App 自己的开关，不读 yaml |
+| **FlClash（Android）** | 无条件失效 | `VpnOptions.ipv6` 与 `dnsHijacking` 同一个来源（`lib/providers/state/system.dart` 的 `vpnSetting`），走 App「网络设置」页面，不是 profile |
+| **Clash Mi** | 顶层 `ipv6` 无条件失效（已见前文「关键发现」）；`dns.ipv6` 视「覆写」开关而定 | `defaultConfigNoOverwrite()` 里 `IPv6: _setting.IPv6` 恒定用 App 自己的值；`DNS` 段整体是否为 `null`（即是否保留 profile 原值）才决定 `dns.ipv6` 命运，跟前文 DNS 段结论一致 |
+| **Hako** | 配置值本身真实生效，但运行时是否对外声明 IPv6 隧道另有前提 | 不在偏差登记表里，我们写的值会被采纳；但 `declaresIPv6(coreOffersIPv6, physicalPathSupportsIPv6)` 还要看当前网络路径是否真的有 IPv6——写 `true` 不代表隧道一定会声明 IPv6，没有物理 IPv6 时 Hako 会自动撤回声明 |
+| **FlClash 桌面端** | 真实生效 | 原生 mihomo，无覆写层 |
+
+---
+
 ## 汇总表
 
 | | `tun:` 段 | `redir/tproxy-port` | `dns:`/`sniffer:` 等非 TUN 字段 |
