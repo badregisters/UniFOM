@@ -13,6 +13,11 @@
 
 proxy-groups:
   - {name: 🚀 节点选择, type: select, proxies: [📡 自动测速, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇺🇳 小众节点, 💰 省流节点, DIRECT]}
+  # url-test 容差按池计算, 不用统一值 —— tolerance 的字面含义是「当前节点最多可以比最快的慢多少」,
+  # 即同意白付的延迟, 只有相对该池 baseline 才有意义。取值区间: 4σ ≤ tolerance ≤ 0.25×baseline
+  # (σ=单节点抖动; 下限防抖, 上限限制浪费)。相对抖动 σ/baseline > 6% 时两约束冲突, 无解 ——
+  # 那是测量精度问题, 别靠调 tolerance 硬凑。近距离池(港台日新)取 20, 远距离池(美英)取 50。
+  # 实测锚点 2026-09-27: 香港 baseline≈73ms σ=3ms / 美国 baseline≈262ms σ=4ms
   - {name: 📡 自动测速, type: url-test, tolerance: 20, use: [__USE_regional__]}
   - {name: 🎛️ 手动切换, type: select, use: [__USE_manual__]}
   - {name: 🧠 AI 服务, type: select, proxies: [🇺🇸 美国·优选, 🇯🇵 日本·优选, 🇹🇼 台湾·优选, 🇸🇬 狮城·优选, 🎛️ 手动切换]}
@@ -57,11 +62,11 @@ proxy-groups:
   - {name: 🇸🇬 狮城·优选, type: url-test, tolerance: 20, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_premium__]}
   - {name: 🇸🇬 狮城·标准, type: url-test, tolerance: 20, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_standard__]}
   - {name: 🇸🇬 狮城节点, type: fallback, lazy: false, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇸🇬 狮城·优选, 🇸🇬 狮城·标准]}
-  - {name: 🇺🇸 美国·优选, type: url-test, tolerance: 20, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_premium__]}
-  - {name: 🇺🇸 美国·标准, type: url-test, tolerance: 20, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_standard__]}
+  - {name: 🇺🇸 美国·优选, type: url-test, tolerance: 50, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_premium__]}
+  - {name: 🇺🇸 美国·标准, type: url-test, tolerance: 50, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_standard__]}
   - {name: 🇺🇸 美国节点, type: fallback, lazy: false, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇺🇸 美国·优选, 🇺🇸 美国·标准]}
-  - {name: 🇬🇧 英国·优选, type: url-test, tolerance: 20, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_premium__]}
-  - {name: 🇬🇧 英国·标准, type: url-test, tolerance: 20, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_standard__]}
+  - {name: 🇬🇧 英国·优选, type: url-test, tolerance: 50, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_premium__]}
+  - {name: 🇬🇧 英国·标准, type: url-test, tolerance: 50, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_standard__]}
   - {name: 🇬🇧 英国节点, type: fallback, lazy: false, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇬🇧 英国·优选, 🇬🇧 英国·标准]}
   - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)", use: [__USE_manual__]}
   # [proxy-provider-groups end]
