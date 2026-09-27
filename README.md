@@ -14,7 +14,7 @@
 |:-----|:-----|
 | DNS 安全 | DoH 全程加密，严格隔离境内/境外解析路径，防 DNS 泄漏与运营商劫持 |
 | 精细化分流 | AI、金融、支付、加密货币、流媒体、VoWiFi 独立策略组，减少误判 |
-| 节点防抖 | 自动测速 50ms / 省流节点 30ms / 地区组 75ms，多级容差防频繁切换 |
+| 节点防抖 | 全部 url-test 组统一 20ms 容差（≈ 实测抖动 3–4ms 的 5 倍） |
 | 冷启动生存 | GitHub 域名硬编码 + 多级 DNS 兜底（nameserver-policy → fallback），弱网维持基础可用 |
 | 工业化规则集 | GEOSITE/GEOIP 优先，按需混用 BM7 / Loyalsoldier / ACL4SSR |
 | 多平台统一 | Shadowrocket、Mihomo (OpenClash)、Stash 共享规则体系，差异仅在平台头部 |
