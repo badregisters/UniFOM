@@ -55,6 +55,16 @@ PROVIDER_EXCLUDE_FILTER = (
     r'距离下次重置(剩余)? *[:：]|套餐到期 *[:：])'
 )
 
+SHARED_PROVIDER_GROUPS = '''  # [proxy-provider-groups start]
+  - {name: 🇭🇰 香港节点, type: url-test, tolerance: 20, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_shared__]}
+  - {name: 🇹🇼 台湾节点, type: url-test, tolerance: 20, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_shared__]}
+  - {name: 🇯🇵 日本节点, type: url-test, tolerance: 20, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_shared__]}
+  - {name: 🇸🇬 狮城节点, type: url-test, tolerance: 20, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_shared__]}
+  - {name: 🇺🇸 美国节点, type: url-test, tolerance: 50, filter: '(?i)(🇺🇸|美|States|\\bUS\\b)', use: [__USE_shared__]}
+  - {name: 🇬🇧 英国节点, type: url-test, tolerance: 50, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_shared__]}
+  - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)", use: [__USE_shared__]}
+  # [proxy-provider-groups end]'''
+
 def parse_meta(text):
     meta = {}
     for line in text.splitlines():
@@ -117,19 +127,17 @@ def load_providers(path):
     for name, value in raw.items():
         if isinstance(value, str):
             providers[name] = {'url': value, 'groups': ['regional', 'manual'],
-                               'shared_groups': None, 'extra_domains': [], 'shared': False, 'full': True,
+                               'extra_domains': [], 'shared': False, 'full': True,
                                'provider_filter': PROVIDER_FILTER}
         elif isinstance(value, dict):
             groups = parse_groups(value.get('groups'), ['regional', 'manual'])
-            # Optional shared-only group override; falls back to `groups` when absent.
-            shared_groups = parse_groups(value['shared_groups'], groups) if 'shared_groups' in value else None
             extra = value.get('extra_domains', [])
             if isinstance(extra, str):
                 extra = [extra]
             shared = bool(value.get('shared', False))
             full = bool(value.get('full', True))
             provider_filter = value.get('provider_filter') or PROVIDER_FILTER
-            providers[name] = {'url': value['url'], 'groups': groups, 'shared_groups': shared_groups,
+            providers[name] = {'url': value['url'], 'groups': groups,
                                'extra_domains': list(extra), 'shared': shared, 'full': full,
                                'provider_filter': provider_filter}
     return providers
@@ -212,20 +220,28 @@ def inject_sr(content, providers):
     )
     return pattern.sub(replacement, content)
 
-def use_list(providers, group, shared=False):
-    """Return comma-separated provider names belonging to the given group.
+def use_list(providers, group):
+    """Return comma-separated provider names belonging to the given group."""
+    return ', '.join(n for n, i in providers.items() if group in i['groups'])
 
-    When shared=True, a provider's `shared_groups` override (if set) takes
-    precedence over its default `groups`, leaving the full build untouched.
-    """
-    def groups_of(info):
-        if shared and info.get('shared_groups') is not None:
-            return info['shared_groups']
-        return info['groups']
-    return ', '.join(n for n, i in providers.items() if group in groups_of(i))
+def flatten_shared_groups(content):
+    """Replace premium/standard fallback groups with one shared url-test pool."""
+    for region in ('香港', '台湾', '日本', '狮城', '美国', '英国'):
+        content = content.replace(f'{region}·优选', f'{region}节点')
+        content = content.replace(f'{region}·标准', f'{region}节点')
+
+    pattern = re.compile(
+        r'  # \[proxy-provider-groups start\].*?'
+        r'  # \[proxy-provider-groups end\]',
+        re.DOTALL,
+    )
+    return pattern.sub(lambda _: SHARED_PROVIDER_GROUPS, content)
 
 def inject_clash(content, providers, platform, shared=False):
     """Replace all generation markers in base.yaml content."""
+    if shared:
+        content = flatten_shared_groups(content)
+
     content = content.replace(
         '# [GENERATED: proxy-providers]',
         gen_proxy_providers(providers, platform)
@@ -234,11 +250,18 @@ def inject_clash(content, providers, platform, shared=False):
         '  # [GENERATED: direct-domains]',
         gen_direct_domains_clash(providers)
     )
-    content = content.replace('[__USE_regional__]', f'[{use_list(providers, "regional", shared)}]')
-    content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual", shared)}]')
-    content = content.replace('[__USE_economy__]',  f'[{use_list(providers, "economy", shared)}]')
-    content = content.replace('[__USE_premium__]',  f'[{use_list(providers, "premium", shared)}]')
-    content = content.replace('[__USE_standard__]', f'[{use_list(providers, "standard", shared)}]')
+    if shared:
+        shared_use = ', '.join(providers)
+        content = content.replace('[__USE_regional__]', f'[{shared_use}]')
+        content = content.replace('[__USE_manual__]',   f'[{shared_use}]')
+        content = content.replace('[__USE_economy__]',  f'[{shared_use}]')
+        content = content.replace('[__USE_shared__]',   f'[{shared_use}]')
+    else:
+        content = content.replace('[__USE_regional__]', f'[{use_list(providers, "regional")}]')
+        content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual")}]')
+        content = content.replace('[__USE_economy__]',  f'[{use_list(providers, "economy")}]')
+    content = content.replace('[__USE_premium__]',  f'[{use_list(providers, "premium")}]')
+    content = content.replace('[__USE_standard__]', f'[{use_list(providers, "standard")}]')
     content = content.replace('__FALLBACK_LAZY__', 'true' if platform == 'mihomo' else 'false')
     return content
 
