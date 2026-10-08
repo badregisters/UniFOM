@@ -47,6 +47,14 @@ PROVIDER_FILTER = (
     r'喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)'
 )
 
+# Subscription metadata disguised as proxies. Keep this anchored and specific so
+# legitimate nodes containing generic words such as "traffic" are not removed.
+PROVIDER_EXCLUDE_FILTER = (
+    r'(?i)^(Test latency|Traffic *[:：]|Expire *[:：]|'
+    r'应急续费节点(-[0-9]+X)?|剩余流量 *[:：]|'
+    r'距离下次重置(剩余)? *[:：]|套餐到期 *[:：])'
+)
+
 def parse_meta(text):
     meta = {}
     for line in text.splitlines():
@@ -126,20 +134,32 @@ def load_providers(path):
                                'provider_filter': provider_filter}
     return providers
 
-def gen_proxy_providers(providers):
+def gen_proxy_providers(providers, platform):
     """Generate the full proxy-providers: YAML block."""
     lines = ['proxy-providers:']
     for name, info in providers.items():
-        lines += [
+        provider_lines = [
             f'  {name}:',
             f'    type: http',
             f'    url: "{info["url"]}"',
             f'    interval: 86400',
             f'    path: ./proxy_provider/{name}.yaml',
             f"    filter: '{info['provider_filter']}'",
-            f'    health-check: {{enable: true, interval: 1800, url: https://cp.cloudflare.com/generate_204}}',
-            '',
         ]
+        if platform == 'mihomo':
+            provider_lines.append(f"    exclude-filter: '{PROVIDER_EXCLUDE_FILTER}'")
+        if platform == 'mihomo':
+            health_check = (
+                '    health-check: {enable: true, interval: 3600, lazy: false, '
+                'url: https://cp.cloudflare.com/generate_204}'
+            )
+        else:
+            health_check = (
+                '    health-check: {enable: true, interval: 1800, '
+                'url: https://cp.cloudflare.com/generate_204}'
+            )
+        provider_lines += [health_check, '']
+        lines += provider_lines
     return '\n'.join(lines)
 
 def _hosts_from_url(url):
@@ -204,11 +224,11 @@ def use_list(providers, group, shared=False):
         return info['groups']
     return ', '.join(n for n, i in providers.items() if group in groups_of(i))
 
-def inject_clash(content, providers, shared=False):
+def inject_clash(content, providers, platform, shared=False):
     """Replace all generation markers in base.yaml content."""
     content = content.replace(
         '# [GENERATED: proxy-providers]',
-        gen_proxy_providers(providers)
+        gen_proxy_providers(providers, platform)
     )
     content = content.replace(
         '  # [GENERATED: direct-domains]',
@@ -219,6 +239,7 @@ def inject_clash(content, providers, shared=False):
     content = content.replace('[__USE_economy__]',  f'[{use_list(providers, "economy", shared)}]')
     content = content.replace('[__USE_premium__]',  f'[{use_list(providers, "premium", shared)}]')
     content = content.replace('[__USE_standard__]', f'[{use_list(providers, "standard", shared)}]')
+    content = content.replace('__FALLBACK_LAZY__', 'true' if platform == 'mihomo' else 'false')
     return content
 
 
@@ -253,7 +274,7 @@ def build_clash(platform, providers, suffix='', shared=False):
         ) + '\n'
 
     combined = platform_content + '\n' + base
-    combined = inject_clash(combined, providers, shared)
+    combined = inject_clash(combined, providers, platform, shared)
     combined = strip_comments_and_collapse(combined)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

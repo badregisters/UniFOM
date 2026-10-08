@@ -20,7 +20,7 @@ proxy-groups:
   # 实测锚点 2026-09-27: 香港 baseline≈73ms σ=3ms / 美国 baseline≈262ms σ=4ms
   - {name: 📡 自动测速, type: url-test, tolerance: 20, use: [__USE_regional__]}
   - {name: 🎛️ 手动切换, type: select, use: [__USE_manual__]}
-  - {name: 🧠 AI 服务, type: select, proxies: [🇺🇸 美国·优选, 🇯🇵 日本·优选, 🇹🇼 台湾·优选, 🇸🇬 狮城·优选, 🎛️ 手动切换]}
+  - {name: 🧠 AI 服务, type: select, proxies: [🇯🇵 日本·优选, 🇺🇸 美国·优选, 🇹🇼 台湾·优选, 🇸🇬 狮城·优选, 🎛️ 手动切换]}
   - {name: 💰 省流节点, type: url-test, tolerance: 20, filter: '实验性|(?i)(^|[^.0-9])1x|流媒体', use: [__USE_economy__]}
   - {name: 🚄 Speedtest, type: select, proxies: [🎯 全球直连, 📡 自动测速, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇺🇳 小众节点]}
   - {name: ▶️ 油管视频, type: select, proxies: [💰 省流节点, 🚀 节点选择, 🎛️ 手动切换, 🇭🇰 香港节点, 🇹🇼 台湾节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇸 美国节点, 🇬🇧 英国节点, 🇺🇳 小众节点]}
@@ -52,22 +52,22 @@ proxy-groups:
   # [proxy-provider-groups start] add provider to all use: lists below
   - {name: 🇭🇰 香港·优选, type: url-test, tolerance: 20, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_premium__]}
   - {name: 🇭🇰 香港·标准, type: url-test, tolerance: 20, filter: "(?i)(🇭🇰|港|Hong|HK)", use: [__USE_standard__]}
-  - {name: 🇭🇰 香港节点, type: fallback, lazy: false, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇭🇰 香港·优选, 🇭🇰 香港·标准]}
+  - {name: 🇭🇰 香港节点, type: fallback, lazy: __FALLBACK_LAZY__, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇭🇰 香港·优选, 🇭🇰 香港·标准]}
   - {name: 🇹🇼 台湾·优选, type: url-test, tolerance: 20, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_premium__]}
   - {name: 🇹🇼 台湾·标准, type: url-test, tolerance: 20, filter: "(?i)(🇹🇼|台|Tai|TW)", use: [__USE_standard__]}
-  - {name: 🇹🇼 台湾节点, type: fallback, lazy: false, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇹🇼 台湾·优选, 🇹🇼 台湾·标准]}
+  - {name: 🇹🇼 台湾节点, type: fallback, lazy: __FALLBACK_LAZY__, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇹🇼 台湾·优选, 🇹🇼 台湾·标准]}
   - {name: 🇯🇵 日本·优选, type: url-test, tolerance: 20, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_premium__]}
   - {name: 🇯🇵 日本·标准, type: url-test, tolerance: 20, filter: "(?i)(🇯🇵|日|Japan|JP)", use: [__USE_standard__]}
-  - {name: 🇯🇵 日本节点, type: fallback, lazy: false, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇯🇵 日本·优选, 🇯🇵 日本·标准]}
+  - {name: 🇯🇵 日本节点, type: fallback, lazy: __FALLBACK_LAZY__, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇯🇵 日本·优选, 🇯🇵 日本·标准]}
   - {name: 🇸🇬 狮城·优选, type: url-test, tolerance: 20, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_premium__]}
   - {name: 🇸🇬 狮城·标准, type: url-test, tolerance: 20, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_standard__]}
-  - {name: 🇸🇬 狮城节点, type: fallback, lazy: false, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇸🇬 狮城·优选, 🇸🇬 狮城·标准]}
+  - {name: 🇸🇬 狮城节点, type: fallback, lazy: __FALLBACK_LAZY__, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇸🇬 狮城·优选, 🇸🇬 狮城·标准]}
   - {name: 🇺🇸 美国·优选, type: url-test, tolerance: 50, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_premium__]}
   - {name: 🇺🇸 美国·标准, type: url-test, tolerance: 50, filter: '(?i)(🇺🇸|美|States|\bUS\b)', use: [__USE_standard__]}
-  - {name: 🇺🇸 美国节点, type: fallback, lazy: false, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇺🇸 美国·优选, 🇺🇸 美国·标准]}
+  - {name: 🇺🇸 美国节点, type: fallback, lazy: __FALLBACK_LAZY__, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇺🇸 美国·优选, 🇺🇸 美国·标准]}
   - {name: 🇬🇧 英国·优选, type: url-test, tolerance: 50, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_premium__]}
   - {name: 🇬🇧 英国·标准, type: url-test, tolerance: 50, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_standard__]}
-  - {name: 🇬🇧 英国节点, type: fallback, lazy: false, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇬🇧 英国·优选, 🇬🇧 英国·标准]}
+  - {name: 🇬🇧 英国节点, type: fallback, lazy: __FALLBACK_LAZY__, url: https://cp.cloudflare.com/generate_204, interval: 300, proxies: [🇬🇧 英国·优选, 🇬🇧 英国·标准]}
   - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)", use: [__USE_manual__]}
   # [proxy-provider-groups end]
 
