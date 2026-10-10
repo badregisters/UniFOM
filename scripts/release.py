@@ -35,7 +35,9 @@ def main():
                        check=True)
         destination = ROOT / 'release-artifacts'
         destination.mkdir(exist_ok=True)
-        for path in temporary.rglob('UniFOM*.yaml'):
+        for path in temporary.rglob('UniFOM*'):
+            if not path.is_file():
+                continue
             shutil.copy2(path, destination / path.name)
 
 

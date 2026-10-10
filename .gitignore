@@ -14,6 +14,7 @@ clash/openclash/dist/
 clash/stash/dist/
 release-artifacts/
 __pycache__/
+shadowrocket/dist/*.manifest.json
 
 # shadowrocket/dist/ 纳入 git 管理 (不含订阅信息)
 

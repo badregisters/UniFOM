@@ -34,6 +34,8 @@ import subprocess
 import sys
 import yaml
 import argparse
+import hashlib
+import json
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, unquote
@@ -85,6 +87,22 @@ def make_header(meta):
     updated   = meta.get('updated',  'unknown')
     generated = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return f'# {platform} | {version} | {updated} | {PROJECT_URL}\n# Generated: {generated}\n\n'
+
+
+def write_manifest(path, meta, target, publication=None):
+    raw = path.read_bytes()
+    body = b'\n'.join(line for line in raw.splitlines() if not line.startswith(b'# Generated:'))
+    commit = subprocess.run(['git', '-C', str(ROOT), 'rev-parse', 'HEAD'],
+                            capture_output=True, text=True, check=True).stdout.strip()
+    manifest = {
+        'target': target, 'version': meta.get('version'), 'source_commit': commit,
+        'generated_at': datetime.now().isoformat(timespec='seconds'),
+        'file': path.name, 'sha256': hashlib.sha256(raw).hexdigest(),
+        'content_sha256': hashlib.sha256(body).hexdigest(),
+        'publication': publication,
+    }
+    path.with_suffix(path.suffix + '.manifest.json').write_text(
+        json.dumps(manifest, indent=2) + '\n')
 
 def strip_comments_and_collapse(content):
     result = []
@@ -311,6 +329,7 @@ def build_clash(platform, providers, suffix='', shared=False):
         f.write(combined)
 
     print(f'✓ {label} built: {output_path}')
+    write_manifest(output_path, meta, label)
 
     if gist_env and SYNC_GIST:
         gist_id = os.environ.get(gist_env)
@@ -320,7 +339,16 @@ def build_clash(platform, providers, suffix='', shared=False):
                 capture_output=True, text=True
             )
             if result.returncode == 0:
-                print(f'✓ {label} synced to Gist: {gist_id}')
+                readback = subprocess.run(
+                    ['gh', 'gist', 'view', gist_id, '--raw', '--filename', output_path.name],
+                    capture_output=True)
+                if readback.returncode or readback.stdout != output_path.read_bytes():
+                    print(f'✗ {label} Gist content verification failed')
+                    return False
+                write_manifest(output_path, meta, label, {
+                    'destination': 'gist', 'verified': True,
+                    'published_at': datetime.now().isoformat(timespec='seconds')})
+                print(f'✓ {label} synced to Gist and verified')
             else:
                 print(f'✗ Gist sync failed: {result.stderr.strip()}')
                 return False
@@ -346,6 +374,7 @@ def build_sr(providers):
         f.write(content)
 
     print(f'✓ SR built: {output_path}')
+    write_manifest(output_path, meta, 'sr')
     return True
 
 TARGETS = {
