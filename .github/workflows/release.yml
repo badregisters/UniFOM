@@ -16,6 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install -r requirements.txt
+
       - name: Detect client and release type
         id: meta
         run: |
@@ -45,15 +51,21 @@ jobs:
           NEXITALLY_URL: ${{ secrets.NEXITALLY_URL }}
           LIANGXIN_URL: ${{ secrets.LIANGXIN_URL }}
         run: |
-          mkdir -p openclash/src
-          cat > openclash/src/secrets.yaml << EOF
-          FlowerCloud: "$FLOWERCLOUD_URL"
-          oixCloud:    "$OIXCLOUD_URL"
-          Maying:      "$MAYING_URL"
-          Nexitally:   "$NEXITALLY_URL"
-          LiangXin:    "$LIANGXIN_URL"
-          EOF
-          python3 scripts/build.py
+          python3 scripts/release.py
+
+      - name: Validate SR release
+        if: steps.meta.outputs.client == 'sr'
+        run: python3 scripts/validate.py shadowrocket/dist/UniFOM.conf
+
+      - name: Check with pinned Mihomo
+        if: steps.meta.outputs.client == 'oc'
+        run: |
+          curl --fail --location --retry 3 https://github.com/MetaCubeX/mihomo/releases/download/v1.19.32/mihomo-linux-amd64-v1.19.32.gz -o "$RUNNER_TEMP/mihomo.gz"
+          gzip -d "$RUNNER_TEMP/mihomo.gz"
+          chmod +x "$RUNNER_TEMP/mihomo"
+          for config in release-artifacts/*.yaml; do
+            "$RUNNER_TEMP/mihomo" -t -d "$RUNNER_TEMP/mihomo-check" -f "$config"
+          done
 
       - name: Collect dist file
         id: dist
@@ -63,7 +75,7 @@ jobs:
             echo "path=shadowrocket/dist/UniFOM.conf" >> $GITHUB_OUTPUT
             echo "name=UniFOM.conf" >> $GITHUB_OUTPUT
           elif [[ "$CLIENT" == "oc" ]]; then
-            echo "path=openclash/dist/UniFOM.yaml" >> $GITHUB_OUTPUT
+            echo "path=release-artifacts/*" >> $GITHUB_OUTPUT
             echo "name=UniFOM.yaml" >> $GITHUB_OUTPUT
           elif [[ "$CLIENT" == "stash" ]]; then
             echo "path=clash/stash/dist/UniFOM.yaml" >> $GITHUB_OUTPUT
@@ -76,4 +88,5 @@ jobs:
           tag_name: ${{ steps.meta.outputs.tag }}
           prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
           generate_release_notes: true
+          fail_on_unmatched_files: true
           files: ${{ steps.dist.outputs.path }}

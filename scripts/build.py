@@ -33,11 +33,15 @@ import re
 import subprocess
 import sys
 import yaml
+import argparse
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, unquote
+from validate import validate_text
 
 ROOT = Path(__file__).parent.parent
+OUTPUT_ROOT = ROOT
+SYNC_GIST = True
 PROJECT_URL = 'https://github.com/badregisters/UniFOM'
 
 # Default filter applied to all proxy providers
@@ -271,11 +275,11 @@ def build_clash(platform, providers, suffix='', shared=False):
     base_path     = ROOT / 'clash/src/base.yaml'
 
     if platform == 'mihomo':
-        output_path = ROOT / f'clash/openclash/dist/UniFOM{suffix}.yaml'
+        output_path = OUTPUT_ROOT / f'clash/openclash/dist/UniFOM{suffix}.yaml'
         label    = f'OC{suffix}' if suffix else 'OC'
         gist_env = 'OC_SHARED_GIST_ID' if suffix else 'OC_GIST_ID'
     elif platform == 'stash':
-        output_path = ROOT / f'clash/stash/dist/UniFOM{suffix}.yaml'
+        output_path = OUTPUT_ROOT / f'clash/stash/dist/UniFOM{suffix}.yaml'
         label    = f'Stash{suffix}' if suffix else 'Stash'
         gist_env = None
     else:
@@ -299,6 +303,7 @@ def build_clash(platform, providers, suffix='', shared=False):
     combined = platform_content + '\n' + base
     combined = inject_clash(combined, providers, platform, shared)
     combined = strip_comments_and_collapse(combined)
+    validate_text(combined, 'clash')
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w') as f:
@@ -307,7 +312,7 @@ def build_clash(platform, providers, suffix='', shared=False):
 
     print(f'✓ {label} built: {output_path}')
 
-    if gist_env:
+    if gist_env and SYNC_GIST:
         gist_id = os.environ.get(gist_env)
         if gist_id:
             result = subprocess.run(
@@ -318,12 +323,13 @@ def build_clash(platform, providers, suffix='', shared=False):
                 print(f'✓ {label} synced to Gist: {gist_id}')
             else:
                 print(f'✗ Gist sync failed: {result.stderr.strip()}')
+                return False
 
     return True
 
 def build_sr(providers):
     src_path    = ROOT / 'shadowrocket/src/base.conf'
-    output_path = ROOT / 'shadowrocket/dist/UniFOM.conf'
+    output_path = OUTPUT_ROOT / 'shadowrocket/dist/UniFOM.conf'
 
     with open(src_path) as f:
         content = f.read()
@@ -332,6 +338,7 @@ def build_sr(providers):
     header  = make_header(meta)
     content = inject_sr(content, providers)
     content = strip_comments_and_collapse(content)
+    validate_text(content, 'sr')
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w') as f:
@@ -349,14 +356,23 @@ TARGETS = {
 }
 
 if __name__ == '__main__':
-    secrets_path = ROOT / 'clash/src/secrets.yaml'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('targets', nargs='*', choices=None)
+    parser.add_argument('--secrets', type=Path, default=ROOT / 'clash/src/secrets.yaml')
+    parser.add_argument('--output-root', type=Path)
+    parser.add_argument('--no-sync', action='store_true')
+    options = parser.parse_args()
+    SYNC_GIST = not options.no_sync
+    secrets_path = options.secrets
+    if options.output_root:
+        OUTPUT_ROOT = options.output_root
 
     if not secrets_path.exists():
         print(f'✗ Missing: {secrets_path}')
         print('  Create clash/src/secrets.yaml with your subscription URLs.')
         sys.exit(1)
 
-    args = sys.argv[1:]
+    args = options.targets
     if args:
         unknown = [a for a in args if a not in TARGETS]
         if unknown:
