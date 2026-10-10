@@ -34,3 +34,24 @@ Coverage is limited to DOMAIN, DOMAIN-SUFFIX, IP-CIDR and IP-CIDR6. Complex,
 geodata, wildcard and MRS rules need separate inspection. Remote downloads are
 optional; failures and skipped checks are marked incomplete, never as proof
 of no conflicts. Reports use rule locations rather than subscription URLs.
+
+## Runtime DNS leak check after each configuration change
+
+The agent must open https://ipleak.net in a browser on a device running the
+new configuration, or routed through the target OpenClash router. Wait for
+DNS detection to finish and use a fresh tab after reconnecting. A web-search
+fetch or CI runner does not exercise the target device's DNS path.
+
+Record the configuration version, client, network, selected node, browser
+secure-DNS setting, observed public exit and resolver ownership. Compare the
+resolvers with the intended DNS policy. Unexpected ISP resolvers require
+investigation; resolver country or a resolver IP different from the proxy
+exit is not sufficient evidence of a leak. Domestic direct DNS and proxy
+bootstrap queries may be intentional and are outside this website's complete
+coverage. Browser secure DNS can bypass the system resolver, so results apply
+only to the tested browser and network state.
+
+Report passed, failed or unverified with evidence. Do not report success if
+the device is inaccessible, detection remains pending or the resolver path
+cannot be determined. Record IPv6/WebRTC results separately from DNS results.
+Do not publish raw IP addresses or node credentials in repository reports.
