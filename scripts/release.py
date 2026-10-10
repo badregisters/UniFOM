@@ -33,6 +33,9 @@ def main():
         subprocess.run([sys.executable, str(ROOT / 'scripts/build.py'), 'oc', 'oc-shared',
                         '--secrets', str(secrets), '--output-root', directory, '--no-sync'],
                        check=True)
+        for config in temporary.rglob('UniFOM*.yaml'):
+            subprocess.run([sys.executable, str(ROOT / 'scripts/audit.py'), str(config),
+                            '--output', str(config.with_suffix('.audit.json'))], check=True)
         destination = ROOT / 'release-artifacts'
         destination.mkdir(exist_ok=True)
         for path in temporary.rglob('UniFOM*'):
