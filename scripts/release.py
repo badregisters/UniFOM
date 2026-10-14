@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parent.parent
 def main():
     providers = {}
     definitions = {
-        'FlowerCloud': ('FLOWERCLOUD_URL', ['regional', 'manual', 'premium'], True),
-        'oixCloud': ('OIXCLOUD_URL', ['regional', 'manual', 'standard'], True),
+        'FlowerCloud': ('FLOWERCLOUD_URL', ['regional', 'manual', 'premium'], False),
+        'oixCloud': ('OIXCLOUD_URL', ['regional', 'manual', 'standard'], False),
         'Maying': ('MAYING_URL', ['manual', 'economy', 'standard'], True),
         'Nexitally': ('NEXITALLY_URL', ['regional', 'manual', 'premium'], False),
-        'LiangXin': ('LIANGXIN_URL', ['regional', 'manual', 'standard'], False),
+        'LiangXin': ('LIANGXIN_URL', ['regional', 'manual', 'standard'], True),
     }
     for name, (variable, groups, shared) in definitions.items():
         url = os.environ.get(variable)
