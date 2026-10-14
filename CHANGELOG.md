@@ -151,6 +151,11 @@
 
 ## OpenClash (Mihomo)
 
+### 文档 (未发版)
+- 补充 iOS「连接助理」(Connectivity Assist) 旁路 OpenClash DNS 的成因与缓解：
+  路由器侧配置无法拦截蜂窝口查询；优先对本 SSID 关闭连接助理，或改用本机 SR 全隧道。
+  详见 `docs/dns-leak-platform-notes.md`
+
 ### v1.5.7 (2026-09-27)
 **策略组**
 - url-test 容差改为按池计算，不再用统一值。近距离池（港/台/日/新、自动测速、省流）20ms，
