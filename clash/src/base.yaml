@@ -303,6 +303,7 @@ rules:
   - GEOSITE,telegram,✈️ 电报消息 # Telegram IP + 域名完整列表
   - GEOSITE,twitter,🐦 X # X / Twitter(含 x.com, twimg 等)
   - GEOSITE,openai,🧠 AI 服务 # OpenAI / ChatGPT
+  - GEOSITE,google-gemini,🧠 AI 服务 # Gemini / Google AI
   - RULE-SET,AI,🧠 AI 服务 # ACL4SSR AI 规则集(补充 Claude, Gemini 等)
   - GEOSITE,apple,🍎 苹果服务 # Apple 全域名(App Store, iCloud, Siri 等)
   - GEOSITE,onedrive,☁️ 微软云盘 # OneDrive 专项(从 microsoft 集合中独立)
