@@ -23,7 +23,8 @@ def main():
     for name, (variable, groups, shared) in definitions.items():
         url = os.environ.get(variable)
         if url:
-            providers[name] = {'url': url, 'groups': groups, 'shared': shared}
+            providers[name] = {'url': url, 'groups': groups, 'shared': shared,
+                               'oc': name in ('FlowerCloud', 'oixCloud')}
     if not providers:
         raise ValueError('Release requires subscription secrets')
     with tempfile.TemporaryDirectory() as directory:

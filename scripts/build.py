@@ -149,7 +149,7 @@ def load_providers(path):
     for name, value in raw.items():
         if isinstance(value, str):
             providers[name] = {'url': value, 'groups': ['regional', 'manual'],
-                               'extra_domains': [], 'shared': False, 'full': True,
+                               'extra_domains': [], 'shared': False, 'full': True, 'oc': True,
                                'provider_filter': PROVIDER_FILTER}
         elif isinstance(value, dict):
             groups = parse_groups(value.get('groups'), ['regional', 'manual'])
@@ -161,6 +161,7 @@ def load_providers(path):
             provider_filter = value.get('provider_filter') or PROVIDER_FILTER
             providers[name] = {'url': value['url'], 'groups': groups,
                                'extra_domains': list(extra), 'shared': shared, 'full': full,
+                               'oc': bool(value.get('oc', full)),
                                'provider_filter': provider_filter}
     return providers
 
@@ -261,7 +262,7 @@ def flatten_shared_groups(content):
 
 def inject_clash(content, providers, platform, shared=False):
     """Replace all generation markers in base.yaml content."""
-    if shared:
+    if platform == 'mihomo':
         content = flatten_shared_groups(content)
 
     content = content.replace(
@@ -272,7 +273,7 @@ def inject_clash(content, providers, platform, shared=False):
         '  # [GENERATED: direct-domains]',
         gen_direct_domains_clash(providers)
     )
-    if shared:
+    if platform == 'mihomo':
         shared_use = ', '.join(providers)
         content = content.replace('[__USE_regional__]', f'[{shared_use}]')
         content = content.replace('[__USE_manual__]',   f'[{shared_use}]')
@@ -378,7 +379,7 @@ def build_sr(providers):
     return True
 
 TARGETS = {
-    'oc':        lambda p: build_clash('mihomo', {k: v for k, v in p.items() if v['full']}),
+    'oc':        lambda p: build_clash('mihomo', {k: v for k, v in p.items() if v['oc']}),
     'oc-shared': lambda p: build_clash('mihomo', {k: v for k, v in p.items() if v['shared']}, suffix='-shared', shared=True),
     'stash':     lambda p: build_clash('stash', {k: v for k, v in p.items() if v['full']}),
     'sr':        lambda p: build_sr({k: v for k, v in p.items() if v['full']}),

@@ -57,13 +57,13 @@
 
 ### 地区
 
-每个地区组为两层 `fallback`：`优选`（`premium` 标签机场）健康检查失败才自动降级到 `标准`（`standard` 标签机场）。机场分层由 `secrets.yaml` 的 `groups` 字段声明，不做实时质量探测。
+OC 各地区组采用单层 `url-test`，在该地区的机场节点之间直接测速择优，不再区分“优选/标准”。个人版仅使用花云和 oixCloud，通过 `secrets.yaml` 的 `oc` 字段控制机场是否纳入。
 
-`oc-shared` 使用独立的精简结构：只加载标记为 `shared: true` 的机场，各地区组不设“优选/标准”层，直接在共享机场节点之间测速择优；个人版不受影响。
+`oc-shared` 使用同样的单层测速结构，只加载标记为 `shared: true` 的机场，目前为魅影和良心云。Stash 历史目标保留原有分层。
 
 | 🇭🇰 香港 | 🇹🇼 台湾 | 🇯🇵 日本 | 🇸🇬 狮城 | 🇺🇸 美国 | 🇬🇧 英国 | 🇺🇳 小众 |
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|
-| fallback | fallback | fallback | fallback | fallback | fallback | select |
+| url-test | url-test | url-test | url-test | url-test | url-test | select |
 
 `🇺🇳 小众` 不分层，直接从 `manual` 标签机场按关键词（喀麦隆 / 冰岛 / 土耳其 / 阿根廷 / 印度）筛选。
 
