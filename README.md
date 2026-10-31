@@ -49,7 +49,7 @@
 | 🚀 节点选择 | select | 主入口，手动选择或委托子组 |
 | 📡 自动测速 | url-test 50ms | `regional` 标签机场节点中最优选 |
 | 🎛️ 手动切换 | select | 全量节点手动选 |
-| 💰 省流节点 | url-test 75ms | `economy` 标签机场中过滤 实验性 / 1x 倍率 / 流媒体 关键词节点 |
+| 💰 省流节点 | url-test | 按 实验性 / 1x 倍率 / 流媒体 筛选；OC 个人版额外包含 Fusion（忽略大小写） |
 | 🚄 Speedtest | select | 测速专用，默认直连（避免节点带宽干扰读数） |
 | 🐟 漏网之鱼 | select | 未匹配流量的最终 fallback |
 | 🎯 全球直连 | select | 强制直连 |

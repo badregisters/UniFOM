@@ -262,6 +262,10 @@ def flatten_shared_groups(content):
 
 def inject_clash(content, providers, platform, shared=False):
     """Replace all generation markers in base.yaml content."""
+    economy_filter = r'实验性|(?i)(^|[^.0-9])1x|流媒体'
+    if platform == 'mihomo' and not shared:
+        economy_filter += r'|(?i)Fusion'
+    content = content.replace('__ECONOMY_FILTER__', economy_filter)
     if platform == 'mihomo':
         content = flatten_shared_groups(content)
 
