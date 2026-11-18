@@ -179,6 +179,9 @@ def gen_proxy_providers(providers, platform):
         ]
         if platform == 'mihomo':
             provider_lines.append(f"    exclude-filter: '{PROVIDER_EXCLUDE_FILTER}'")
+            if info.get('additional_prefix'):
+                provider_lines += ['    override:',
+                                   f"      additional-prefix: '{info['additional_prefix']}'"]
         if platform == 'mihomo':
             health_check = (
                 '    health-check: {enable: true, interval: 3600, lazy: false, '
@@ -264,7 +267,12 @@ def inject_clash(content, providers, platform, shared=False):
     """Replace all generation markers in base.yaml content."""
     economy_filter = r'实验性|(?i)(^|[^.0-9])1x|流媒体'
     if platform == 'mihomo' and not shared:
-        economy_filter += r'|(?i)Fusion'
+        economy_filter += r'|(?i)Fusion|^\[良心云\] '
+        # Keep the source metadata unchanged for shared and other platform builds.
+        providers = {name: dict(info) for name, info in providers.items()}
+        if 'LiangXin' in providers:
+            providers['LiangXin']['provider_filter'] = '.*'
+            providers['LiangXin']['additional_prefix'] = '[良心云] '
     content = content.replace('__ECONOMY_FILTER__', economy_filter)
     if platform == 'mihomo':
         content = flatten_shared_groups(content)
@@ -279,10 +287,12 @@ def inject_clash(content, providers, platform, shared=False):
     )
     if platform == 'mihomo':
         shared_use = ', '.join(providers)
-        content = content.replace('[__USE_regional__]', f'[{shared_use}]')
-        content = content.replace('[__USE_manual__]',   f'[{shared_use}]')
+        regular_use = ', '.join(name for name in providers
+                               if shared or name != 'LiangXin')
+        content = content.replace('[__USE_regional__]', f'[{regular_use}]')
+        content = content.replace('[__USE_manual__]',   f'[{regular_use}]')
         content = content.replace('[__USE_economy__]',  f'[{shared_use}]')
-        content = content.replace('[__USE_shared__]',   f'[{shared_use}]')
+        content = content.replace('[__USE_shared__]',   f'[{regular_use}]')
     else:
         content = content.replace('[__USE_regional__]', f'[{use_list(providers, "regional")}]')
         content = content.replace('[__USE_manual__]',   f'[{use_list(providers, "manual")}]')
