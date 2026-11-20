@@ -267,12 +267,13 @@ def inject_clash(content, providers, platform, shared=False):
     """Replace all generation markers in base.yaml content."""
     economy_filter = r'实验性|(?i)(^|[^.0-9])1x|流媒体'
     if platform == 'mihomo' and not shared:
-        economy_filter += r'|(?i)Fusion|^\[良心云\] '
+        economy_filter += r'|(?i)Fusion|^\[(良心云|魅影)\] '
         # Keep the source metadata unchanged for shared and other platform builds.
         providers = {name: dict(info) for name, info in providers.items()}
-        if 'LiangXin' in providers:
-            providers['LiangXin']['provider_filter'] = '.*'
-            providers['LiangXin']['additional_prefix'] = '[良心云] '
+        for name, prefix in (('LiangXin', '[良心云] '), ('Maying', '[魅影] ')):
+            if name in providers:
+                providers[name]['provider_filter'] = '.*'
+                providers[name]['additional_prefix'] = prefix
     content = content.replace('__ECONOMY_FILTER__', economy_filter)
     if platform == 'mihomo':
         content = flatten_shared_groups(content)
@@ -288,7 +289,7 @@ def inject_clash(content, providers, platform, shared=False):
     if platform == 'mihomo':
         shared_use = ', '.join(providers)
         regular_use = ', '.join(name for name in providers
-                               if shared or name != 'LiangXin')
+                               if shared or name not in ('LiangXin', 'Maying'))
         content = content.replace('[__USE_regional__]', f'[{regular_use}]')
         content = content.replace('[__USE_manual__]',   f'[{regular_use}]')
         content = content.replace('[__USE_economy__]',  f'[{shared_use}]')

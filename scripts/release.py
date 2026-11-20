@@ -24,7 +24,7 @@ def main():
         url = os.environ.get(variable)
         if url:
             providers[name] = {'url': url, 'groups': groups, 'shared': shared,
-                               'oc': name in ('FlowerCloud', 'oixCloud', 'LiangXin')}
+                               'oc': name in ('FlowerCloud', 'oixCloud', 'LiangXin', 'Maying')}
     if not providers:
         raise ValueError('Release requires subscription secrets')
     with tempfile.TemporaryDirectory() as directory:
