@@ -47,10 +47,17 @@ SYNC_GIST = True
 PROJECT_URL = 'https://github.com/badregisters/UniFOM'
 
 # Default filter applied to all proxy providers
+UNCOMMON_FILTER = (
+    r'(?i)(德国|🇩🇪|Germany|\bDE\b|土耳其|🇹🇷|Türkiye|Turkey|\bTR\b|'
+    r'印度|🇮🇳|India|\bIN\b|法国|🇫🇷|France|\bFR\b|'
+    r'阿根廷|🇦🇷|Argentina|\bAR\b|喀麦隆|🇨🇲|Cameroon|\bCM\b|'
+    r'冰岛|🇮🇸|Iceland|\bIS\b)'
+)
 PROVIDER_FILTER = (
-    r'(?i)(香港|🇭🇰|HK|美国|🇺🇸|\bUS\b|日本|🇯🇵|JP|'
-    r'台湾|🇹🇼|TW|Taiwan|新加坡|狮城|🇸🇬|SG|英国|🇬🇧|UK|'
-    r'喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)'
+    r'(?i)(香港|🇭🇰|Hong[ -]?Kong|\bHK\b|美国|🇺🇸|United States|\bUS\b|'
+    r'日本|🇯🇵|Japan|\bJP\b|台湾|🇹🇼|Taiwan|\bTW\b|'
+    r'新加坡|狮城|🇸🇬|Singapore|\bSG\b|英国|🇬🇧|United Kingdom|\bUK\b)'
+    + '|' + UNCOMMON_FILTER
 )
 
 # Subscription metadata disguised as proxies. Keep this anchored and specific so
@@ -68,7 +75,7 @@ SHARED_PROVIDER_GROUPS = '''  # [proxy-provider-groups start]
   - {name: 🇸🇬 狮城节点, type: url-test, tolerance: 20, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_shared__]}
   - {name: 🇺🇸 美国节点, type: url-test, tolerance: 50, filter: '(?i)(🇺🇸|美|States|\\bUS\\b)', use: [__USE_shared__]}
   - {name: 🇬🇧 英国节点, type: url-test, tolerance: 50, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_shared__]}
-  - {name: 🇺🇳 小众节点, type: select, filter: "(?i)(喀麦隆|冰岛|土耳其|阿根廷|印度|🇮🇳|India)", use: [__USE_shared__]}
+  - {name: 🇺🇳 小众节点, type: select, filter: '__UNCOMMON_FILTER__', use: [__USE_manual__]}
   # [proxy-provider-groups end]'''
 
 def parse_meta(text):
@@ -265,18 +272,20 @@ def flatten_shared_groups(content):
 
 def inject_clash(content, providers, platform, shared=False):
     """Replace all generation markers in base.yaml content."""
+    if platform == 'mihomo':
+        providers = {name: dict(info) for name, info in providers.items()}
     economy_filter = r'实验性|(?i)(^|[^.0-9])1x|流媒体'
     if platform == 'mihomo' and not shared:
         economy_filter += r'|(?i)Fusion|^\[(良心云|魅影)\] '
-        # Keep the source metadata unchanged for shared and other platform builds.
-        providers = {name: dict(info) for name, info in providers.items()}
         for name, prefix in (('LiangXin', '[良心云] '), ('Maying', '[魅影] ')):
             if name in providers:
-                providers[name]['provider_filter'] = '.*'
                 providers[name]['additional_prefix'] = prefix
     content = content.replace('__ECONOMY_FILTER__', economy_filter)
     if platform == 'mihomo':
         content = flatten_shared_groups(content)
+        content = content.replace('__UNCOMMON_FILTER__', UNCOMMON_FILTER)
+        for info in providers.values():
+            info['provider_filter'] = PROVIDER_FILTER
 
     content = content.replace(
         '# [GENERATED: proxy-providers]',
