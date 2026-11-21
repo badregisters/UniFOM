@@ -291,7 +291,7 @@ def inject_clash(content, providers, platform, shared=False):
         regular_use = ', '.join(name for name in providers
                                if shared or name not in ('LiangXin', 'Maying'))
         content = content.replace('[__USE_regional__]', f'[{regular_use}]')
-        content = content.replace('[__USE_manual__]',   f'[{regular_use}]')
+        content = content.replace('[__USE_manual__]',   f'[{shared_use}]')
         content = content.replace('[__USE_economy__]',  f'[{shared_use}]')
         content = content.replace('[__USE_shared__]',   f'[{regular_use}]')
     else:
