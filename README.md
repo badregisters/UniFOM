@@ -157,6 +157,8 @@ scripts/
 
 Stash 基于 Clash Premium 内核，其 DNS 架构无法满足本项目对 DNS 泄露防护的要求：境外域名的 DNS 查询无法经由代理节点发出，`follow-rule` 选项在节点地址为域名时存在不可回避的死锁。详见 [docs/dns-leak-platform-notes.md](docs/dns-leak-platform-notes.md)。
 
+iPhone 在 OpenClash Wi-Fi 下若开启 iOS「连接助理」(Connectivity Assist)，蜂窝侧 DNS 会旁路路由器劫持；OpenClash 配置无法单独堵住，缓解办法见同文档 [iOS 连接助理小节](docs/dns-leak-platform-notes.md#ios连接助理connectivity-assist-与-openclash)。
+
 代码与历史记录完整保留，最终可用版本为 [`stash-v1.2.0`](https://github.com/badregisters/UniFOM/tree/stash-v1.2.0)。
 
 ---
