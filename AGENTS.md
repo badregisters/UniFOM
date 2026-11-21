@@ -24,3 +24,9 @@ v1.2.1 2026-05-21 sr: AI 策略组默认节点改为美国节点
 - 必须在已加载新配置、流量经过目标客户端或 OpenClash 路由器的设备浏览器中测试，等待 DNS detection 完成；网页搜索工具或 CI 的出口不能代替目标设备检测。
 - 记录配置版本、客户端、网络、选中节点、浏览器安全 DNS 状态，以及出口和 DNS 解析器的归属；依据预期解析路径判断异常，不能仅凭 DNS 所在国家或与代理 IP 不同判断泄漏。
 - 无法访问目标设备、检测失败或结果未完成时，明确标记未验证，不得报告无 DNS 泄漏。具体流程见 docs/build-validation.md。
+
+## Cloud Agent 本地命令
+
+- 依赖：`python3 -m pip install --user -r requirements.txt`（Python 3.12，PyYAML）。发布同款配置检查使用 `/usr/local/bin/mihomo` v1.19.32。
+- 结构构建不需要真实订阅。`clash/src/secrets.example.yaml` 只声明 `regional` 与 `manual`，`mihomo -t` 会因优选、标准、省流组的 `use` 为空而失败。要跑通 Mihomo 检查，示例订阅需同时覆盖 `premium`、`standard` 和 `economy`。构建、审计与单测命令见 `docs/build-validation.md`。
+- 浏览器生成器是 `docs/index.html`，由启动脚本提供在 `http://127.0.0.1:8765/`。生成时仍从 GitHub raw 拉取模板。
