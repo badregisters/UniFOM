@@ -276,7 +276,11 @@ def inject_clash(content, providers, platform, shared=False):
         providers = {name: dict(info) for name, info in providers.items()}
     economy_filter = r'实验性|(?i)(^|[^.0-9])1x|流媒体'
     if platform == 'mihomo' and not shared:
-        economy_filter += r'|(?i)Fusion|^\[(良心云|魅影)\] '
+        economy_filter = (
+            r'(?i)^(?:\[魅影\] .*?(?<![.0-9])1x(?![.0-9a-z])|'
+            r'(?!\[魅影\] ).*(?:实验性|(?:^|[^.0-9])1x|流媒体|Fusion)|'
+            r'\[良心云\] )'
+        )
         for name, prefix in (('LiangXin', '[良心云] '), ('Maying', '[魅影] ')):
             if name in providers:
                 providers[name]['additional_prefix'] = prefix
