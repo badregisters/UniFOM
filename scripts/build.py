@@ -310,7 +310,32 @@ def inject_clash(content, providers, platform, shared=False):
     content = content.replace('[__USE_premium__]',  f'[{use_list(providers, "premium")}]')
     content = content.replace('[__USE_standard__]', f'[{use_list(providers, "standard")}]')
     content = content.replace('__FALLBACK_LAZY__', 'true' if platform == 'mihomo' else 'false')
+    if platform == 'mihomo':
+        content = guard_group_regions(content)
     return content
+
+
+def guard_group_regions(content):
+    """Also enforce the region allowlist where provider nodes enter groups."""
+    lines = []
+    region_filter = PROVIDER_FILTER.replace('(?i)', '')
+    for line in content.splitlines(keepends=True):
+        if line.lstrip().startswith('- {name:'):
+            group = yaml.safe_load(line)[0]
+            if group.get('use'):
+                current = group.get('filter', '').replace('(?i)', '')
+                combined = rf'(?i)^(?=.*(?:{region_filter}))'
+                if current:
+                    combined += rf'(?=.*(?:{current}))'
+                combined += '.*$'
+                quoted = "'" + combined.replace("'", "''") + "'"
+                if 'filter' in group:
+                    line = re.sub(r'''filter:\s*('(?:''|[^'])*'|"(?:\\.|[^"\\])*")''',
+                                  lambda _: 'filter: ' + quoted, line, count=1)
+                else:
+                    line = line.replace('use:', 'filter: ' + quoted + ', use:', 1)
+        lines.append(line)
+    return ''.join(lines)
 
 
 def build_clash(platform, providers, suffix='', shared=False):
