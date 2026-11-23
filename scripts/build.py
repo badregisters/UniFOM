@@ -280,11 +280,12 @@ def inject_clash(content, providers, platform, shared=False):
         if not shared:
             general_economy += '|Fusion'
         economy_filter = (
-            r'(?i)^(?:\[魅影\] .*?(?<![.0-9])1x(?![.0-9a-z])|'
-            r'(?!\[(?:魅影|良心云)\] ).*(?:' + general_economy + r')|'
-            r'\[良心云\] .*流媒体)'
+            r'(?i)^(?:👥 .*?(?<![.0-9])1x(?![.0-9a-z])|'
+            r'(?!(?:👥|💔) ).*(?:' + general_economy + r')|'
+            r'💔 .*流媒体)'
         )
-        for name, prefix in (('LiangXin', '[良心云] '), ('Maying', '[魅影] ')):
+        for name, prefix in (('FlowerCloud', '🌹 '), ('oixCloud', '🕳️ '),
+                             ('Maying', '👥 '), ('LiangXin', '💔 ')):
             if name in providers:
                 providers[name]['additional_prefix'] = prefix
     content = content.replace('__ECONOMY_FILTER__', economy_filter)
