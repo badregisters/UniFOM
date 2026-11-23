@@ -75,7 +75,7 @@ SHARED_PROVIDER_GROUPS = '''  # [proxy-provider-groups start]
   - {name: 🇸🇬 狮城节点, type: url-test, tolerance: 20, filter: "(?i)(🇸🇬|新|Singapore|SG)", use: [__USE_shared__]}
   - {name: 🇺🇸 美国节点, type: url-test, tolerance: 50, filter: '(?i)(🇺🇸|美|States|\\bUS\\b)', use: [__USE_shared__]}
   - {name: 🇬🇧 英国节点, type: url-test, tolerance: 50, filter: "(?i)(🇬🇧|英|Kingdom|UK)", use: [__USE_shared__]}
-  - {name: 🇺🇳 小众节点, type: select, filter: '__UNCOMMON_FILTER__', use: [__USE_manual__]}
+  - {name: 🇺🇳 小众节点, type: select, filter: '__UNCOMMON_FILTER__', use: [__USE_shared__]}
   # [proxy-provider-groups end]'''
 
 def parse_meta(text):
@@ -292,8 +292,9 @@ def inject_clash(content, providers, platform, shared=False):
     if platform == 'mihomo':
         content = flatten_shared_groups(content)
         content = content.replace('__UNCOMMON_FILTER__', UNCOMMON_FILTER)
-        for info in providers.values():
-            info['provider_filter'] = PROVIDER_FILTER
+        for name, info in providers.items():
+            info['provider_filter'] = ('.*' if not shared and name in ('Maying', 'LiangXin')
+                                       else PROVIDER_FILTER)
 
     content = content.replace(
         '# [GENERATED: proxy-providers]',
@@ -319,11 +320,11 @@ def inject_clash(content, providers, platform, shared=False):
     content = content.replace('[__USE_standard__]', f'[{use_list(providers, "standard")}]')
     content = content.replace('__FALLBACK_LAZY__', 'true' if platform == 'mihomo' else 'false')
     if platform == 'mihomo':
-        content = guard_group_regions(content)
+        content = guard_group_regions(content, shared)
     return content
 
 
-def guard_group_regions(content):
+def guard_group_regions(content, shared=False):
     """Also enforce the region allowlist where provider nodes enter groups."""
     lines = []
     region_filter = PROVIDER_FILTER.replace('(?i)', '')
@@ -332,7 +333,10 @@ def guard_group_regions(content):
             group = yaml.safe_load(line)[0]
             if group.get('use'):
                 current = group.get('filter', '').replace('(?i)', '')
-                combined = rf'(?i)^(?=.*(?:{region_filter}))'
+                region_guard = rf'(?=.*(?:{region_filter}))'
+                if not shared and group['name'] in ('🎛️ 手动切换', '💰 省流节点'):
+                    region_guard = rf'(?:(?=(?:👥|💔) )|{region_guard})'
+                combined = rf'(?i)^{region_guard}'
                 if current:
                     combined += rf'(?=.*(?:{current}))'
                 combined += '.*$'
