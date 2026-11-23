@@ -278,8 +278,8 @@ def inject_clash(content, providers, platform, shared=False):
     if platform == 'mihomo' and not shared:
         economy_filter = (
             r'(?i)^(?:\[魅影\] .*?(?<![.0-9])1x(?![.0-9a-z])|'
-            r'(?!\[魅影\] ).*(?:实验性|(?:^|[^.0-9])1x|流媒体|Fusion)|'
-            r'\[良心云\] )'
+            r'(?!\[(?:魅影|良心云)\] ).*(?:实验性|(?:^|[^.0-9])1x|流媒体|Fusion)|'
+            r'\[良心云\] .*流媒体)'
         )
         for name, prefix in (('LiangXin', '[良心云] '), ('Maying', '[魅影] ')):
             if name in providers:
