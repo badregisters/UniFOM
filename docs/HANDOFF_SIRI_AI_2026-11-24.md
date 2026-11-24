@@ -76,8 +76,20 @@
 
 Apple 官方 [企业网络端点说明](https://support.apple.com/en-us/101555) 明确列出 `guzzoni.apple.com`、`*.smoot.apple.com` 及三个 Cloudflare/Fastly PCC 端点和 Apple Intelligence Extensions 中继；`mask.icloud.com`、`mask-h2.icloud.com`、`mask-api.icloud.com` 列在 iCloud Private Relay 分类。官方清单没有将整段 `ls.apple.com` 或 `gateway.icloud.com` 标为 Siri 专属端点。因此第 2、3 节中关于 OHTTP 令牌、位置合规及故障根因的措辞应视为待验证推断，不能据此声称 Siri 已修好。
 
-### 当前待办
+## 7. 设备复测与暂停点（2026-11-24）
 
-1. 通过 OC 配置订阅更新并启用新配置；只读检查 runtime 中的新规则与 17/8 顺序，避免只以 Gist 上传成功推断设备已加载。
-2. 在同一 Wi-Fi 下触发 Siri，并提供结果/时间窗口以对应日志。如果仍失败，先确认请求是否进入 Siri AI；再按第 4 节做有记录、可恢复的 A/B 测试。
-3. 对已加载新配置的目标设备完成浏览器 DNS 验收。目前 Siri 功能与 DNS 泄漏验收均为未验证。
+R2S 已通过订阅加载生成于 14:26:30 的个人版。运行配置确认网关规则在 Apple GEOSITE 和 `17.0.0.0/8` 之前。以下时间均为北京时间。
+
+| 时间 | 对照及结果 |
+| --- | --- |
+| 14:50 | 同一台 iPhone 的 ChatGPT App 对话成功，`ios.chat.openai.com` 走日本实验性 IEPL 专线。 |
+| 14:52 | Siri 扩展显示 ChatGPT 不可用。网关和 Apple 中继走 Siri AI 的日本 IEPL，`api-siri-prod.apple.com` 走苹果服务直连。此前同一分钟有一条 `chatgpt.com` 代理拨号超时，无法归因给 Siri。 |
+| 14:54 | 仅将 Siri AI 切到日本 Fusion 1，仍报不可用。网关和中继确认走 Fusion 1，AI 服务仍走 IEPL。 |
+| 14:56 | 苹果服务也临时切到 Fusion 1，日志确认 `api-siri-prod.apple.com` 与网关、中继同走 Fusion 1，仍报不可用。 |
+| 14:57 | Siri AI 和 AI 服务均切到 Fusion 1，网关、中继和 `chatgpt.com` 的选路符合预期，仍报不可用。 |
+
+同一台 iPhone 使用 5G + Clash by Hako 也复现，尚无成功的对照网络。路由日志能确认选路，业务响应未知。临时策略组最终是否恢复未核实。
+
+照片 Clean Up 在 Auto 下报通用处理错误，新拍照片也复现。切到 Fast 后用户确认成功。Fast 只验证照片的快速处理路径可用。Auto 是否选中 High Quality、是否发出 Private Cloud Compute 请求，以及它与 Siri 扩展失败是否同源，都尚未确认。Apple 支持三种处理档位，同类社区报告也有高画质失败而 Fast 可用的情况。[Apple 照片指南](https://support.apple.com/guide/iphone/clean-up-extend-and-reframe-photos-xy0grrlxue5w/27/ios/27) · [社区复现](https://www.reddit.com/r/iOS27/comments/1wd0rn4/photo_cleanup_extend_reframe_error/)
+
+后续接手时，优先找能够区分模式和服务端处理的证据，例如对应报错时间的 [Apple Intelligence Report](https://support.apple.com/en-lamr/guide/iphone/iphe3f499e0e/ios)。报告有对应记录可确认请求发出，空报告无法排除发送前失败。现有对照不足以支持继续加分流规则。Siri 的 ChatGPT 扩展仍失败，目标设备 DNS 泄漏验收未验证。
