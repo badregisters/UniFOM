@@ -37,6 +37,7 @@
      - `enable_meta_sniffer='1'` 且 `enable_meta_sniffer_custom='0'` 时，插件会用默认模板整段覆写 YAML 的 `sniffer`（导致 `HTTP.override-destination` 变 `false`、`QUIC` 端口缩成 `[443]`、`+.12306.cn/.com` 跳过规则丢失）；
      - 直接设 `enable_meta_sniffer='0'` 会把运行配置强制改成 `sniffer.enable: false`（彻底关闭嗅探）。
    - **正确解法**：开启 `enable_meta_sniffer='1'` + `enable_meta_sniffer_pure_ip='1'` + `enable_meta_sniffer_custom='1'`，并将与 `clash/src/platform/mihomo.yaml` 一致的 `sniffer` 写入 `/etc/openclash/custom/openclash_custom_sniffer.yaml`。
+   - UTM 和 R2S 上仅启用模板未能稳定保住运行值。优化脚本会安装最终覆写钩子，对个人版和共享版使用同一份模板，保留其他配置原样。它会备份原模板和覆写脚本；无法安全插入时停止，不覆盖原脚本。应用后须确认核心正在使用的配置与模板一致，否则脚本报错。
 3. **`tun.stack` 策略（按硬件分档，刻意保留单机差异）**
    - **Mac mini + UTM（最适用 `gVisor`）**：Apple Silicon 算力充裕，`gVisor` 跑满千兆无压力，且用户态协议栈能隔离虚拟化网卡（`virtio-net` / 桥接）偶发的 GSO/校验和卸载兼容问题。
    - **R4S（RK3399 双核 A72 + 四核 A53）**：4GB 版或 ≤500M 宽带可用 `gVisor`；若为 1GB 版或经常 500M~1000M 高并发下载，推荐 `mixed`（TCP 走 `system`、UDP 走 `gVisor`）或 `system`。

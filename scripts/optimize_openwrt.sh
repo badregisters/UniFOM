@@ -62,7 +62,7 @@ TS=$(date +%Y%m%d-%H%M%S)
 BACKUP_DIR="/tmp/openwrt-opt-backup-$TS"
 if [ "$DRY_RUN" -eq 0 ]; then
   mkdir -p "$BACKUP_DIR"
-  for f in /etc/config/firewall /etc/config/openclash /etc/config/dhcp /etc/config/network /etc/sysctl.conf /etc/crontabs/root; do
+  for f in /etc/config/firewall /etc/config/openclash /etc/config/dhcp /etc/config/network /etc/sysctl.conf /etc/crontabs/root /etc/openclash/custom/openclash_custom_sniffer.yaml /etc/openclash/custom/openclash_custom_overwrite.sh; do
     [ -f "$f" ] && cp -a "$f" "$BACKUP_DIR/"
   done
   log "Backup saved to $BACKUP_DIR"
@@ -151,6 +151,41 @@ EOF
     OPENCLASH_CHANGED=1
   else
     rm -f "$TMP_SNIFFER"
+  fi
+  HOOK=/etc/openclash/custom/openclash_custom_overwrite.sh
+  if ! grep -q '^# UniFOM managed sniffer overwrite$' "$HOOK" 2>/dev/null; then
+    log "OpenClash: install final sniffer overwrite for both UniFOM profiles"
+    if [ "$DRY_RUN" -eq 0 ]; then
+      TMP_HOOK=$(mktemp "${HOOK}.XXXXXX")
+      if ! ruby -e '
+        path, dest = ARGV
+        source = File.exist?(path) ? File.read(path) : "#!/bin/sh\nexit 0\n"
+        block = STDIN.read
+        abort "Unsupported custom hook ending; original left intact" unless source.sub!(/^exit 0[ \t]*\s*\z/, block)
+        File.write(dest, source)
+      ' "$HOOK" "$TMP_HOOK" <<'HOOK_EOF'
+# UniFOM managed sniffer overwrite
+case "$(uci -q get openclash.config.config_path)" in
+  */UniFOM.yaml|*/UniFOM-shared.yaml)
+    ruby -ryaml -e '
+      path, template = ARGV
+      config = YAML.load_file(path)
+      config["sniffer"] = YAML.load_file(template).fetch("sniffer")
+      File.write(path, YAML.dump(config))
+    ' "$1" /etc/openclash/custom/openclash_custom_sniffer.yaml || exit 1
+    ;;
+esac
+exit 0
+HOOK_EOF
+      then
+        rm -f "$TMP_HOOK"
+        exit 1
+      fi
+      sh -n "$TMP_HOOK"
+      chmod 755 "$TMP_HOOK"
+      mv "$TMP_HOOK" "$HOOK"
+    fi
+    OPENCLASH_CHANGED=1
   fi
   if [ "$OPENCLASH_CHANGED" -eq 1 ]; then
     run uci commit openclash
@@ -289,6 +324,24 @@ if [ "$DRY_RUN" -eq 0 ]; then
     log "Restarting OpenClash..."
     /etc/init.d/openclash restart
   fi
+  case "$(uci -q get openclash.config.config_path || true)" in
+    */UniFOM.yaml|*/UniFOM-shared.yaml)
+      PROFILE=$(uci -q get openclash.config.config_path)
+      RUNTIME="/etc/openclash/${PROFILE##*/}"
+      tries=0
+      until ps w | grep '[c]lash -d' | grep -F -- "-f $RUNTIME" >/dev/null &&
+        ruby -ryaml -e 'abort unless ARGV.map { |p| YAML.load_file(p).fetch("sniffer") }.uniq.size == 1' \
+          "$RUNTIME" "$SNIFFER_FILE" 2>/dev/null; do
+        tries=$((tries + 1))
+        if [ "$tries" -ge 30 ]; then
+          log "ERROR: active runtime sniffer does not match the template; backup: $BACKUP_DIR"
+          exit 1
+        fi
+        sleep 2
+      done
+      log "Verified active UniFOM runtime sniffer"
+      ;;
+  esac
   log "Optimization completed."
 else
   log "Dry-run completed. No changes were made."
