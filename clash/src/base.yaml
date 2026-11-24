@@ -155,9 +155,8 @@ rule-providers:
     interval: 86400
 
 rules:
-  # === core transport layer (public DNS & Apple push) ===
+  # === core transport layer (public DNS & Apple Safe Browsing) ===
   - DOMAIN,token.safebrowsing.apple,🍎 苹果服务 # Safe Browsing token 走苹果策略组, 强制远程解析防污染
-  - IP-CIDR,17.0.0.0/8,🍎 苹果服务,no-resolve # Apple 全段 IP(APNs + CDN)
   - IP-CIDR,8.8.8.8/32,🚀 节点选择,no-resolve # Google Public DNS, 走代理保证可达
   - IP-CIDR,1.1.1.1/32,🚀 节点选择,no-resolve # Cloudflare DNS, 同上
 
@@ -256,19 +255,23 @@ rules:
   - DOMAIN-SUFFIX,api.genuine-software.autodesk.com,REJECT
   - DOMAIN-SUFFIX,genuine-software2.autodesk.com,REJECT
   # === Apple Intelligence / Siri AI (域名依据 Apple 官方 support.apple.com/en-us/101555) ===
-  # 须早于 apple 规则集: 该集合含 guzzoni / siri / ml.cdn 等域名, 排在后面会被捞进 🍎 苹果服务
+  # 须早于 apple 规则集与 17.0.0.0/8: 否则会被捞进 🍎 苹果服务(默认直连)
   - DOMAIN,guzzoni.apple.com,✨ Siri AI                        # Siri 与听写请求
   - DOMAIN-SUFFIX,smoot.apple.com,✨ Siri AI                   # 搜索建议(Siri/Spotlight/Lookup/Safari/News); 含 guzzoni.smoot
   - DOMAIN-SUFFIX,siri.apple.com,✨ Siri AI                    # probe / seed* 等 Siri 端点
   - DOMAIN-SUFFIX,siri.com,✨ Siri AI                          # Siri 主域
   - DOMAIN,guzzoni-apple-com.v.aaplimg.com,✨ Siri AI          # guzzoni 的 aaplimg 别名
-  - DOMAIN,ml.cdn-apple.com,✨ Siri AI                         # ML 模型分发
-  - DOMAIN,apple-relay.apple.com,✨ Siri AI                    # Apple Intelligence Extensions
-  - DOMAIN,apple-relay.cloudflare.com,✨ Siri AI               # Private Cloud Compute; 不在 GEOSITE,apple 内
-  - DOMAIN,apple-relay.fastly-edge.com,✨ Siri AI              # Private Cloud Compute; 同上
-  - DOMAIN,cp4.cloudflare.com,✨ Siri AI                       # PCC 连通性探测; 同上
+  - DOMAIN-SUFFIX,ml.cdn-apple.com,✨ Siri AI                  # ML 模型分发
+  - DOMAIN,gateway.icloud.com,✨ Siri AI                       # Apple Intelligence / PCC OHTTP 令牌签发网关
+  - DOMAIN-SUFFIX,mask.icloud.com,✨ Siri AI                   # Apple OHTTP / Private Relay 入口
+  - DOMAIN,mask-h2.icloud.com,✨ Siri AI                       # Apple OHTTP / Private Relay HTTP/2 入口
+  - DOMAIN,mask-api.icloud.com,✨ Siri AI                      # Apple OHTTP / Private Relay API
+  - DOMAIN-SUFFIX,apple-relay.apple.com,✨ Siri AI             # Apple Intelligence Extensions (含子域)
+  - DOMAIN-SUFFIX,apple-relay.cloudflare.com,✨ Siri AI        # Private Cloud Compute (含子域); 不在 GEOSITE,apple 内
+  - DOMAIN-SUFFIX,apple-relay.fastly-edge.com,✨ Siri AI       # Private Cloud Compute (含子域); 同上
+  - DOMAIN-SUFFIX,cp4.cloudflare.com,✨ Siri AI                # PCC 连通性探测 (含子域); 同上
   - DOMAIN-SUFFIX,apple-relay.mask.apple-dns.net,✨ Siri AI    # PCC 中继
-  - DOMAIN,gspe1-ssl.ls.apple.com,✨ Siri AI                   # PCC 位置上下文
+  - DOMAIN-SUFFIX,ls.apple.com,✨ Siri AI                      # PCC 与地区合规位置上下文(含 gspe1/gsp/gspe19/gspe35/gspe79-ssl)
   # === custom overrides end ===
 
   # === CN tech giants hardcoded direct (Tencent / Alibaba / ASN exemptions) ===
@@ -306,6 +309,7 @@ rules:
   - GEOSITE,google-gemini,🧠 AI 服务 # Gemini / Google AI
   - RULE-SET,AI,🧠 AI 服务 # ACL4SSR AI 规则集(补充 Claude, Gemini 等)
   - GEOSITE,apple,🍎 苹果服务 # Apple 全域名(App Store, iCloud, Siri 等)
+  - IP-CIDR,17.0.0.0/8,🍎 苹果服务,no-resolve # Apple 全段 IP(APNs + CDN); 排在 Siri AI 之后防提前截胡
   - GEOSITE,onedrive,☁️ 微软云盘 # OneDrive 专项(从 microsoft 集合中独立)
   - GEOSITE,microsoft,🪟 微软服务 # Microsoft 全域名
   - GEOSITE,tiktok,📱 TikTok # TikTok 国际版
