@@ -117,3 +117,19 @@ ssh -i ~/.ssh/openwrt_ed25519 root@<ROUTER_IP> 'sh -s' < scripts/optimize_openwr
   - `br-lan` 上残留的旧 ULA 地址将在下次重启后彻底消失；
   - `mmcblk0p1`（boot 分区）开机日志曾报 `EXT4-fs warning: mounting unchecked fs`，后续停机/插卡维护时可顺手做一次文件系统检查（参考 [HANDOFF_TF_CARD_2026-10-25.md](HANDOFF_TF_CARD_2026-10-25.md)）；
   - 若确认所有管理终端均已使用 SSH 公钥，可按需关闭 Dropbear 密码登录。
+
+## 6. Codex 只读复核（2026-11-24）
+
+对 R2S #1（`192.168.30.254`）通过 SSH 读取 UCI、运行 YAML、进程与内核状态，未执行优化脚本、未修改配置、未重启服务。
+
+- 系统为 ImmortalWrt 24.10.6 / NanoPi R2S；实际 OpenClash 核心进程及 dnsmasq 存活。
+- 软件/硬件 Flow Offloading、旁路由 FullCone 均为 `0`；无活动 flowtable，未发现 `flow add` 引流。
+- `stack_type=system`；三项自定义 sniffer 开关为 `1`。运行 YAML 中 `parse-pure-ip=true`、HTTP `override-destination=true`、QUIC 端口 `[443,8443]`、12306 跳过项均存在。
+- 六项 IPv4 ICMP Redirect 设置运行值为 `0`，且均已写入 `/etc/sysctl.conf`。
+- dnsmasq 实际配置为 `cache-size=0`、上游 `127.0.0.1#7874`，未发现最小缓存 TTL 与 stale cache 配置。
+- LAN RA/DHCPv6/NDP 均禁用；`ip6assign` 与 ULA 前缀配置不存在。
+- TUN 双向转发规则有非零计数；本轮只取一次快照，不以此证明所有业务均正常。
+- `/overlay` 已用 165.4M、可用 126.5M（57%）；冗余备份与闲置 GeoIP.dat 不存在，Country.mmdb 非空。
+- 每周日 04:00 的延时重启及每日 05:00 的 OpenClash 任务保留。
+
+结论：首台 R2S 的系统优化项已复核生效，无需重复执行优化。其余四台未在本轮核查；浏览器 DNS 泄漏验收仍未验证。硬件吞吐和协议栈推荐沿用此前交接记录，本轮未重新做性能测试。

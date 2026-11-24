@@ -63,3 +63,21 @@
 ## 5. 关联交接文档
 
 - OpenWrt 系统级优化交接（仅涉及路由器防火墙/sysctl/dnsmasq/overlay/cron，与 Gist 配置订阅解耦）：[HANDOFF_OPENWRT_OPT_2026-11-24.md](HANDOFF_OPENWRT_OPT_2026-11-24.md)
+
+## 6. Codex 接手复核与发布（2026-11-24）
+
+- 只读 SSH 证实 R2S 的优化设置仍生效，但 `/etc/openclash/config/UniFOM.yaml` 文件头仍为 `Generated: 2026-11-23 22:06:11`。运行规则中没有 `gateway.icloud.com`，定位仍只匹配 `gspe1-ssl.ls.apple.com`，17/8 规则仍位于前部。
+- 近期日志确认 `gateway.icloud.com` 的 TCP/UDP 443 及 `gspe35-ssl.ls.apple.com`、`gspe79-ssl.ls.apple.com` 仍经 `GEOSITE,apple` 走苹果服务直连。这证明旧配置的分流行为，不单独证明 Siri 报错的根因。
+- 控制 API 显示 Siri AI 选择日本节点组，苹果服务选择全球直连。本轮未改变选择、未直接写入路由器配置、未重启服务。
+- 发布前回读确认个人版和共享版 Gist 也都缺少新网关规则，17/8 规则位于索引 1。
+- 已执行 `source ~/.zshrc && python3 scripts/build.py oc oc-shared`，两份 Gist 均上传及回读验证通过。构建结构验证通过；另检查网关、位置与中继规则都排在 Apple GEOSITE 和 17/8 之前。
+
+### 证据边界
+
+Apple 官方 [企业网络端点说明](https://support.apple.com/en-us/101555) 明确列出 `guzzoni.apple.com`、`*.smoot.apple.com` 及三个 Cloudflare/Fastly PCC 端点和 Apple Intelligence Extensions 中继；`mask.icloud.com`、`mask-h2.icloud.com`、`mask-api.icloud.com` 列在 iCloud Private Relay 分类。官方清单没有将整段 `ls.apple.com` 或 `gateway.icloud.com` 标为 Siri 专属端点。因此第 2、3 节中关于 OHTTP 令牌、位置合规及故障根因的措辞应视为待验证推断，不能据此声称 Siri 已修好。
+
+### 当前待办
+
+1. 通过 OC 配置订阅更新并启用新配置；只读检查 runtime 中的新规则与 17/8 顺序，避免只以 Gist 上传成功推断设备已加载。
+2. 在同一 Wi-Fi 下触发 Siri，并提供结果/时间窗口以对应日志。如果仍失败，先确认请求是否进入 Siri AI；再按第 4 节做有记录、可恢复的 A/B 测试。
+3. 对已加载新配置的目标设备完成浏览器 DNS 验收。目前 Siri 功能与 DNS 泄漏验收均为未验证。
