@@ -16,10 +16,12 @@
 
 ### 当前设备进度
 
-| 设备 | 拓扑 / 架构 | 状态 | 备注 |
-|---|---|---|---|
-| R2S（`192.168.30.254`） | 单臂旁路由 / `rockchip/armv8` | **路由器侧已优化并核验** | `ipleak.net` 浏览器 DNS 泄漏验收待做 |
-| 其他 OpenWrt 设备 | 待识别 | **待执行** | 复用 `scripts/optimize_openwrt.sh` |
+| 设备 | 数量 | 拓扑 / 架构 | 推荐 TUN 栈 | 状态 | 备注 |
+|---|---:|---|---|---|---|
+| R2S #1（`192.168.30.254`） | 1 | 单臂旁路由 / `rockchip/armv8` | `system` | **路由器侧已优化并核验** | `ipleak.net` 浏览器 DNS 泄漏验收待做 |
+| R2S #2、#3 | 2 | 待识别 / `rockchip/armv8` | `system` | **待执行** | 复用 `scripts/optimize_openwrt.sh` |
+| R4S | 1 | 待识别 / `rockchip/armv8` | `gVisor`（4GB / ≤500M）或 `mixed`/`system`（1GB / 千兆高并发） | **待执行** | 复用 `scripts/optimize_openwrt.sh` |
+| Mac mini + UTM（OpenWrt VM） | 1 | 虚拟机 / Apple Silicon + `virtio-net` | **`gVisor`（最适用）** | **待执行** | 复用 `scripts/optimize_openwrt.sh` |
 
 ---
 
@@ -35,8 +37,10 @@
      - `enable_meta_sniffer='1'` 且 `enable_meta_sniffer_custom='0'` 时，插件会用默认模板整段覆写 YAML 的 `sniffer`（导致 `HTTP.override-destination` 变 `false`、`QUIC` 端口缩成 `[443]`、`+.12306.cn/.com` 跳过规则丢失）；
      - 直接设 `enable_meta_sniffer='0'` 会把运行配置强制改成 `sniffer.enable: false`（彻底关闭嗅探）。
    - **正确解法**：开启 `enable_meta_sniffer='1'` + `enable_meta_sniffer_pure_ip='1'` + `enable_meta_sniffer_custom='1'`，并将与 `clash/src/platform/mihomo.yaml` 一致的 `sniffer` 写入 `/etc/openclash/custom/openclash_custom_sniffer.yaml`。
-3. **`tun.stack` 策略（刻意保留单机差异）**
-   - R2S（RK3328 + 1GB RAM）性能较弱，使用 `stack_type='system'` 降低用户态协议栈与 Go GC 开销是合理且有意的选择；R4S 等高性能设备可保留 `gvisor`。
+3. **`tun.stack` 策略（按硬件分档，刻意保留单机差异）**
+   - **Mac mini + UTM（最适用 `gVisor`）**：Apple Silicon 算力充裕，`gVisor` 跑满千兆无压力，且用户态协议栈能隔离虚拟化网卡（`virtio-net` / 桥接）偶发的 GSO/校验和卸载兼容问题。
+   - **R4S（RK3399 双核 A72 + 四核 A53）**：4GB 版或 ≤500M 宽带可用 `gVisor`；若为 1GB 版或经常 500M~1000M 高并发下载，推荐 `mixed`（TCP 走 `system`、UDP 走 `gVisor`）或 `system`。
+   - **3 台 R2S（RK3328 全小核 A53 + 1GB RAM）**：不推荐 `gVisor`（高并发下易吃满 CPU 并触发 Go GC 抖动），统一保持 `system`（前提是已关闭 Flow Offloading 与旁路由 ICMP Redirect）。
    - 脚本**不会**修改各设备的 `stack_type`。
 4. **旁路由 ICMP Redirect（内核已触发告警）**
    - 单臂旁路由与客户端、主路由同处一个二层子网，开启 `send_redirects=1` 会诱导客户端绕过旁路由直连主路由，引发三角路由丢包。
@@ -107,8 +111,8 @@ ssh -i ~/.ssh/openwrt_ed25519 root@<ROUTER_IP> 'sh -s' < scripts/optimize_openwr
 
 ## 5. 待办与观察项
 
-- [ ] **R2S（`192.168.30.254`）`https://ipleak.net` DNS 泄漏检查**：当前为 **未验证**，需在目标设备浏览器中完成。
-- [ ] **其余 OpenWrt 设备**：按第 4 节流程逐台 `--dry-run` → 执行 → 核验 → `ipleak.net` 验收。
+- [ ] **R2S #1（`192.168.30.254`）`https://ipleak.net` DNS 泄漏检查**：当前为 **未验证**，需在目标设备浏览器中完成。
+- [ ] **其余 4 台设备（R2S #2/#3、R4S、Mac mini + UTM）**：按第 4 节流程逐台 `--dry-run` → 执行 → 核验 → `ipleak.net` 验收，并按第 2 节硬件分档确认各自 `stack_type`。
 - [ ] **R2S 观察项**：
   - `br-lan` 上残留的旧 ULA 地址将在下次重启后彻底消失；
   - `mmcblk0p1`（boot 分区）开机日志曾报 `EXT4-fs warning: mounting unchecked fs`，后续停机/插卡维护时可顺手做一次文件系统检查（参考 [HANDOFF_TF_CARD_2026-10-25.md](HANDOFF_TF_CARD_2026-10-25.md)）；
